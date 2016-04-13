@@ -1,0 +1,57 @@
+plugins {
+    id "java"
+    id "maven-publish"
+    id "com.jfrog.bintray" version "1.6"
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.github.javaparser:javaparser-core:2.3.0'
+    compile 'io.github.lukehutch:fast-classpath-scanner:1.9.17'
+    compile 'io.vertx:vertx-core:3.2.1'
+    compile 'io.vertx:vertx-mysql-postgresql-client:3.2.1'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'io.github.notsyncing.lightfur'
+            artifactId 'lightfur'
+            version '0.1.0'
+            from components.java
+        }
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenLocal()
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+
+    pkg {
+        repo = 'maven'
+        name = 'lightfur'
+        licenses = [ 'GPL-3.0' ]
+        vcsUrl = 'https://github.com/notsyncing/lightfur.git'
+
+        version {
+            name = '0.1.0'
+            vcsTag = '0.1.0'
+        }
+    }
+
+    publications = [ 'maven' ]
+}

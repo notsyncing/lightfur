@@ -5,6 +5,7 @@ plugins {
 }
 
 sourceCompatibility = 1.8
+def ver = '0.1.1'
 
 repositories {
     mavenLocal()
@@ -25,7 +26,7 @@ publishing {
         maven(MavenPublication) {
             groupId 'io.github.notsyncing.lightfur'
             artifactId 'lightfur'
-            version '0.1.0'
+            version ver
             from components.java
         }
     }
@@ -48,8 +49,8 @@ bintray {
         vcsUrl = 'https://github.com/notsyncing/lightfur.git'
 
         version {
-            name = '0.1.0'
-            vcsTag = '0.1.0'
+            name = ver
+            vcsTag = ver
         }
     }
 

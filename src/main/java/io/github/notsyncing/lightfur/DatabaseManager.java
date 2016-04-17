@@ -25,25 +25,26 @@ public class DatabaseManager
         return instance;
     }
 
-    public void init(String host, int port, String username, String password)
+    public void init(String host, int port, String username, String password, String databaseName)
     {
         JsonObject configs = new JsonObject()
                 .put("host", host)
                 .put("port", port)
                 .put("username", username)
-                .put("password", password);
+                .put("password", password)
+                .put("database", databaseName);
 
         client = PostgreSQLClient.createNonShared(vertx, configs);
     }
 
-    public void init(String username, String password)
+    public void init(String username, String password, String databaseName)
     {
-        init("localhost", 3306, username, password);
+        init("localhost", 3306, username, password, databaseName);
     }
 
-    public void init()
+    public void init(String databaseName)
     {
-        init("postgres", "123456");
+        init("postgres", "123456", databaseName);
     }
 
     public CompletableFuture<SQLConnection> getConnection()

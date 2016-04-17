@@ -1,13 +1,11 @@
 package io.github.notsyncing.lightfur;
 
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.sql.UpdateResult;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 public class DataSession
 {

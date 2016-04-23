@@ -1,17 +1,12 @@
 package io.github.notsyncing.lightfur.entity;
 
 import io.github.notsyncing.lightfur.annotations.entity.Column;
-import io.github.notsyncing.lightfur.annotations.entity.PrimaryKey;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DataMapper
 {
@@ -25,6 +20,10 @@ public class DataMapper
             }
 
             Column c = f.getAnnotation(Column.class);
+
+            if (!row.containsKey(c.value())) {
+                continue;
+            }
 
             f.set(instance, row.getValue(c.value()));
         }

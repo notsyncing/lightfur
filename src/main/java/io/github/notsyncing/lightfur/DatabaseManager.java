@@ -39,12 +39,12 @@ public class DatabaseManager
 
     public void init(String username, String password, String databaseName)
     {
-        init("localhost", 3306, username, password, databaseName);
+        init("localhost", 5432, username, password, databaseName);
     }
 
     public void init(String databaseName)
     {
-        init("postgres", "123456", databaseName);
+        init("postgres", null, databaseName);
     }
 
     public CompletableFuture<SQLConnection> getConnection()
@@ -55,6 +55,7 @@ public class DatabaseManager
             if (r.succeeded()) {
                 future.complete(r.result());
             } else {
+                r.cause().printStackTrace();
                 future.completeExceptionally(r.cause());
             }
         });

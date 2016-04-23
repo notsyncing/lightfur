@@ -1,10 +1,12 @@
 package io.github.notsyncing.lightfur;
 
+import io.github.notsyncing.lightfur.entity.DataMapper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.sql.UpdateResult;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class DataSession
@@ -37,6 +39,7 @@ public class DataSession
                 if (r.succeeded()) {
                     f.complete(r.result());
                 } else {
+                    r.cause().printStackTrace();
                     f.completeExceptionally(r.cause());
                 }
             });
@@ -59,6 +62,7 @@ public class DataSession
                 if (r.succeeded()) {
                     f.complete(r.result());
                 } else {
+                    r.cause().printStackTrace();
                     f.completeExceptionally(r.cause());
                 }
             });
@@ -92,6 +96,7 @@ public class DataSession
                 if (r.succeeded()) {
                     f.complete(r.result());
                 } else {
+                    r.cause().printStackTrace();
                     f.completeExceptionally(r.cause());
                 }
             });
@@ -125,12 +130,30 @@ public class DataSession
                 if (r.succeeded()) {
                     f.complete(r.result());
                 } else {
+                    r.cause().printStackTrace();
                     f.completeExceptionally(r.cause());
                 }
             });
 
             return f;
         });
+    }
+
+    public CompletableFuture<UpdateResult> execute(String sql, Object... params)
+    {
+        return execute(sql, objectsToJsonArray(params));
+    }
+
+    private JsonArray objectsToJsonArray(Object[] params)
+    {
+        JsonArray arr = new JsonArray();
+
+        if (params != null) {
+            for (Object o : params) {
+                arr.add(o);
+            }
+        }
+        return arr;
     }
 
     public CompletableFuture<ResultSet> query(String sql, JsonArray params)
@@ -142,6 +165,7 @@ public class DataSession
                 if (r.succeeded()) {
                     f.complete(r.result());
                 } else {
+                    r.cause().printStackTrace();
                     f.completeExceptionally(r.cause());
                 }
             });
@@ -150,8 +174,44 @@ public class DataSession
         });
     }
 
+    public CompletableFuture<ResultSet> query(String sql, Object... params)
+    {
+        return query(sql, objectsToJsonArray(params));
+    }
+
     public void end()
     {
         conn.close();
+    }
+
+    public <T> CompletableFuture<T> queryFirst(Class<T> clazz, String sql, Object... params)
+    {
+        return query(sql, params).thenCompose(r -> {
+            try {
+                return CompletableFuture.completedFuture(DataMapper.map(clazz, r));
+            } catch (Exception e) {
+                CompletableFuture<T> f = new CompletableFuture<>();
+                f.completeExceptionally(e);
+                return f;
+            }
+        });
+    }
+
+    public <T> CompletableFuture<List<T>> queryList(Class<T> clazz, String sql, Object... params)
+    {
+        return query(sql, params).thenCompose(r -> {
+            try {
+                return CompletableFuture.completedFuture(DataMapper.mapToList(clazz, r));
+            } catch (Exception e) {
+                CompletableFuture<List<T>> f = new CompletableFuture<>();
+                f.completeExceptionally(e);
+                return f;
+            }
+        });
+    }
+
+    public CompletableFuture<Object> queryFirstValue(String sql, Object... params)
+    {
+        return query(sql, params).thenApply(r -> r.getNumRows() > 0 ? r.getResults().get(0).getValue(0) : null);
     }
 }

@@ -14,6 +14,7 @@ public class DatabaseManager
 
     private Vertx vertx;
     private AsyncSQLClient client;
+    private JsonObject configs;
 
     private DatabaseManager()
     {
@@ -27,7 +28,7 @@ public class DatabaseManager
 
     public void init(String host, int port, String username, String password, String databaseName)
     {
-        JsonObject configs = new JsonObject()
+        configs = new JsonObject()
                 .put("host", host)
                 .put("port", port)
                 .put("username", username)
@@ -61,5 +62,67 @@ public class DatabaseManager
         });
 
         return future;
+    }
+
+    public CompletableFuture<Void> createDatabase(String databaseName, boolean switchTo)
+    {
+        CompletableFuture<Void> f = new CompletableFuture<>();
+
+        client.getConnection(r -> {
+            if (!r.succeeded()) {
+                f.completeExceptionally(r.cause());
+                return;
+            }
+
+            SQLConnection c = r.result();
+            c.execute("CREATE DATABASE \"" + databaseName + "\"", r2 -> {
+                c.close();
+
+                if (!r2.succeeded()) {
+                    f.completeExceptionally(r.cause());
+                    return;
+                }
+
+                if (switchTo) {
+                    setDatabase(databaseName);
+                }
+
+                f.complete(r2.result());
+            });
+        });
+
+        return f;
+    }
+
+    public CompletableFuture<Void> dropDatabase(String databaseName)
+    {
+        CompletableFuture<Void> f = new CompletableFuture<>();
+
+        client.getConnection(r -> {
+            if (!r.succeeded()) {
+                f.completeExceptionally(r.cause());
+                return;
+            }
+
+            SQLConnection c = r.result();
+            c.execute("DROP DATABASE \"" + databaseName + "\"", r2 -> {
+                c.close();
+
+                if (!r2.succeeded()) {
+                    f.completeExceptionally(r.cause());
+                    return;
+                }
+
+                f.complete(r2.result());
+            });
+        });
+
+        return f;
+    }
+
+    public void setDatabase(String databaseName)
+    {
+        configs.put("database", databaseName);
+        client = PostgreSQLClient.createNonShared(vertx, configs);
     }
 }

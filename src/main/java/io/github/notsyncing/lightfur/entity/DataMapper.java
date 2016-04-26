@@ -5,11 +5,35 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
 import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataMapper
 {
+    private static Instant valueToInstant(Object value)
+    {
+        Instant time = null;
+
+        if ((value instanceof Integer) || (value instanceof Long) || (value.getClass() == int.class) || (value.getClass() == long.class)) {
+            time = Instant.ofEpochMilli((long)value);
+        } else if (value instanceof String) {
+            try {
+                time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S").parse((String)value).toInstant();
+            } catch (ParseException e1) {
+                try {
+                    time = Instant.parse((String) value);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return time;
+    }
+
     private static <T> T mapSingleRow(Class<T> clazz, JsonObject row) throws IllegalAccessException, InstantiationException
     {
         T instance = clazz.newInstance();
@@ -25,7 +49,11 @@ public class DataMapper
                 continue;
             }
 
-            f.set(instance, row.getValue(c.value()));
+            if (f.getType() == Instant.class) {
+                f.set(instance, valueToInstant(row.getValue(c.value())));
+            } else {
+                f.set(instance, row.getValue(c.value()));
+            }
         }
 
         return instance;

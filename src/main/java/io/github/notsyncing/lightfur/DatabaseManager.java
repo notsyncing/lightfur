@@ -1,6 +1,7 @@
 package io.github.notsyncing.lightfur;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
 import io.vertx.ext.asyncsql.PostgreSQLClient;
@@ -18,7 +19,10 @@ public class DatabaseManager
 
     private DatabaseManager()
     {
-        vertx = Vertx.vertx();
+        VertxOptions opts = new VertxOptions()
+                .setBlockedThreadCheckInterval(60 * 60 * 1000);
+
+        vertx = Vertx.vertx(opts);
     }
 
     public static DatabaseManager getInstance()

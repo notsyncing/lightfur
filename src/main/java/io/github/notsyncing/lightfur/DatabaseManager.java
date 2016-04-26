@@ -98,7 +98,7 @@ public class DatabaseManager
         return f;
     }
 
-    public CompletableFuture<Void> dropDatabase(String databaseName)
+    public CompletableFuture<Void> dropDatabase(String databaseName, boolean ifExists)
     {
         setDatabase("postgres");
 
@@ -111,7 +111,14 @@ public class DatabaseManager
             }
 
             SQLConnection c = r.result();
-            c.execute("DROP DATABASE \"" + databaseName + "\"", r2 -> {
+
+            String sql = "DROP DATABASE";
+
+            if (ifExists) {
+                sql += " IF EXISTS";
+            }
+
+            c.execute(sql + " \"" + databaseName + "\"", r2 -> {
                 c.close();
 
                 if (!r2.succeeded()) {
@@ -124,6 +131,11 @@ public class DatabaseManager
         });
 
         return f;
+    }
+
+    public CompletableFuture<Void> dropDatabase(String databaseName)
+    {
+        return dropDatabase(databaseName, false);
     }
 
     public void setDatabase(String databaseName)

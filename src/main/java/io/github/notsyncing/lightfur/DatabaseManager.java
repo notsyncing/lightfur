@@ -96,6 +96,8 @@ public class DatabaseManager
 
     public CompletableFuture<Void> dropDatabase(String databaseName)
     {
+        setDatabase("postgres");
+
         CompletableFuture<Void> f = new CompletableFuture<>();
 
         client.getConnection(r -> {

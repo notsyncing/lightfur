@@ -79,7 +79,7 @@ public class DatabaseManager
                 c.close();
 
                 if (!r2.succeeded()) {
-                    f.completeExceptionally(r.cause());
+                    f.completeExceptionally(r2.cause());
                     return;
                 }
 
@@ -109,7 +109,7 @@ public class DatabaseManager
                 c.close();
 
                 if (!r2.succeeded()) {
-                    f.completeExceptionally(r.cause());
+                    f.completeExceptionally(r2.cause());
                     return;
                 }
 

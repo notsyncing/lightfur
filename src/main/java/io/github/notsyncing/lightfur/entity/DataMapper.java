@@ -59,6 +59,15 @@ public class DataMapper
         return instance;
     }
 
+    /**
+     * 将结果集中的第一行映射至指定的类/实体上
+     * @param clazz 指定的类/实体的类型
+     * @param results c
+     * @param <T> 指定的类/实体的类型
+     * @return 指定类型的，已实例化的，并根据结果集的第一行填充其字段的类/实体对象
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
     public static <T> T map(Class<T> clazz, ResultSet results) throws IllegalAccessException, InstantiationException
     {
         if (results.getNumRows() <= 0) {
@@ -69,6 +78,15 @@ public class DataMapper
         return mapSingleRow(clazz, row);
     }
 
+    /**
+     * 将整个结果集映射到指定的类/实体的列表上
+     * @param clazz 指定的类/实体的类型
+     * @param results 指定的类/实体的类型
+     * @param <T> 指定的类/实体的类型
+     * @return 指定类型的，已实例化的，并根据结果集的每一行填充其字段的类/实体对象的列表
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
     public static <T> List<T> mapToList(Class<T> clazz, ResultSet results) throws InstantiationException, IllegalAccessException
     {
         if (results.getNumRows() <= 0) {

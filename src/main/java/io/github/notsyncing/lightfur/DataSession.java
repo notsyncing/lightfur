@@ -9,12 +9,18 @@ import io.vertx.ext.sql.UpdateResult;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * 数据操作会话类
+ */
 public class DataSession
 {
     private DatabaseManager mgr;
     private SQLConnection conn = null;
     private CompletableFuture<Void> connFuture;
 
+    /**
+     * 实例化一个数据操作会话
+     */
     public DataSession()
     {
         mgr = DatabaseManager.getInstance();
@@ -48,6 +54,10 @@ public class DataSession
         });
     }
 
+    /**
+     * 异步开始一个数据库事务
+     * @return 指示事务是否已开始的 CompletableFuture 对象
+     */
     public CompletableFuture beginTransaction()
     {
         return setAutoCommit(false);
@@ -71,6 +81,12 @@ public class DataSession
         });
     }
 
+    /**
+     * 异步提交当前数据库事务
+     * 应先调用 {@link DataSession#beginTransaction} 来开始一个事务
+     * @param endTransaction 提交后是否结束事务
+     * @return 指示提交是否已完成的 CompletableFuture 对象
+     */
     public CompletableFuture<Void> commit(boolean endTransaction)
     {
         return commitCore().thenCompose(o -> {
@@ -82,6 +98,11 @@ public class DataSession
         });
     }
 
+    /**
+     * 异步提交当前数据库事务，并结束当前事务
+     * 应先调用 {@link DataSession#beginTransaction} 来开始一个事务
+     * @return 指示提交和结束事务是否已完成的 CompletableFuture 对象
+     */
     public CompletableFuture commit()
     {
         return commit(true);
@@ -105,6 +126,12 @@ public class DataSession
         });
     }
 
+    /**
+     * 异步回滚当前数据库事务
+     * 应先调用 {@link DataSession#beginTransaction} 来开始一个事务
+     * @param endTransaction 回滚后是否结束事务
+     * @return 指示回滚是否已完成的 CompletableFuture 对象
+     */
     public CompletableFuture<Void> rollback(boolean endTransaction)
     {
         return rollbackCore().thenCompose(o -> {
@@ -116,11 +143,22 @@ public class DataSession
         });
     }
 
+    /**
+     * 异步回滚当前数据库事务，并结束当前事务
+     * 应先调用 {@link DataSession#beginTransaction} 来开始一个事务
+     * @return 指示回滚和结束事务是否已完成的 CompletableFuture 对象
+     */
     public CompletableFuture<Void> rollback()
     {
         return rollback(true);
     }
 
+    /**
+     * 异步执行一条 SQL 语句
+     * @param sql 要执行的 SQL 语句
+     * @param params 该语句的参数列表
+     * @return 包含执行结果的 CompletableFuture 对象
+     */
     public CompletableFuture<UpdateResult> execute(String sql, JsonArray params)
     {
         return ensureConnection().thenCompose(c -> {
@@ -139,6 +177,12 @@ public class DataSession
         });
     }
 
+    /**
+     * 异步执行一条 SQL 语句
+     * @param sql 要执行的 SQL 语句
+     * @param params 该语句的参数列表
+     * @return 包含执行结果的 CompletableFuture 对象
+     */
     public CompletableFuture<UpdateResult> execute(String sql, Object... params)
     {
         return execute(sql, objectsToJsonArray(params));
@@ -156,6 +200,12 @@ public class DataSession
         return arr;
     }
 
+    /**
+     * 异步执行一条 SQL 查询语句
+     * @param sql 要执行的 SQL 查询语句
+     * @param params 该语句的参数列表
+     * @return 包含查询结果集的 CompletableFuture 对象
+     */
     public CompletableFuture<ResultSet> query(String sql, JsonArray params)
     {
         return ensureConnection().thenCompose(c -> {
@@ -174,16 +224,35 @@ public class DataSession
         });
     }
 
+    /**
+     * 异步执行一条 SQL 查询语句
+     * @param sql 要执行的 SQL 查询语句
+     * @param params 该语句的参数列表
+     * @return 包含查询结果集的 CompletableFuture 对象
+     */
     public CompletableFuture<ResultSet> query(String sql, Object... params)
     {
         return query(sql, objectsToJsonArray(params));
     }
 
+    /**
+     * 结束当前数据会话，并关闭数据库连接
+     * 在执行此函数之后，当前数据会话对象上的所有后续操作将失败
+     * 要再次操作，请调用 {@link DataSession#DataSession()} 开始一个新的数据会话
+     */
     public void end()
     {
         conn.close();
     }
 
+    /**
+     * 异步执行一条 SQL 查询语句，并将第一条查询结果映射到指定类型的类/实体
+     * @param clazz 指定的类/实体的类型
+     * @param sql 要执行的 SQL 查询语句
+     * @param params 该语句的参数列表
+     * @param <T> 指定的类/实体的类型
+     * @return 包含指定类型的，已实例化的，并根据结果集的第一行填充其字段的类/实体对象的 CompletableFuture 对象
+     */
     public <T> CompletableFuture<T> queryFirst(Class<T> clazz, String sql, Object... params)
     {
         return query(sql, params).thenCompose(r -> {
@@ -197,6 +266,14 @@ public class DataSession
         });
     }
 
+    /**
+     * 异步执行一条 SQL 查询语句，并将整个查询结果集映射到指定类型的类/实体列表上
+     * @param clazz 指定的类/实体的类型
+     * @param sql 要执行的 SQL 查询语句
+     * @param params 该语句的参数列表
+     * @param <T> 指定的类/实体的类型
+     * @return 包含指定类型的，已实例化的，并根据结果集的每一行填充其字段的类/实体对象的列表的 CompletableFuture 对象
+     */
     public <T> CompletableFuture<List<T>> queryList(Class<T> clazz, String sql, Object... params)
     {
         return query(sql, params).thenCompose(r -> {
@@ -210,6 +287,12 @@ public class DataSession
         });
     }
 
+    /**
+     * 异步执行一条 SQL 查询语句，并返回查询结果第一行第一列的值
+     * @param sql 要执行的 SQL 查询语句
+     * @param params 该语句的参数列表
+     * @return 包含查询结果第一行第一列的值的 CompletableFuture 对象
+     */
     public CompletableFuture<Object> queryFirstValue(String sql, Object... params)
     {
         return query(sql, params).thenApply(r -> r.getNumRows() > 0 ? r.getResults().get(0).getValue(0) : null);

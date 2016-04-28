@@ -22,6 +22,16 @@ dependencies {
     testCompile 'io.vertx:vertx-unit:3.2.1'
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier "sources"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier "javadoc"
+    from javadoc.destinationDir
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
@@ -29,6 +39,9 @@ publishing {
             artifactId 'lightfur'
             version ver
             from components.java
+
+            artifact sourceJar
+            artifact javadocJar
         }
     }
 }

@@ -9,6 +9,9 @@ import io.vertx.ext.sql.SQLConnection;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * 数据库相关的各种操作
+ */
 public class DatabaseManager
 {
     private static DatabaseManager instance = new DatabaseManager();
@@ -25,11 +28,23 @@ public class DatabaseManager
         vertx = Vertx.vertx(opts);
     }
 
+    /**
+     * 获取该类的实例
+     * @return 数据库相关的各种操作的类
+     */
     public static DatabaseManager getInstance()
     {
         return instance;
     }
 
+    /**
+     * 设置到数据库的连接参数
+     * @param host 数据库主机名/IP地址
+     * @param port 数据库端口号
+     * @param username 数据库用户名
+     * @param password 该数据库用户的密码
+     * @param databaseName 要连接的数据库的名称
+     */
     public void init(String host, int port, String username, String password, String databaseName)
     {
         configs = new JsonObject()
@@ -42,16 +57,30 @@ public class DatabaseManager
         client = PostgreSQLClient.createNonShared(vertx, configs);
     }
 
+    /**
+     * 设置到数据库的连接参数，主机默认为 localhost，端口默认为 5432
+     * @param username 数据库用户名
+     * @param password 该数据库用户的密码
+     * @param databaseName 要连接的数据库的名称
+     */
     public void init(String username, String password, String databaseName)
     {
         init("localhost", 5432, username, password, databaseName);
     }
 
+    /**
+     * 设置到数据库的连接参数，主机默认为 localhost，端口默认为 5432，用户名默认为 postgres，密码默认为空
+     * @param databaseName 要连接的数据库的名称
+     */
     public void init(String databaseName)
     {
         init("postgres", null, databaseName);
     }
 
+    /**
+     * 异步获取数据库连接对象
+     * @return 包含数据库连接对象的 CompletableFuture 对象
+     */
     public CompletableFuture<SQLConnection> getConnection()
     {
         CompletableFuture<SQLConnection> future = new CompletableFuture<>();
@@ -68,6 +97,12 @@ public class DatabaseManager
         return future;
     }
 
+    /**
+     * 异步创建数据库
+     * @param databaseName 要创建的数据库名称
+     * @param switchTo 创建完毕后是否切换到该数据库
+     * @return 指示是否完成的 CompletableFuture 对象
+     */
     public CompletableFuture<Void> createDatabase(String databaseName, boolean switchTo)
     {
         CompletableFuture<Void> f = new CompletableFuture<>();
@@ -98,6 +133,12 @@ public class DatabaseManager
         return f;
     }
 
+    /**
+     * 异步删除数据库
+     * @param databaseName 要删除的数据库名称
+     * @param ifExists 仅在该数据库存在时删除之
+     * @return 指示是否完成的 CompletableFuture 对象
+     */
     public CompletableFuture<Void> dropDatabase(String databaseName, boolean ifExists)
     {
         setDatabase("postgres");
@@ -133,11 +174,20 @@ public class DatabaseManager
         return f;
     }
 
+    /**
+     * 异步删除数据库
+     * @param databaseName 要删除的数据库名称
+     * @return 指示是否完成的 CompletableFuture 对象
+     */
     public CompletableFuture<Void> dropDatabase(String databaseName)
     {
         return dropDatabase(databaseName, false);
     }
 
+    /**
+     * 设置/切换要连接到的数据库
+     * @param databaseName 要连接到的数据库名称
+     */
     public void setDatabase(String databaseName)
     {
         configs.put("database", databaseName);

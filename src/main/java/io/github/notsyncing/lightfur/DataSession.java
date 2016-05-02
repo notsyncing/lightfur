@@ -1,11 +1,15 @@
 package io.github.notsyncing.lightfur;
 
 import io.github.notsyncing.lightfur.entity.DataMapper;
+import io.github.notsyncing.lightfur.models.PageResult;
+import io.github.notsyncing.lightfur.utils.FutureUtils;
+import io.github.notsyncing.lightfur.utils.PageUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.sql.UpdateResult;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -285,6 +289,53 @@ public class DataSession
                 return f;
             }
         });
+    }
+
+    /**
+     * 异步执行一条 SQL 查询语句，并将查询结果集分页以列表形式返回<br />
+     * 本函数会先执行一条 COUNT 查询，并且不在内部使用事务
+     * @param clazz 指定的类/实体的类型
+     * @param pageNum 要查询的页数，从 0 开始
+     * @param pageSize 每页最大条目数量
+     * @param sql 要执行的 SQL 查询语句
+     * @param params 该语句的参数列表
+     * @param <T> 指定的类/实体的类型
+     * @return 包含总页数、总条目数及列表的 CompletableFuture 对象
+     */
+    public <T> CompletableFuture<PageResult<T>> queryListPaged(Class<T> clazz, int pageNum, int pageSize, String sql,
+                                                               Object... params)
+    {
+        int begin = sql.indexOf("SELECT");
+        int end = sql.indexOf("FROM", begin);
+
+        if (begin < 0) {
+            return FutureUtils.failed(new InvalidParameterException("SQL " + sql + " does not contain a SELECT!"));
+        }
+
+        if (end < 0) {
+            return FutureUtils.failed(new InvalidParameterException("SQL " + sql + " does not contain a FROM after SELECT!"));
+        }
+
+        String countSql = sql.indexOf(0, begin) + "SELECT COUNT(*) " + sql.indexOf(end);
+
+        PageResult<T> result = new PageResult<>();
+        result.setPageNum(pageNum);
+        result.setPageSize(pageSize);
+
+        return queryFirstValue(countSql, params)
+                .thenCompose(r -> {
+                    int totalCount = (int)r;
+                    String limitSql = sql + " LIMIT " + pageSize + " OFFSET " + (pageNum * pageSize);
+
+                    result.setTotalCount(totalCount);
+                    result.setPageCount(PageUtils.calculatePageCount(pageSize, totalCount));
+
+                    return queryList(clazz, limitSql, params);
+                })
+                .thenApply(r -> {
+                    result.setList(r);
+                    return result;
+                });
     }
 
     /**

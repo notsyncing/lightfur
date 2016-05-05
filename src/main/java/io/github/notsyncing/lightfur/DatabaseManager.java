@@ -78,6 +78,26 @@ public class DatabaseManager
     }
 
     /**
+     * 异步关闭数据库客户端
+     * @return 指示数据库客户端关闭是否完成的 CompletableFuture 对象
+     */
+    public CompletableFuture close()
+    {
+        CompletableFuture f = new CompletableFuture();
+
+        client.close(r -> {
+            if (r.failed()) {
+                f.completeExceptionally(r.cause());
+                return;
+            }
+
+            f.complete(r.result());
+        });
+
+        return f;
+    }
+
+    /**
      * 异步获取数据库连接对象
      * @return 包含数据库连接对象的 CompletableFuture 对象
      */

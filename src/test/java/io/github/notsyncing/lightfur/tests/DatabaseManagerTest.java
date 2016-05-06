@@ -1,5 +1,6 @@
-package io.github.notsyncing.lightfur;
+package io.github.notsyncing.lightfur.tests;
 
+import io.github.notsyncing.lightfur.DatabaseManager;
 import io.vertx.core.impl.verticle.PackageHelper;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.unit.Async;

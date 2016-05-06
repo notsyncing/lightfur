@@ -51,6 +51,8 @@ public class DataMapper
 
             if (f.getType() == Instant.class) {
                 f.set(instance, valueToInstant(row.getValue(c.value())));
+            } else if (Enum.class.isAssignableFrom(f.getType())) {
+                f.set(instance, f.getType().getEnumConstants()[row.getInteger(c.value())]);
             } else {
                 f.set(instance, row.getValue(c.value()));
             }

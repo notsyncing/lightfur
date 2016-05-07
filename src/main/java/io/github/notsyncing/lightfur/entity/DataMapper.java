@@ -4,6 +4,7 @@ import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +35,35 @@ public class DataMapper
         return time;
     }
 
+    private static Object stringToType(Class<?> clazz, String value)
+    {
+        if (clazz.equals(String.class)) {
+            return value;
+        }
+
+        if ((clazz.equals(int.class)) || (clazz.equals(Integer.class))) {
+            return Integer.parseInt(value);
+        }
+
+        if ((clazz.equals(float.class)) || (clazz.equals(Float.class))) {
+            return Float.parseFloat(value);
+        }
+
+        if ((clazz.equals(double.class)) || (clazz.equals(Double.class))) {
+            return Double.parseDouble(value);
+        }
+
+        if ((clazz.equals(boolean.class)) || (clazz.equals(Boolean.class))) {
+            return Boolean.parseBoolean(value);
+        }
+
+        if ((clazz.equals(byte.class)) || (clazz.equals(Byte.class))) {
+            return Byte.parseByte(value);
+        }
+
+        return value;
+    }
+
     private static <T> T mapSingleRow(Class<T> clazz, JsonObject row) throws IllegalAccessException, InstantiationException
     {
         T instance = clazz.newInstance();
@@ -53,12 +83,33 @@ public class DataMapper
                 f.set(instance, valueToInstant(row.getValue(c.value())));
             } else if (Enum.class.isAssignableFrom(f.getType())) {
                 f.set(instance, f.getType().getEnumConstants()[row.getInteger(c.value())]);
+            } else if (f.getType().isArray()) {
+                String value = row.getString(c.value());
+
+                if ((value.startsWith("{")) && (value.endsWith("}"))) {
+                    f.set(instance, convertSQLArrayToJavaArray(f.getType().getComponentType(), value));
+                } else {
+                    throw new IllegalAccessException("Invalid array result " + value);
+                }
             } else {
                 f.set(instance, row.getValue(c.value()));
             }
         }
 
         return instance;
+    }
+
+    private static Object convertSQLArrayToJavaArray(Class<?> arrayComponentType, String sqlArrayAsString)
+    {
+        sqlArrayAsString = sqlArrayAsString.substring(1, sqlArrayAsString.length() - 1);
+        String[] values = sqlArrayAsString.split(",");
+        Object vals = Array.newInstance(arrayComponentType, values.length);
+
+        for (int i = 0; i < values.length; i++) {
+            Array.set(vals, i, stringToType(arrayComponentType, values[i]));
+        }
+
+        return vals;
     }
 
     /**

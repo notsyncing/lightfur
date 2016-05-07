@@ -4,16 +4,18 @@ import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.github.notsyncing.lightfur.entity.DataMapper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
+@RunWith(VertxUnitRunner.class)
 public class DataMapperTest
 {
     public enum TestEnum
@@ -35,19 +37,23 @@ public class DataMapperTest
 
         @Column("type")
         public TestEnum type;
+
+        @Column("list")
+        public int[] list;
     }
 
     @Test
     public void testMap() throws InstantiationException, IllegalAccessException, ParseException
     {
         ResultSet r = new ResultSet();
-        r.setColumnNames(Arrays.asList("id", "username", "date", "type"));
+        r.setColumnNames(Arrays.asList("id", "username", "date", "type", "list"));
 
         JsonArray arr = new JsonArray();
         arr.add(1);
         arr.add("test");
         arr.add("2015-04-03T11:35:29.384");
         arr.add(TestEnum.TypeB.ordinal());
+        arr.add("{1,2,3}");
         r.setResults(Arrays.asList(arr));
 
         TestObject o = DataMapper.map(TestObject.class, r);
@@ -57,5 +63,6 @@ public class DataMapperTest
         assertEquals(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S").parse("2015-04-03T11:35:29.384").toInstant().getEpochSecond(),
                 o.date.getEpochSecond());
         assertEquals(TestEnum.TypeB, o.type);
+        assertArrayEquals(new int[] { 1, 2, 3 }, o.list);
     }
 }

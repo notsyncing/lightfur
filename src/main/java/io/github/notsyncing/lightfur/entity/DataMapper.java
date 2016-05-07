@@ -1,6 +1,7 @@
 package io.github.notsyncing.lightfur.entity;
 
 import io.github.notsyncing.lightfur.annotations.entity.Column;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
@@ -84,10 +85,25 @@ public class DataMapper
             } else if (Enum.class.isAssignableFrom(f.getType())) {
                 f.set(instance, f.getType().getEnumConstants()[row.getInteger(c.value())]);
             } else if (f.getType().isArray()) {
-                String value = row.getString(c.value());
+                Object value = row.getValue(c.value());
 
-                if ((value.startsWith("{")) && (value.endsWith("}"))) {
-                    f.set(instance, convertSQLArrayToJavaArray(f.getType().getComponentType(), value));
+                if (value instanceof JsonArray) {
+                    JsonArray arr = (JsonArray)value;
+                    Object vals = Array.newInstance(f.getType().getComponentType(), arr.size());
+
+                    for (int i = 0; i < arr.size(); i++) {
+                        Array.set(vals, i, arr.getValue(i));
+                    }
+
+                    f.set(instance, vals);
+                } else if (value instanceof String) {
+                    String s = (String)value;
+
+                    if ((s.startsWith("{")) && (s.endsWith("}"))) {
+                        f.set(instance, convertSQLArrayToJavaArray(f.getType().getComponentType(), s));
+                    } else {
+                        throw new IllegalAccessException("Invalid array result " + value);
+                    }
                 } else {
                     throw new IllegalAccessException("Invalid array result " + value);
                 }

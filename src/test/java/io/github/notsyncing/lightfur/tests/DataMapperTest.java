@@ -40,13 +40,16 @@ public class DataMapperTest
 
         @Column("list")
         public int[] list;
+
+        @Column("list2")
+        public int[] list2;
     }
 
     @Test
     public void testMap() throws InstantiationException, IllegalAccessException, ParseException
     {
         ResultSet r = new ResultSet();
-        r.setColumnNames(Arrays.asList("id", "username", "date", "type", "list"));
+        r.setColumnNames(Arrays.asList("id", "username", "date", "type", "list", "list2"));
 
         JsonArray arr = new JsonArray();
         arr.add(1);
@@ -54,6 +57,7 @@ public class DataMapperTest
         arr.add("2015-04-03T11:35:29.384");
         arr.add(TestEnum.TypeB.ordinal());
         arr.add("{1,2,3}");
+        arr.add(new JsonArray("[4,5,6]"));
         r.setResults(Arrays.asList(arr));
 
         TestObject o = DataMapper.map(TestObject.class, r);
@@ -64,5 +68,6 @@ public class DataMapperTest
                 o.date.getEpochSecond());
         assertEquals(TestEnum.TypeB, o.type);
         assertArrayEquals(new int[] { 1, 2, 3 }, o.list);
+        assertArrayEquals(new int[] { 4, 5, 6 }, o.list2);
     }
 }

@@ -4,6 +4,7 @@ import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
+import scala.Char;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -59,6 +60,14 @@ public class DataMapper
         }
 
         if ((clazz.equals(byte.class)) || (clazz.equals(Byte.class))) {
+            return Byte.parseByte(value);
+        }
+
+        if ((clazz.equals(long.class)) || (clazz.equals(Long.class))) {
+            return Byte.parseByte(value);
+        }
+
+        if ((clazz.equals(char.class)) || (clazz.equals(Char.class))) {
             return Byte.parseByte(value);
         }
 

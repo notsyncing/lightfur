@@ -1,5 +1,6 @@
 package io.github.notsyncing.lightfur.entity;
 
+import com.alibaba.fastjson.JSON;
 import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -117,7 +118,31 @@ public class DataMapper
                     throw new IllegalAccessException("Invalid array result " + value);
                 }
             } else {
-                f.set(instance, row.getValue(c.value()));
+                Object value = row.getValue(c.value());
+
+                if (value instanceof String) {
+                    String s = (String)value;
+
+                    if (((s.startsWith("{")) && (s.endsWith("}")))
+                            && (!f.getType().isPrimitive())
+                            && (!f.getType().equals(String.class))) {
+                        f.set(instance, JSON.parseObject(s, f.getType()));
+                        continue;
+                    }
+                } else if (value instanceof JsonObject) {
+                    if (f.getType().equals(JsonObject.class)) {
+                        f.set(instance, value);
+                    } else {
+                        f.set(instance, JSON.parseObject(((JsonObject)value).encode(), f.getType()));
+                    }
+
+                    continue;
+                } else if ((value instanceof JsonArray) && (f.getType().equals(JsonArray.class))) {
+                    f.set(instance, value);
+                    continue;
+                }
+
+                f.set(instance, value);
             }
         }
 

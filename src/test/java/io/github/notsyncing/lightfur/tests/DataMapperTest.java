@@ -3,6 +3,7 @@ package io.github.notsyncing.lightfur.tests;
 import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.github.notsyncing.lightfur.entity.DataMapper;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Test;
@@ -43,13 +44,22 @@ public class DataMapperTest
 
         @Column("list2")
         public int[] list2;
+
+        @Column("complex")
+        public TestInnerObject complex;
+    }
+
+    public static class TestInnerObject
+    {
+        public int a;
+        public int b;
     }
 
     @Test
     public void testMap() throws InstantiationException, IllegalAccessException, ParseException
     {
         ResultSet r = new ResultSet();
-        r.setColumnNames(Arrays.asList("id", "username", "date", "type", "list", "list2"));
+        r.setColumnNames(Arrays.asList("id", "username", "date", "type", "list", "list2", "complex"));
 
         JsonArray arr = new JsonArray();
         arr.add(1);
@@ -58,6 +68,7 @@ public class DataMapperTest
         arr.add(TestEnum.TypeB.ordinal());
         arr.add("{1,2,3}");
         arr.add(new JsonArray("[4,5,6]"));
+        arr.add(new JsonObject("{\"a\":7,\"b\":8}"));
         r.setResults(Arrays.asList(arr));
 
         TestObject o = DataMapper.map(TestObject.class, r);
@@ -69,5 +80,8 @@ public class DataMapperTest
         assertEquals(TestEnum.TypeB, o.type);
         assertArrayEquals(new int[] { 1, 2, 3 }, o.list);
         assertArrayEquals(new int[] { 4, 5, 6 }, o.list2);
+        assertNotNull(o.complex);
+        assertEquals(7, o.complex.a);
+        assertEquals(8, o.complex.b);
     }
 }

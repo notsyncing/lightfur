@@ -111,6 +111,8 @@ public class DataMapper
 
                     if ((s.startsWith("{")) && (s.endsWith("}"))) {
                         f.set(instance, convertSQLArrayToJavaArray(f.getType().getComponentType(), s));
+                    } else if ((s.startsWith("[")) && (s.endsWith("]"))) {
+                        f.set(instance, convertJsonArrayToJavaArray(f.getType().getComponentType(), s));
                     } else {
                         throw new IllegalAccessException("Invalid array result " + value);
                     }
@@ -160,6 +162,18 @@ public class DataMapper
         }
 
         return vals;
+    }
+
+    private static <T> T[] convertJsonArrayToJavaArray(Class<T> arrayComponentType, String jsonArrayAsString)
+    {
+        List<T> values = JSON.parseArray(jsonArrayAsString, arrayComponentType);
+        Object vals = Array.newInstance(arrayComponentType, values.size());
+
+        for (int i = 0; i < values.size(); i++) {
+            Array.set(vals, i, values.get(i));
+        }
+
+        return (T[])vals;
     }
 
     /**

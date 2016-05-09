@@ -47,6 +47,9 @@ public class DataMapperTest
 
         @Column("complex")
         public TestInnerObject complex;
+
+        @Column("complex2")
+        public TestInnerObject[] complexArray;
     }
 
     public static class TestInnerObject
@@ -59,7 +62,7 @@ public class DataMapperTest
     public void testMap() throws InstantiationException, IllegalAccessException, ParseException
     {
         ResultSet r = new ResultSet();
-        r.setColumnNames(Arrays.asList("id", "username", "date", "type", "list", "list2", "complex"));
+        r.setColumnNames(Arrays.asList("id", "username", "date", "type", "list", "list2", "complex", "complex2"));
 
         JsonArray arr = new JsonArray();
         arr.add(1);
@@ -69,6 +72,7 @@ public class DataMapperTest
         arr.add("{1,2,3}");
         arr.add(new JsonArray("[4,5,6]"));
         arr.add(new JsonObject("{\"a\":7,\"b\":8}"));
+        arr.add("[{\"a\":9,\"b\":0},{\"a\":1,\"b\":2}]");
         r.setResults(Arrays.asList(arr));
 
         TestObject o = DataMapper.map(TestObject.class, r);
@@ -80,8 +84,18 @@ public class DataMapperTest
         assertEquals(TestEnum.TypeB, o.type);
         assertArrayEquals(new int[] { 1, 2, 3 }, o.list);
         assertArrayEquals(new int[] { 4, 5, 6 }, o.list2);
+
         assertNotNull(o.complex);
         assertEquals(7, o.complex.a);
         assertEquals(8, o.complex.b);
+
+        assertNotNull(o.complexArray);
+        assertEquals(2, o.complexArray.length);
+        assertNotNull(o.complexArray[0]);
+        assertEquals(9, o.complexArray[0].a);
+        assertEquals(0, o.complexArray[0].b);
+        assertNotNull(o.complexArray[1]);
+        assertEquals(1, o.complexArray[1].a);
+        assertEquals(2, o.complexArray[1].b);
     }
 }

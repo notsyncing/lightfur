@@ -192,6 +192,17 @@ public class DataSession
         return execute(sql, objectsToJsonArray(params));
     }
 
+    /**
+     * 异步执行一条 SQL 语句，并获取返回的列
+     * @param sql 要执行的 SQL 语句
+     * @param params 该语句的参数列表
+     * @return 包含执行结果的 CompletableFuture 对象
+     */
+    public CompletableFuture<ResultSet> executeWithReturning(String sql, Object... params)
+    {
+        return query(sql, objectsToJsonArray(params));
+    }
+
     private JsonArray objectsToJsonArray(Object[] params)
     {
         JsonArray arr = new JsonArray();

@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import scala.Char;
+import scala.math.BigDecimal;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -142,6 +143,11 @@ public class DataMapper
                 } else if ((value instanceof JsonArray) && (f.getType().equals(JsonArray.class))) {
                     f.set(instance, value);
                     continue;
+                } else if (value instanceof BigDecimal) {
+                    if (f.getType().equals(java.math.BigDecimal.class)) {
+                        f.set(instance, ((BigDecimal)value).bigDecimal());
+                        continue;
+                    }
                 }
 
                 f.set(instance, value);

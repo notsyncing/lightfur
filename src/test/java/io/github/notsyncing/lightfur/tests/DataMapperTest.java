@@ -9,6 +9,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -50,6 +51,9 @@ public class DataMapperTest
 
         @Column("complex2")
         public TestInnerObject[] complexArray;
+
+        @Column("long_number")
+        public BigDecimal longNumber;
     }
 
     public static class TestInnerObject
@@ -62,7 +66,7 @@ public class DataMapperTest
     public void testMap() throws InstantiationException, IllegalAccessException, ParseException
     {
         ResultSet r = new ResultSet();
-        r.setColumnNames(Arrays.asList("id", "username", "date", "type", "list", "list2", "complex", "complex2"));
+        r.setColumnNames(Arrays.asList("id", "username", "date", "type", "list", "list2", "complex", "complex2", "long_number"));
 
         JsonArray arr = new JsonArray();
         arr.add(1);
@@ -73,6 +77,7 @@ public class DataMapperTest
         arr.add(new JsonArray("[4,5,6]"));
         arr.add(new JsonObject("{\"a\":7,\"b\":8}"));
         arr.add("[{\"a\":9,\"b\":0},{\"a\":1,\"b\":2}]");
+        arr.add(new scala.math.BigDecimal(new BigDecimal("92375947293472934923794729345345345433.2345345345")));
         r.setResults(Arrays.asList(arr));
 
         TestObject o = DataMapper.map(TestObject.class, r);
@@ -97,5 +102,7 @@ public class DataMapperTest
         assertNotNull(o.complexArray[1]);
         assertEquals(1, o.complexArray[1].a);
         assertEquals(2, o.complexArray[1].b);
+
+        assertTrue(new BigDecimal("92375947293472934923794729345345345433.2345345345").equals(o.longNumber));
     }
 }

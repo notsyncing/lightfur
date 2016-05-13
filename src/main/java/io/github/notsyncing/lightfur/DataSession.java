@@ -303,7 +303,7 @@ public class DataSession
     }
 
     /**
-     * 异步执行一条 SQL 查询语句，并将查询结果集分页以列表形式返回<br />
+     * 异步执行一条 SQL 查询语句，并将查询结果集分页以列表形式返回
      * 本函数会先执行一条 COUNT 查询，并且不在内部使用事务
      * @param clazz 指定的类/实体的类型
      * @param pageNum 要查询的页数，从 0 开始

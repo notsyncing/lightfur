@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 @RunWith(VertxUnitRunner.class)
 public class DataSessionTest
@@ -57,11 +58,11 @@ public class DataSessionTest
         Async async = context.async();
 
         db.close()
-                .thenCompose(r -> {
+                .thenCompose((Function) r -> {
                     db.init("postgres");
                     return db.dropDatabase(TEST_DB, true);
                 })
-                .thenCompose(r -> db.close())
+                .thenCompose((Function) r -> db.close())
                 .thenAccept(r -> async.complete())
                 .exceptionally(ex -> {
                     context.fail((Throwable)ex);

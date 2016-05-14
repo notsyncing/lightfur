@@ -212,7 +212,11 @@ public class DataSession
                 if (o == null) {
                     arr.addNull();
                 } else {
-                    arr.add(o);
+                    if (o instanceof Enum) {
+                        arr.add(((Enum)o).ordinal());
+                    } else {
+                        arr.add(o);
+                    }
                 }
             }
         }

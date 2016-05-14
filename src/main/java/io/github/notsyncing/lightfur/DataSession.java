@@ -209,9 +209,14 @@ public class DataSession
 
         if (params != null) {
             for (Object o : params) {
-                arr.add(o);
+                if (o == null) {
+                    arr.addNull();
+                } else {
+                    arr.add(o);
+                }
             }
         }
+
         return arr;
     }
 

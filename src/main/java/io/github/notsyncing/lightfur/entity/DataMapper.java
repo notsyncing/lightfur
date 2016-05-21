@@ -108,7 +108,7 @@ public class DataMapper
 
                     f.set(instance, vals);
                 } else if (value instanceof String) {
-                    String s = (String)value;
+                    String s = (String) value;
 
                     if ((s.startsWith("{")) && (s.endsWith("}"))) {
                         f.set(instance, convertSQLArrayToJavaArray(f.getType().getComponentType(), s));
@@ -117,6 +117,8 @@ public class DataMapper
                     } else {
                         throw new IllegalAccessException("Invalid array result " + value);
                     }
+                } else if (value == null) {
+                    f.set(instance, null);
                 } else {
                     throw new IllegalAccessException("Invalid array result " + value);
                 }

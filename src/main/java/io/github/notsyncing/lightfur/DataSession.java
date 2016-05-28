@@ -9,6 +9,7 @@ import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.sql.UpdateResult;
 
+import java.lang.reflect.Array;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -214,6 +215,14 @@ public class DataSession
                 } else {
                     if (o instanceof Enum) {
                         arr.add(((Enum)o).ordinal());
+                    } else if (o.getClass().isArray()) {
+                        JsonArray a = new JsonArray();
+
+                        for (int i = 0; i < Array.getLength(o); i++) {
+                            a.add(Array.get(o, i));
+                        }
+
+                        arr.add(a);
                     } else {
                         arr.add(o);
                     }

@@ -1,5 +1,6 @@
 package io.github.notsyncing.lightfur;
 
+import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException;
 import io.github.notsyncing.lightfur.entity.DataMapper;
 import io.github.notsyncing.lightfur.models.PageResult;
 import io.github.notsyncing.lightfur.utils.FutureUtils;
@@ -173,6 +174,8 @@ public class DataSession
                 if (r.succeeded()) {
                     f.complete(r.result());
                 } else {
+                    System.out.println("Error occured when executing SQL: " + sql + " (" + params + ")");
+
                     r.cause().printStackTrace();
                     f.completeExceptionally(r.cause());
                 }
@@ -248,6 +251,8 @@ public class DataSession
                 if (r.succeeded()) {
                     f.complete(r.result());
                 } else {
+                    System.out.println("Error occured when querying SQL: " + sql + " (" + params + ")");
+
                     r.cause().printStackTrace();
                     f.completeExceptionally(r.cause());
                 }

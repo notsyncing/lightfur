@@ -122,4 +122,32 @@ public class DataSessionTest
                     return null;
                 });
     }
+
+    @Test
+    public void testQuery(TestContext context)
+    {
+        Async async = context.async();
+
+        DataSession session = new DataSession();
+        session.execute("INSERT INTO test (message, flag, arr) VALUES (?, ?, ?)", "test2", 2, new int[] { 1, 2, 3 })
+                .thenAccept(r -> context.assertEquals(1, r.getUpdated()))
+                .thenCompose(r -> session.query("SELECT message, flag, arr::text FROM test WHERE flag = ANY(?::int[])", new Object[] { new int[] { 1, 2, 3 } }))
+                .thenAccept(r -> {
+                    context.assertEquals(1, r.getNumRows());
+                    context.assertEquals(3, r.getNumColumns());
+                    context.assertEquals("test2", r.getResults().get(0).getString(0));
+                    context.assertEquals(2, r.getResults().get(0).getInteger(1));
+                    context.assertEquals("{1,2,3}", r.getResults().get(0).getString(2));
+
+                    async.complete();
+
+                    session.end();
+                })
+                .exceptionally(ex -> {
+                    session.end();
+                    context.fail((Throwable) ex);
+                    async.complete();
+                    return null;
+                });
+    }
 }

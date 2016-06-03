@@ -131,7 +131,7 @@ public class DataSessionTest
         DataSession session = new DataSession();
         session.execute("INSERT INTO test (message, flag, arr) VALUES (?, ?, ?)", "test2", 2, new int[] { 1, 2, 3 })
                 .thenAccept(r -> context.assertEquals(1, r.getUpdated()))
-                .thenCompose(r -> session.query("SELECT message, flag, arr::text FROM test WHERE flag = ANY(?::int[])", new Object[] { new int[] { 1, 2, 3 } }))
+                .thenCompose(r -> session.query("SELECT message, flag, arr::text FROM test WHERE flag = ANY(?)", new Object[] { new int[] { 1, 2, 3 } }))
                 .thenAccept(r -> {
                     context.assertEquals(1, r.getNumRows());
                     context.assertEquals(3, r.getNumColumns());

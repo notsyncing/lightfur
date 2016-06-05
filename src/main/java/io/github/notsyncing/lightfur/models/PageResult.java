@@ -1,5 +1,7 @@
 package io.github.notsyncing.lightfur.models;
 
+import io.github.notsyncing.lightfur.utils.PageUtils;
+
 import java.util.List;
 
 public class PageResult<T>
@@ -72,5 +74,6 @@ public class PageResult<T>
     public void setTotalCount(int totalCount)
     {
         this.totalCount = totalCount;
+        this.pageCount = PageUtils.calculatePageCount(pageSize, totalCount);
     }
 }

@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.math.BigDecimal;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -32,7 +33,7 @@ public class DataSessionTest
                 .thenCompose(c -> {
                     CompletableFuture f = new CompletableFuture();
 
-                    c.execute("CREATE TABLE test (id SERIAL PRIMARY KEY, message TEXT, flag INTEGER, arr INTEGER[])", h -> {
+                    c.execute("CREATE TABLE test (id SERIAL PRIMARY KEY, message TEXT, flag INTEGER, arr INTEGER[], price NUMERIC(38,6))", h -> {
                         c.close();
 
                         if (h.succeeded()) {
@@ -101,15 +102,16 @@ public class DataSessionTest
         Async async = context.async();
 
         DataSession session = new DataSession();
-        session.execute("INSERT INTO test (message, flag, arr) VALUES (?, ?, ?)", "test2", 2, new int[] { 1, 2, 3 })
+        session.execute("INSERT INTO test (message, flag, arr, price) VALUES (?, ?, ?, ?)", "test2", 2, new int[] { 1, 2, 3 }, new BigDecimal("23445345343.000000"))
                 .thenAccept(r -> context.assertEquals(1, r.getUpdated()))
-                .thenCompose(r -> session.query("SELECT message, flag, arr::text FROM test"))
+                .thenCompose(r -> session.query("SELECT message, flag, arr::text, price FROM test"))
                 .thenAccept(r -> {
                     context.assertEquals(1, r.getNumRows());
-                    context.assertEquals(3, r.getNumColumns());
+                    context.assertEquals(4, r.getNumColumns());
                     context.assertEquals("test2", r.getResults().get(0).getString(0));
                     context.assertEquals(2, r.getResults().get(0).getInteger(1));
                     context.assertEquals("{1,2,3}", r.getResults().get(0).getString(2));
+                    context.assertEquals(new scala.math.BigDecimal(new BigDecimal("23445345343.000000")), r.getResults().get(0).getValue(3));
 
                     async.complete();
 

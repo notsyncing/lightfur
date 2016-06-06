@@ -1,6 +1,5 @@
 package io.github.notsyncing.lightfur;
 
-import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException;
 import io.github.notsyncing.lightfur.entity.DataMapper;
 import io.github.notsyncing.lightfur.models.PageResult;
 import io.github.notsyncing.lightfur.utils.FutureUtils;
@@ -11,6 +10,7 @@ import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.sql.UpdateResult;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -226,6 +226,8 @@ public class DataSession
                         }
 
                         arr.add(a);
+                    } else if (o instanceof BigDecimal) {
+                        arr.add(((BigDecimal)o).toPlainString());
                     } else {
                         arr.add(o);
                     }

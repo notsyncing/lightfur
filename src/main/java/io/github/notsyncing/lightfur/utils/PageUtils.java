@@ -8,6 +8,10 @@ public class PageUtils
             return 0;
         }
 
+        if (pageSize <= 0) {
+            return 0;
+        }
+
         if (totalCount < pageSize) {
             return 1;
         }

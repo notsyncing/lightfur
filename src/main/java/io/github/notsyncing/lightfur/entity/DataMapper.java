@@ -20,6 +20,10 @@ public class DataMapper
 {
     private static Instant valueToInstant(Object value)
     {
+        if (value == null) {
+            return null;
+        }
+
         Instant time = null;
 
         if ((value instanceof Integer) || (value instanceof Long) || (value.getClass() == int.class) || (value.getClass() == long.class)) {

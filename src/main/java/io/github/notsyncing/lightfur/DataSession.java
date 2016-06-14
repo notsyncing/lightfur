@@ -64,7 +64,7 @@ public class DataSession
      * 异步开始一个数据库事务
      * @return 指示事务是否已开始的 CompletableFuture 对象
      */
-    public CompletableFuture beginTransaction()
+    public CompletableFuture<Void> beginTransaction()
     {
         return setAutoCommit(false);
     }
@@ -109,7 +109,7 @@ public class DataSession
      * 应先调用 {@link DataSession#beginTransaction} 来开始一个事务
      * @return 指示提交和结束事务是否已完成的 CompletableFuture 对象
      */
-    public CompletableFuture commit()
+    public CompletableFuture<Void> commit()
     {
         return commit(true);
     }

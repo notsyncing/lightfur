@@ -1,6 +1,7 @@
 package io.github.notsyncing.lightfur.entity;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.IntegerCodec;
 import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -98,7 +99,13 @@ public class DataMapper
             if (f.getType() == Instant.class) {
                 f.set(instance, valueToInstant(row.getValue(c.value())));
             } else if (Enum.class.isAssignableFrom(f.getType())) {
-                f.set(instance, f.getType().getEnumConstants()[row.getInteger(c.value())]);
+                Integer v = row.getInteger(c.value());
+
+                if (v == null) {
+                    f.set(instance, null);
+                } else {
+                    f.set(instance, f.getType().getEnumConstants()[v]);
+                }
             } else if (f.getType().isArray()) {
                 Object value = row.getValue(c.value());
 

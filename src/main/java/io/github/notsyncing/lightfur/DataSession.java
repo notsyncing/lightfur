@@ -12,6 +12,9 @@ import io.vertx.ext.sql.UpdateResult;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -227,7 +230,9 @@ public class DataSession
 
                         arr.add(a);
                     } else if (o instanceof BigDecimal) {
-                        arr.add(((BigDecimal)o).toPlainString());
+                        arr.add(((BigDecimal) o).toPlainString());
+                    } else if (o instanceof Temporal) {
+                        arr.add(o.toString());
                     } else {
                         arr.add(o);
                     }

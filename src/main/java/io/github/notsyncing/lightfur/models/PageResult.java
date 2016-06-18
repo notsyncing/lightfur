@@ -10,7 +10,7 @@ public class PageResult<T>
     private int pageNum;
     private int pageSize;
     private int pageCount;
-    private int totalCount;
+    private long totalCount;
 
     public PageResult()
     {
@@ -66,12 +66,12 @@ public class PageResult<T>
         this.pageCount = pageCount;
     }
 
-    public int getTotalCount()
+    public long getTotalCount()
     {
         return totalCount;
     }
 
-    public void setTotalCount(int totalCount)
+    public void setTotalCount(long totalCount)
     {
         this.totalCount = totalCount;
         this.pageCount = PageUtils.calculatePageCount(pageSize, totalCount);

@@ -226,7 +226,7 @@ public class DataMapper
     public static <T> List<T> mapToList(Class<T> clazz, ResultSet results) throws InstantiationException, IllegalAccessException
     {
         if (results.getNumRows() <= 0) {
-            return null;
+            return new ArrayList<>();
         }
 
         List<T> list = new ArrayList<>();

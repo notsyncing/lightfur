@@ -33,7 +33,7 @@ public class DataSessionTest
                 .thenCompose(c -> {
                     CompletableFuture f = new CompletableFuture();
 
-                    c.execute("CREATE TABLE test (id SERIAL PRIMARY KEY, message TEXT, flag INTEGER, arr INTEGER[], price NUMERIC(38,6))", h -> {
+                    c.execute("CREATE TABLE test (id SERIAL PRIMARY KEY, message TEXT, flag INTEGER, arr INTEGER[], text_arr TEXT[], price NUMERIC(38,6))", h -> {
                         c.close();
 
                         if (h.succeeded()) {
@@ -140,6 +140,34 @@ public class DataSessionTest
                     context.assertEquals("test2", r.getResults().get(0).getString(0));
                     context.assertEquals(2, r.getResults().get(0).getInteger(1));
                     context.assertEquals("{1,2,3}", r.getResults().get(0).getString(2));
+
+                    async.complete();
+
+                    session.end();
+                })
+                .exceptionally(ex -> {
+                    session.end();
+                    context.fail((Throwable) ex);
+                    async.complete();
+                    return null;
+                });
+    }
+
+    @Test
+    public void testQueryWithArray(TestContext context)
+    {
+        Async async = context.async();
+
+        DataSession session = new DataSession();
+        session.execute("INSERT INTO test (message, flag, text_arr) VALUES (?, ?, ?)", "test2", 2, new String[] { "b" })
+                .thenAccept(r -> context.assertEquals(1, r.getUpdated()))
+                .thenCompose(r -> session.query("SELECT message, flag, text_arr::text FROM test WHERE text_arr && ?::text[]", new Object[] { new String[] { "b" } }))
+                .thenAccept(r -> {
+                    context.assertEquals(1, r.getNumRows());
+                    context.assertEquals(3, r.getNumColumns());
+                    context.assertEquals("test2", r.getResults().get(0).getString(0));
+                    context.assertEquals(2, r.getResults().get(0).getInteger(1));
+                    context.assertEquals("{b}", r.getResults().get(0).getString(2));
 
                     async.complete();
 

@@ -225,7 +225,13 @@ public class DataSession
                         JsonArray a = new JsonArray();
 
                         for (int i = 0; i < Array.getLength(o); i++) {
-                            a.add(Array.get(o, i));
+                            Object item = Array.get(o, i);
+
+                            if (item.getClass().isEnum()) {
+                                a.add(((Enum)item).ordinal());
+                            } else {
+                                a.add(item);
+                            }
                         }
 
                         arr.add(a);

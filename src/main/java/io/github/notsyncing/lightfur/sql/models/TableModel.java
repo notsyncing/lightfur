@@ -30,7 +30,7 @@ public class TableModel extends DatabaseItemModel
 
     public boolean isSubQuery()
     {
-        return subQuery == null;
+        return subQuery != null;
     }
 
     @Override

@@ -8,6 +8,16 @@ public class ColumnModel extends DatabaseItemModel implements SQLPart
     private TableModel table;
     private String column;
 
+    public ColumnModel()
+    {
+
+    }
+
+    public ColumnModel(TableModel table)
+    {
+        this.table = table;
+    }
+
     public TableModel getTable()
     {
         return table;
@@ -60,5 +70,10 @@ public class ColumnModel extends DatabaseItemModel implements SQLPart
         buf.append(SQLUtils.escapeName(column));
 
         return buf.toString();
+    }
+
+    public String toColumnString()
+    {
+        return SQLUtils.escapeName(column);
     }
 }

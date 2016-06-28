@@ -7,6 +7,22 @@ public class OrderByColumnInfo
     private SQLPart column;
     private boolean desc;
 
+    public OrderByColumnInfo()
+    {
+
+    }
+
+    public OrderByColumnInfo(SQLPart column)
+    {
+        this.column = column;
+    }
+
+    public OrderByColumnInfo(SQLPart column, boolean desc)
+    {
+        this.column = column;
+        this.desc = desc;
+    }
+
     public SQLPart getColumn()
     {
         return column;

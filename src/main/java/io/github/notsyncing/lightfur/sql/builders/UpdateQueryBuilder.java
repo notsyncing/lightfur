@@ -6,17 +6,14 @@ import io.github.notsyncing.lightfur.sql.base.SQLPart;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
 {
     private TableModel table;
     private Map<ColumnModel, SQLPart> setColumns = new LinkedHashMap<>();
-    private List<TableModel> fromTables;
+    private List<TableModel> fromTables = new ArrayList<>();
     private ConditionBuilder whereConditions = new ConditionBuilder();
 
     public UpdateQueryBuilder on(TableModel t)

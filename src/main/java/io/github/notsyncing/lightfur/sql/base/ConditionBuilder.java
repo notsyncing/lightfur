@@ -21,6 +21,12 @@ public class ConditionBuilder implements SQLPart
         return this;
     }
 
+    public ConditionBuilder expr(String s)
+    {
+        buf.append(s);
+        return this;
+    }
+
     public ConditionBuilder operator(String op)
     {
         if (buf.length() <= 0) {
@@ -56,5 +62,35 @@ public class ConditionBuilder implements SQLPart
     public ConditionBuilder not()
     {
         return operator("NOT");
+    }
+
+    public ConditionBuilder eq()
+    {
+        return operator("=");
+    }
+
+    public ConditionBuilder gt()
+    {
+        return operator(">");
+    }
+
+    public ConditionBuilder gte()
+    {
+        return operator(">=");
+    }
+
+    public ConditionBuilder lt()
+    {
+        return operator("<");
+    }
+
+    public ConditionBuilder lte()
+    {
+        return operator("<=");
+    }
+
+    public ConditionBuilder like()
+    {
+        return operator("LIKE");
     }
 }

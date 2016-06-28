@@ -14,7 +14,7 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
     private TableModel table;
     private SelectQueryBuilder select;
     private List<ColumnModel> columns = new ArrayList<>();
-    private List values = new ArrayList();
+    private List<Object> values = new ArrayList<>();
 
     public InsertQueryBuilder into(TableModel t)
     {
@@ -26,6 +26,11 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
     {
         select = s;
         return this;
+    }
+
+    public InsertQueryBuilder column(ColumnModel c)
+    {
+        return column(c, null);
     }
 
     public InsertQueryBuilder column(ColumnModel c, Object value)
@@ -63,26 +68,25 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
 
         buf.append("INSERT INTO ").append(table);
 
-        if (select != null) {
-            buf.append("\n").append(select);
-            return buf.toString();
-        }
-
         buf.append(" (");
 
         buf.append(columns.stream()
-                .map(ColumnModel::toString)
+                .map(ColumnModel::toColumnString)
                 .collect(Collectors.joining(", ")));
 
         buf.append(")");
 
-        buf.append("\nVALUES (");
+        if (select != null) {
+            buf.append("\n").append(select.toString());
+        } else {
+            buf.append("\nVALUES (");
 
-        buf.append(values.stream()
-                .map(SQLUtils::valueToSQL)
-                .collect(Collectors.joining(", ")));
+            buf.append(values.stream()
+                    .map(SQLUtils::valueToSQL)
+                    .collect(Collectors.joining(", ")));
 
-        buf.append(")");
+            buf.append(")");
+        }
 
         appendReturningClause(buf);
 

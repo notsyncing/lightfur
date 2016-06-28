@@ -69,6 +69,31 @@ public class SelectQueryBuilder implements SQLPart
         return this;
     }
 
+    public SelectQueryBuilder leftJoin(TableModel targetTable, ConditionBuilder conditions)
+    {
+        return join(JoinClauseInfo.JOIN_LEFT, targetTable, conditions);
+    }
+
+    public SelectQueryBuilder rightJoin(TableModel targetTable, ConditionBuilder conditions)
+    {
+        return join(JoinClauseInfo.JOIN_RIGHT, targetTable, conditions);
+    }
+
+    public SelectQueryBuilder innerJoin(TableModel targetTable, ConditionBuilder conditions)
+    {
+        return join(JoinClauseInfo.JOIN_INNER, targetTable, conditions);
+    }
+
+    public SelectQueryBuilder crossJoin(TableModel targetTable, ConditionBuilder conditions)
+    {
+        return join(JoinClauseInfo.JOIN_CROSS, targetTable, conditions);
+    }
+
+    public SelectQueryBuilder fullJoin(TableModel targetTable, ConditionBuilder conditions)
+    {
+        return join(JoinClauseInfo.JOIN_FULL, targetTable, conditions);
+    }
+
     public SelectQueryBuilder where(ConditionBuilder conditions)
     {
         whereConditions.and().beginGroup().expr(conditions).endGroup();

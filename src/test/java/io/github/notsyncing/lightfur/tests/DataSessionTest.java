@@ -111,7 +111,7 @@ public class DataSessionTest
                     context.assertEquals("test2", r.getResults().get(0).getString(0));
                     context.assertEquals(2, r.getResults().get(0).getInteger(1));
                     context.assertEquals("{1,2,3}", r.getResults().get(0).getString(2));
-                    context.assertEquals(new scala.math.BigDecimal(new BigDecimal("23445345343.000000")), r.getResults().get(0).getValue(3));
+                    context.assertEquals("23445345343.000000", r.getResults().get(0).getValue(3));
 
                     async.complete();
 

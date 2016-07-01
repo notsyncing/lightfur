@@ -77,7 +77,7 @@ public class DataMapperTest
         arr.add(new JsonArray("[4,5,6]"));
         arr.add(new JsonObject("{\"a\":7,\"b\":8}"));
         arr.add("[{\"a\":9,\"b\":0},{\"a\":1,\"b\":2}]");
-        arr.add(new scala.math.BigDecimal(new BigDecimal("92375947293472934923794729345345345433.2345345345")));
+        arr.add("92375947293472934923794729345345345433.2345345345");
         r.setResults(Arrays.asList(arr));
 
         TestObject o = DataMapper.map(TestObject.class, r);

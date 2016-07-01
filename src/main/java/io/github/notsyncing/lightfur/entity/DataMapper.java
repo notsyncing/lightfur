@@ -110,7 +110,7 @@ public class DataMapper
                 Object value = row.getValue(c.value());
 
                 if (value instanceof JsonArray) {
-                    JsonArray arr = (JsonArray)value;
+                    JsonArray arr = (JsonArray) value;
                     Object vals = Array.newInstance(f.getType().getComponentType(), arr.size());
 
                     for (int i = 0; i < arr.size(); i++) {
@@ -132,6 +132,14 @@ public class DataMapper
                     f.set(instance, null);
                 } else {
                     throw new IllegalAccessException("Invalid array result " + value);
+                }
+            } else if (f.getType().equals(java.math.BigDecimal.class)) {
+                String value = row.getString(c.value());
+
+                if (value != null) {
+                    f.set(instance, new java.math.BigDecimal(value));
+                } else {
+                    f.set(instance, null);
                 }
             } else {
                 Object value = row.getValue(c.value());

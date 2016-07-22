@@ -4,6 +4,10 @@ plugins {
 
 sourceCompatibility = 1.8
 
+project.ext {
+    ver = '0.2.0'
+}
+
 repositories {
     mavenCentral()
 }

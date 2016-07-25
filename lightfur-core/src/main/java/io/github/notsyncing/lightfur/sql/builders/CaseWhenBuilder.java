@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.sql.builders;
 
-import io.github.notsyncing.lightfur.sql.base.ConditionBuilder;
+import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
 
 public class CaseWhenBuilder implements SQLPart
@@ -18,7 +18,7 @@ public class CaseWhenBuilder implements SQLPart
         return buf.toString();
     }
 
-    public CaseWhenBuilder when(ConditionBuilder c)
+    public CaseWhenBuilder when(ExpressionBuilder c)
     {
         buf.append("WHEN ").append(c);
         return this;

@@ -1,7 +1,7 @@
 package io.github.notsyncing.lightfur.tests.builders;
 
 import io.github.notsyncing.lightfur.sql.SQLBuilder;
-import io.github.notsyncing.lightfur.sql.base.ConditionBuilder;
+import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
@@ -51,7 +51,7 @@ public class SQLBuilderSelectTest
     {
         String sql = SQLBuilder.select(columnId_A, columnName_A)
                 .from(tableA)
-                .where(new ConditionBuilder().expr(columnId_A).gt().expr("0"))
+                .where(new ExpressionBuilder().expr(columnId_A).gt().literal(0))
                 .toString();
 
         String expected = "SELECT \"test_table\".\"id\", \"test_table\".\"name\"\n" +
@@ -66,7 +66,7 @@ public class SQLBuilderSelectTest
     {
         String sql = SQLBuilder.select(columnFlag_B)
                 .from(tableA)
-                .leftJoin(tableB, new ConditionBuilder().expr(columnAId_B).eq().expr(columnId_A))
+                .leftJoin(tableB, new ExpressionBuilder().expr(columnAId_B).eq().expr(columnId_A))
                 .toString();
 
         String expected = "SELECT \"test_table_sub\".\"flag\"\n" +
@@ -97,7 +97,7 @@ public class SQLBuilderSelectTest
     @Test
     public void testSimpleConditions()
     {
-        String sql = new ConditionBuilder().beginGroup().expr(columnId_A).gt().expr("1").endGroup()
+        String sql = new ExpressionBuilder().beginGroup().expr(columnId_A).gt().literal(1).endGroup()
                 .and().beginGroup().expr(columnName_A).like().expr(columnId_A).endGroup()
                 .toString();
 

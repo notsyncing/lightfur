@@ -9,6 +9,11 @@ public abstract class ReturningQueryBuilder implements SQLPart
     protected boolean needReturn = false;
     protected Map<SQLPart, String> returnExpressions = new LinkedHashMap<>();
 
+    public boolean isNeedReturn()
+    {
+        return needReturn;
+    }
+
     protected void appendReturningClause(StringBuilder buf)
     {
         if (needReturn) {

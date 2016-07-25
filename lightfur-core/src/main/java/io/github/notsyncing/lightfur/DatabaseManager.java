@@ -1,7 +1,8 @@
 package io.github.notsyncing.lightfur;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import io.github.notsyncing.lightfur.annotations.GeneratedQueryContext;
+import io.github.notsyncing.lightfur.annotations.GeneratedDataContext;
+import io.github.notsyncing.lightfur.dsl.DataContext;
 import io.github.notsyncing.lightfur.dsl.IQueryContext;
 import io.github.notsyncing.lightfur.dsl.Query;
 import io.vertx.core.Vertx;
@@ -27,8 +28,8 @@ public class DatabaseManager
     private DatabaseManager()
     {
         new FastClasspathScanner()
-                .matchClassesWithAnnotation(GeneratedQueryContext.class,
-                        c -> Query.addQueryContextImplementation((Class<? extends IQueryContext>)c))
+                .matchClassesWithAnnotation(GeneratedDataContext.class,
+                        c -> Query.addDataContextImplementation((Class<? extends DataContext>)c))
                 .scan();
 
         VertxOptions opts = new VertxOptions()

@@ -1,7 +1,6 @@
 package io.github.notsyncing.lightfur.tests.builders;
 
 import io.github.notsyncing.lightfur.sql.SQLBuilder;
-import io.github.notsyncing.lightfur.sql.base.ConditionBuilder;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo;

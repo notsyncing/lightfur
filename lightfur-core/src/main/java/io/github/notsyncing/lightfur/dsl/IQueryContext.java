@@ -29,5 +29,8 @@ public interface IQueryContext<T extends DataModel>
 
     CompletableFuture<List<T>> execute(DataSession db, Object... parameters);
 
-    CompletableFuture<List<T>> execute(Object... parameters);
+    default CompletableFuture<List<T>> execute(Object... parameters)
+    {
+        return execute(null, parameters);
+    }
 }

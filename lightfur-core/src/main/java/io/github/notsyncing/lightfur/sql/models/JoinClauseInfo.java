@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.sql.models;
 
-import io.github.notsyncing.lightfur.sql.base.ConditionBuilder;
+import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 
 public class JoinClauseInfo
 {
@@ -12,7 +12,7 @@ public class JoinClauseInfo
 
     private String joinType;
     private TableModel targetTable;
-    private ConditionBuilder joinCondition;
+    private ExpressionBuilder joinCondition;
 
     public String getJoinType()
     {
@@ -34,12 +34,12 @@ public class JoinClauseInfo
         this.targetTable = targetTable;
     }
 
-    public ConditionBuilder getJoinCondition()
+    public ExpressionBuilder getJoinCondition()
     {
         return joinCondition;
     }
 
-    public void setJoinCondition(ConditionBuilder joinCondition)
+    public void setJoinCondition(ExpressionBuilder joinCondition)
     {
         this.joinCondition = joinCondition;
     }

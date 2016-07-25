@@ -7,6 +7,7 @@ public class ColumnModel extends DatabaseItemModel implements SQLPart
 {
     private TableModel table;
     private String column;
+    private boolean primaryKey;
 
     public ColumnModel()
     {
@@ -36,6 +37,16 @@ public class ColumnModel extends DatabaseItemModel implements SQLPart
     public void setColumn(String column)
     {
         this.column = column;
+    }
+
+    public boolean isPrimaryKey()
+    {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(boolean primaryKey)
+    {
+        this.primaryKey = primaryKey;
     }
 
     @Override
@@ -75,5 +86,25 @@ public class ColumnModel extends DatabaseItemModel implements SQLPart
     public String toColumnString()
     {
         return SQLUtils.escapeName(column);
+    }
+
+    public String toUpdateColumnString()
+    {
+        if (table.isSubQuery()) {
+            return "(" + table.getSubQuery() + ")";
+        }
+
+        boolean tableHasAlias = table.getAlias() != null;
+
+        StringBuilder buf = new StringBuilder();
+
+        if (tableHasAlias) {
+            buf.append(SQLUtils.escapeName(table.getAlias()))
+                    .append(".");
+        }
+
+        buf.append(SQLUtils.escapeName(column));
+
+        return buf.toString();
     }
 }

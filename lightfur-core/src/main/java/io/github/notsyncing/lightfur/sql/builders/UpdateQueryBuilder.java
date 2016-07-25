@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.sql.builders;
 
-import io.github.notsyncing.lightfur.sql.base.ConditionBuilder;
+import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.base.ReturningQueryBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
@@ -14,7 +14,7 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
     private TableModel table;
     private Map<ColumnModel, SQLPart> setColumns = new LinkedHashMap<>();
     private List<TableModel> fromTables = new ArrayList<>();
-    private ConditionBuilder whereConditions = new ConditionBuilder();
+    private ExpressionBuilder whereConditions = new ExpressionBuilder();
 
     public UpdateQueryBuilder on(TableModel t)
     {
@@ -40,9 +40,14 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
         return this;
     }
 
-    public UpdateQueryBuilder where(ConditionBuilder cond)
+    public UpdateQueryBuilder where(ExpressionBuilder cond)
     {
-        whereConditions.and().beginGroup().expr(cond).endGroup();
+        if (!whereConditions.isEmpty()) {
+            whereConditions.and();
+        }
+
+        whereConditions.beginGroup().expr(cond).endGroup();
+
         return this;
     }
 
@@ -68,7 +73,7 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
         buf.append("UPDATE ").append(table).append("\nSET ");
 
         buf.append(setColumns.entrySet().stream()
-            .map(e -> e.getKey() + " = (" + e.getValue() + ")")
+            .map(e -> e.getKey().toColumnString() + " = (" + e.getValue().toUpdateColumnString() + ")")
             .collect(Collectors.joining(", ")));
 
         if (fromTables.size() > 0) {

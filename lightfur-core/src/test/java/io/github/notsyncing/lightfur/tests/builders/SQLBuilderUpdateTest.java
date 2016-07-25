@@ -42,7 +42,22 @@ public class SQLBuilderUpdateTest
                 .toString();
 
         String expected = "UPDATE \"test_table\"\n" +
-                "SET \"test_table\".\"id\" = ('1'), \"test_table\".\"name\" = (\"test_table\".\"id\")";
+                "SET \"id\" = ('1'), \"name\" = (\"id\")";
+
+        assertEquals(expected, sql);
+    }
+
+    @Test
+    public void testConditionalUpdate()
+    {
+        String sql = SQLBuilder.update(tableA).set(columnId_A, new ExpressionBuilder().literal("1"))
+                .set(columnName_A, columnId_A)
+                .where(new ExpressionBuilder().column(columnId_A).gt().literal(1))
+                .toString();
+
+        String expected = "UPDATE \"test_table\"\n" +
+                "SET \"id\" = ('1'), \"name\" = (\"id\")\n" +
+                "WHERE (\"test_table\".\"id\" > 1)";
 
         assertEquals(expected, sql);
     }

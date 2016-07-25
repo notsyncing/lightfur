@@ -1,6 +1,8 @@
 package io.github.notsyncing.lightfur.models;
 
+import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
+import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
 
 import java.util.ArrayList;
@@ -29,5 +31,14 @@ public class ModelColumnResult
     public void setColumns(List<SQLPart> columns)
     {
         this.columns = columns;
+    }
+
+    public SQLPart getKeyColumn()
+    {
+        return columns.stream()
+                .filter(c -> (c instanceof ColumnModel) && ((ColumnModel)c).isPrimaryKey())
+                .map(c -> (ColumnModel)c)
+                .findFirst()
+                .orElse(null);
     }
 }

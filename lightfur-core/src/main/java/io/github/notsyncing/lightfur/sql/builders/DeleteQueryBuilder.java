@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.sql.builders;
 
-import io.github.notsyncing.lightfur.sql.base.ConditionBuilder;
+import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.base.ReturningQueryBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
@@ -14,7 +14,7 @@ public class DeleteQueryBuilder extends ReturningQueryBuilder implements SQLPart
 {
     private TableModel table;
     private List<TableModel> usingTables = new ArrayList<>();
-    private ConditionBuilder whereConditions = new ConditionBuilder();
+    private ExpressionBuilder whereConditions = new ExpressionBuilder();
 
     public DeleteQueryBuilder from(TableModel t)
     {
@@ -34,7 +34,7 @@ public class DeleteQueryBuilder extends ReturningQueryBuilder implements SQLPart
         return this;
     }
 
-    public DeleteQueryBuilder where(ConditionBuilder cond)
+    public DeleteQueryBuilder where(ExpressionBuilder cond)
     {
         whereConditions.and().beginGroup().expr(cond).endGroup();
         return this;

@@ -1,4 +1,4 @@
-package io.github.notsyncing.lightfur.codegen.tests;
+package io.github.notsyncing.lightfur.codegen.tests.toys;
 
 import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.github.notsyncing.lightfur.annotations.entity.Table;

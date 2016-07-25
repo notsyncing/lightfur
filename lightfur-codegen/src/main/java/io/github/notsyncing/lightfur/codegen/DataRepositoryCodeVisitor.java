@@ -6,7 +6,6 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import io.github.notsyncing.lightfur.dsl.Query;
-import io.github.notsyncing.lightfur.codegen.QueryContextCodeBuilder;
 import io.github.notsyncing.lightfur.codegen.models.ProcessorContext;
 import io.github.notsyncing.lightfur.codegen.utils.CodeVisitorUtils;
 
@@ -15,13 +14,13 @@ import java.util.List;
 
 public class DataRepositoryCodeVisitor extends VoidVisitorAdapter<ProcessorContext>
 {
-    private List<QueryContextCodeBuilder> builders = new ArrayList<>();
-    private QueryContextCodeBuilder currentBuilder;
+    private List<CodeToSqlBuilder> builders = new ArrayList<>();
+    private CodeToSqlBuilder currentBuilder;
     private NameExpr prevQuery;
     private List<String> imports = new ArrayList<>();
     private String packageName;
 
-    public List<QueryContextCodeBuilder> getBuilders()
+    public List<CodeToSqlBuilder> getBuilders()
     {
         return builders;
     }
@@ -52,7 +51,7 @@ public class DataRepositoryCodeVisitor extends VoidVisitorAdapter<ProcessorConte
 
         if (Query.class.getSimpleName().equals(currQuery.getName())) {
             try {
-                currentBuilder = new QueryContextCodeBuilder(n, arg, packageName, imports);
+                currentBuilder = new CodeToSqlBuilder(n, arg, packageName, imports);
             } catch (Exception e) {
                 e.printStackTrace();
                 return;

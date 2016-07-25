@@ -1,7 +1,6 @@
 package io.github.notsyncing.lightfur.tests.builders;
 
 import io.github.notsyncing.lightfur.sql.SQLBuilder;
-import io.github.notsyncing.lightfur.sql.base.ConditionBuilder;
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
@@ -38,7 +37,7 @@ public class SQLBuilderDeleteTest
     public void testSimpleUpdate()
     {
         String sql = SQLBuilder.delete().from(tableA)
-                .where(new ConditionBuilder().expr(columnId_A).gt().expr("2"))
+                .where(new ExpressionBuilder().expr(columnId_A).gt().literal(2))
                 .toString();
 
         String expected = "DELETE FROM \"test_table\"\n" +

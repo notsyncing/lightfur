@@ -5,6 +5,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import io.github.notsyncing.lightfur.annotations.entity.Column;
+import io.github.notsyncing.lightfur.annotations.entity.PrimaryKey;
 import io.github.notsyncing.lightfur.annotations.entity.Table;
 import io.github.notsyncing.lightfur.models.ModelColumnResult;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
@@ -70,6 +71,10 @@ public class DataModelCodeVisitor extends VoidVisitorAdapter<ModelColumnResult>
         ColumnModel column = new ColumnModel();
         column.setTable(table);
         column.setColumn(CodeVisitorUtils.getAnnotationParameterStringValue(columnAnnotation, "value"));
+
+        if (annotations.stream().anyMatch(a -> a.getName().getName().equals(PrimaryKey.class.getSimpleName()))) {
+            column.setPrimaryKey(true);
+        }
 
         arg.getColumns().add(column);
 

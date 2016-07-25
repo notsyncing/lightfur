@@ -4,6 +4,11 @@ public class ExpressionBuilder implements SQLPart
 {
     private StringBuilder buf = new StringBuilder();
 
+    public boolean isEmpty()
+    {
+        return buf.length() <= 0;
+    }
+
     @Override
     public String toString()
     {
@@ -78,7 +83,13 @@ public class ExpressionBuilder implements SQLPart
 
     public ExpressionBuilder literal(boolean l)
     {
-        buf.append(l ? "1" : "0");
+        buf.append(l ? "true" : "false");
+        return this;
+    }
+
+    public ExpressionBuilder literal(long l)
+    {
+        buf.append(l);
         return this;
     }
 
@@ -86,6 +97,16 @@ public class ExpressionBuilder implements SQLPart
     {
         buf.append(" ").append(op).append(" ");
         return this;
+    }
+
+    public ExpressionBuilder and()
+    {
+        return operator("AND");
+    }
+
+    public ExpressionBuilder or()
+    {
+        return operator("OR");
     }
 
     public ExpressionBuilder eq()
@@ -126,5 +147,22 @@ public class ExpressionBuilder implements SQLPart
     public ExpressionBuilder not()
     {
         return operator("NOT");
+    }
+
+    public ExpressionBuilder like()
+    {
+        return operator("LIKE");
+    }
+
+    public ExpressionBuilder namedParameterReference(String name)
+    {
+        buf.append(":").append(name);
+        return this;
+    }
+
+    public ExpressionBuilder parameterReference()
+    {
+        buf.append("?");
+        return this;
     }
 }

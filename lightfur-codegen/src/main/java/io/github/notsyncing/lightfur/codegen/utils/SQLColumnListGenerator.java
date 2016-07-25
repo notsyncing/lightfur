@@ -1,4 +1,4 @@
-package io.github.notsyncing.lightfur.codegen;
+package io.github.notsyncing.lightfur.codegen.utils;
 
 import com.github.javaparser.ast.CompilationUnit;
 import io.github.notsyncing.lightfur.codegen.DataModelCodeVisitor;

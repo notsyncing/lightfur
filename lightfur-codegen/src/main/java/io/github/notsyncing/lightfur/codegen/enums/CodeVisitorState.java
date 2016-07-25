@@ -1,4 +1,4 @@
-package io.github.notsyncing.lightfur.codegen;
+package io.github.notsyncing.lightfur.codegen.enums;
 
 public enum CodeVisitorState
 {

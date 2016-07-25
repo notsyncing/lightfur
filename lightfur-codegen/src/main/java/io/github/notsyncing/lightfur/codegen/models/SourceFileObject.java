@@ -1,4 +1,4 @@
-package io.github.notsyncing.lightfur.codegen;
+package io.github.notsyncing.lightfur.codegen.models;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 

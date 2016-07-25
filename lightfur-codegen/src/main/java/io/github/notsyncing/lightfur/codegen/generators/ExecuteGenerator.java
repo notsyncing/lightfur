@@ -1,12 +1,11 @@
 package io.github.notsyncing.lightfur.codegen.generators;
 
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import io.github.notsyncing.lightfur.codegen.CodeToSqlBuilder;
+import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
 import io.github.notsyncing.lightfur.models.ModelColumnResult;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
-import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 
 public class ExecuteGenerator extends CodeGenerator
 {

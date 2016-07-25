@@ -1,32 +1,13 @@
 package io.github.notsyncing.lightfur.codegen.tests;
 
-import com.google.testing.compile.JavaFileObjects;
-import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.DatabaseManager;
-import io.github.notsyncing.lightfur.codegen.QueryContext;
-import io.github.notsyncing.lightfur.codegen.UpdateContext;
-import io.github.notsyncing.lightfur.codegen.tests.toys.TestDataRepository;
+import io.github.notsyncing.lightfur.codegen.contexts.UpdateContext;
 import io.github.notsyncing.lightfur.codegen.tests.toys.TestModel;
 import io.github.notsyncing.lightfur.dsl.Query;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.IOUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-import javax.tools.JavaFileObject;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

@@ -5,6 +5,7 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
 import io.github.notsyncing.lightfur.dsl.Query;
 import io.github.notsyncing.lightfur.codegen.models.ProcessorContext;
 import io.github.notsyncing.lightfur.codegen.utils.CodeVisitorUtils;

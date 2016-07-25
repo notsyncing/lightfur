@@ -2,7 +2,7 @@ package io.github.notsyncing.lightfur.codegen.generators;
 
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
-import io.github.notsyncing.lightfur.codegen.CodeToSqlBuilder;
+import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;

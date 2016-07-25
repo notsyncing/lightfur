@@ -1,4 +1,4 @@
-package io.github.notsyncing.lightfur.codegen;
+package io.github.notsyncing.lightfur.codegen.contexts;
 
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.codegen.annotations.Generator;

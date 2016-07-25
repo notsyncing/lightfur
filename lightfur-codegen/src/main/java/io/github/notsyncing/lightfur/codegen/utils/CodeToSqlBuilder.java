@@ -1,4 +1,4 @@
-package io.github.notsyncing.lightfur.codegen;
+package io.github.notsyncing.lightfur.codegen.utils;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
@@ -8,13 +8,14 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.github.notsyncing.lightfur.codegen.annotations.Generator;
+import io.github.notsyncing.lightfur.codegen.contexts.QueryContext;
+import io.github.notsyncing.lightfur.codegen.contexts.UpdateContext;
 import io.github.notsyncing.lightfur.codegen.generators.CodeGenerator;
 import io.github.notsyncing.lightfur.dsl.DataContext;
 import io.github.notsyncing.lightfur.models.ModelColumnResult;
 import io.github.notsyncing.lightfur.codegen.models.ProcessorContext;
 import io.github.notsyncing.lightfur.sql.SQLBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
-import io.github.notsyncing.lightfur.codegen.utils.CodeVisitorUtils;
 
 import javax.tools.FileObject;
 import java.io.IOException;

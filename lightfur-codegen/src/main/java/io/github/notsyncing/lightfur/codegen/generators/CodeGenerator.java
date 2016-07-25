@@ -2,7 +2,7 @@ package io.github.notsyncing.lightfur.codegen.generators;
 
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import io.github.notsyncing.lightfur.codegen.CodeToSqlBuilder;
+import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 
 public abstract class CodeGenerator

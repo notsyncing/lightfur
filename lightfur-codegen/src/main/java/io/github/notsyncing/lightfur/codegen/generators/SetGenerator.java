@@ -2,14 +2,12 @@ package io.github.notsyncing.lightfur.codegen.generators;
 
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.Statement;
-import io.github.notsyncing.lightfur.codegen.CodeToSqlBuilder;
+import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
 import io.github.notsyncing.lightfur.models.ModelColumnResult;
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
-import jdk.nashorn.internal.ir.ExpressionStatement;
 
 public class SetGenerator extends CodeGenerator
 {

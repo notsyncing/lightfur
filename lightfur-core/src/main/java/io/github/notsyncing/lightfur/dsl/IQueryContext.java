@@ -12,14 +12,22 @@ import java.util.function.Predicate;
 public interface IQueryContext<T extends DataModel>
 {
     String getTag();
+
     Class<T> getModelClass();
+
     IQueryContext<T> filter(Predicate<T> predicate);
+
     IQueryContext<T> sorted(Consumer<T> field);
-    IQueryContext<T> limit(long n);
+
+    IQueryContext<T> take(long n);
+
     IQueryContext<T> skip(long n);
+
     <R> IQueryContext<T> map(Class<R> targetClass, BiConsumer<T, R> mapper);
-    IQueryContext<T> toList();
+
     IQueryContext<T> count();
+
     CompletableFuture<List<T>> execute(DataSession db, Object... parameters);
+
     CompletableFuture<List<T>> execute(Object... parameters);
 }

@@ -11,7 +11,7 @@ public class TestDataRepository
     public CompletableFuture<TestModel> getSimpleData()
     {
         return Query.get(TestModel.class, "simpleData")
-                .limit(1)
+                .take(1)
                 .execute()
                 .thenApply(l -> l.size() > 0 ? l.get(0) : null);
     }
@@ -23,7 +23,7 @@ public class TestDataRepository
                     m.id = r.id;
                     m.name = r.name;
                 })
-                .limit(1)
+                .take(1)
                 .execute()
                 .thenApply(l -> l.size() > 0 ? l.get(0) : null);
     }

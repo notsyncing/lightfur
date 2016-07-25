@@ -3,7 +3,7 @@ package io.github.notsyncing.lightfur.codegen;
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.codegen.annotations.Generator;
 import io.github.notsyncing.lightfur.codegen.generators.ExecuteGenerator;
-import io.github.notsyncing.lightfur.codegen.generators.LimitGenerator;
+import io.github.notsyncing.lightfur.codegen.generators.TakeGenerator;
 import io.github.notsyncing.lightfur.dsl.IQueryContext;
 import io.github.notsyncing.lightfur.entity.DataModel;
 
@@ -18,8 +18,9 @@ public class QueryContext<T extends DataModel> implements IQueryContext<T>
     private Class<T> modelClass;
     private String tag;
 
-    protected QueryContext(String tag)
+    protected QueryContext(Class<T> modelClass, String tag)
     {
+        this.modelClass = modelClass;
         this.tag = tag;
     }
 
@@ -33,11 +34,6 @@ public class QueryContext<T extends DataModel> implements IQueryContext<T>
         return modelClass;
     }
 
-    public QueryContext(Class<T> modelClass)
-    {
-        this.modelClass = modelClass;
-    }
-
     public QueryContext<T> filter(Predicate<T> predicate)
     {
         return this;
@@ -48,8 +44,8 @@ public class QueryContext<T extends DataModel> implements IQueryContext<T>
         return this;
     }
 
-    @Generator(LimitGenerator.class)
-    public QueryContext<T> limit(long n)
+    @Generator(TakeGenerator.class)
+    public QueryContext<T> take(long n)
     {
         return this;
     }
@@ -60,11 +56,6 @@ public class QueryContext<T extends DataModel> implements IQueryContext<T>
     }
 
     public <R> QueryContext<T> map(Class<R> targetClass, BiConsumer<T, R> mapper)
-    {
-        return this;
-    }
-
-    public QueryContext<T> toList()
     {
         return this;
     }

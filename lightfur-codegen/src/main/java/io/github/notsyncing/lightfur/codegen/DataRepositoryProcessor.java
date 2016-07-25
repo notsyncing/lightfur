@@ -207,7 +207,7 @@ public class DataRepositoryProcessor extends AbstractProcessor
 
             MethodSpec constructor = MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
-                    .addStatement("super($S)", b.getQueryContextTag())
+                    .addStatement("super($T.class, $S)", dataModelTypeName, b.getQueryContextTag())
                     .build();
 
             TypeSpec t = TypeSpec.classBuilder(queryContextTypeName)

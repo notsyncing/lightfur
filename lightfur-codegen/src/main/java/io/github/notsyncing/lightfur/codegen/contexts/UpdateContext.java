@@ -13,32 +13,20 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class UpdateContext<T extends TableDefineModel> implements IUpdateContext<T>, DataContext
+public class UpdateContext<T extends TableDefineModel> extends DataContext implements IUpdateContext<T>
 {
     private Class<T> modelClass;
-    private String tag;
-    private String sql;
 
     protected UpdateContext(Class<T> modelClass, String tag, String sql)
     {
-        this.modelClass = modelClass;
-        this.tag = tag;
-        this.sql = sql;
-    }
+        super(tag, sql);
 
-    public String getTag()
-    {
-        return tag;
+        this.modelClass = modelClass;
     }
 
     public Class<T> getModelClass()
     {
         return modelClass;
-    }
-
-    public String getSql()
-    {
-        return sql;
     }
 
     @Generator(SetGenerator.class)

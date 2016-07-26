@@ -182,7 +182,7 @@ public class DataRepositoryProcessorTest
         db.execute("INSERT INTO test_table (name) VALUES (?)", "test2").get();
         db.end();
 
-        repo.updateSimpleData()
+        repo.updateSimpleDataWithOuterVariable()
                 .thenAccept(m -> {
                     context.assertNotNull(m);
 

@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     compile project(":lightfur-core")
-    compile 'com.github.javaparser:javaparser-core:2.5.0'
+    compile 'com.github.javaparser:javaparser-core:2.5.1'
     compile 'com.alibaba:fastjson:1.2.14'
     compile group: 'com.squareup', name: 'javapoet', version: '1.7.0'
 

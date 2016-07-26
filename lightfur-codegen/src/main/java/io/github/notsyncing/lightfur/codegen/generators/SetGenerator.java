@@ -25,8 +25,6 @@ public class SetGenerator extends CodeGenerator
             throw new RuntimeException("set must be used in UPDATE clause!");
         }
 
-        ModelColumnResult columns = builder.getDataModelColumnResult();
-
         UpdateQueryBuilder b = (UpdateQueryBuilder)builder.getSqlBuilder();
         LambdaExpr setter = (LambdaExpr)method.getArgs().get(0);
         ExpressionStmt exp = (ExpressionStmt)setter.getBody();

@@ -37,6 +37,7 @@ public class CodeToSqlBuilder
     private String queryContextTag;
     private ProcessorContext context;
     private ModelColumnResult dataModelColumnResult;
+    private List<String> executeParameters;
 
     public CodeToSqlBuilder(MethodCallExpr expr, ProcessorContext context, String packageName,
                             List<String> importClasses) throws IllegalAccessException, InstantiationException, IOException, ParseException, NoSuchMethodException, InvocationTargetException
@@ -91,6 +92,16 @@ public class CodeToSqlBuilder
                 cg.generate(m);
             }
         }
+    }
+
+    public List<String> getExecuteParameters()
+    {
+        return executeParameters;
+    }
+
+    public void setExecuteParameters(List<String> executeParameters)
+    {
+        this.executeParameters = executeParameters;
     }
 
     private ModelColumnResult makeDataModelColumnResult(ProcessorContext context) throws ParseException, IOException

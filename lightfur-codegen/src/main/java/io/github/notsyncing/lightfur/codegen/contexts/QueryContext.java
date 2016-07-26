@@ -14,32 +14,20 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class QueryContext<T extends DataModel> implements IQueryContext<T>, DataContext
+public class QueryContext<T extends DataModel> extends DataContext implements IQueryContext<T>
 {
     private Class<T> modelClass;
-    private String tag;
-    private String sql;
 
     protected QueryContext(Class<T> modelClass, String tag, String sql)
     {
-        this.modelClass = modelClass;
-        this.tag = tag;
-        this.sql = sql;
-    }
+        super(tag, sql);
 
-    public String getTag()
-    {
-        return tag;
+        this.modelClass = modelClass;
     }
 
     public Class<T> getModelClass()
     {
         return modelClass;
-    }
-
-    public String getSql()
-    {
-        return sql;
     }
 
     public QueryContext<T> filter(Predicate<T> predicate)

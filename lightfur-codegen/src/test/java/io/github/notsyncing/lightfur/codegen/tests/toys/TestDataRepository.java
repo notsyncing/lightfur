@@ -38,14 +38,14 @@ public class TestDataRepository
                 .thenApply(o -> (ResultSet) o);
     }
 
-    public CompletableFuture<Integer> updateSimpleDataWithOuterVariable()
+    public CompletableFuture<ResultSet> updateSimpleDataWithOuterVariable()
     {
         String s = "tested";
 
-        return Query.update(TestModel.class, "simpleData")
+        return Query.update(TestModel.class, "simpleData_outVar")
                 .filter(m -> m.id > 1)
                 .set(m -> m.name = s)
-                .execute()
-                .thenApply(o -> (Integer)o);
+                .execute(s)
+                .thenApply(o -> (ResultSet)o);
     }
 }

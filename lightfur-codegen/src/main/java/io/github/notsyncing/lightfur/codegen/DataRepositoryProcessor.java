@@ -3,14 +3,11 @@ package io.github.notsyncing.lightfur.codegen;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.squareup.javapoet.*;
-import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.annotations.DataRepository;
-import io.github.notsyncing.lightfur.annotations.GeneratedDataContext;
 import io.github.notsyncing.lightfur.codegen.models.ProcessorContext;
 import io.github.notsyncing.lightfur.codegen.models.SourceFileObject;
+import io.github.notsyncing.lightfur.codegen.utils.CodeBuilder;
 import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
-import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
-import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -23,8 +20,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 public class DataRepositoryProcessor extends AbstractProcessor
 {
@@ -140,129 +135,14 @@ public class DataRepositoryProcessor extends AbstractProcessor
         visitor.visit(dataRepoUnit, context);
 
         for (CodeToSqlBuilder b : visitor.getBuilders()) {
-            String queryContextTypeName = b.getDataContextType().getSimpleName() + "_" + b.getQueryContextTag();
+            CodeBuilder cb = new CodeBuilder(b);
+            TypeSpec t = cb.build();
 
-            String sql = b.build();
-
-            ClassName dataModelTypeName = ClassName.bestGuess(b.getDataModelType());
-
-            MethodSpec.Builder mb = MethodSpec.methodBuilder("execute")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addParameter(DataSession.class, "db")
-                    .addParameter(Object[].class, "parameters").varargs()
-                    .addStatement("boolean inDb = true")
-                    .beginControlFlow("if (db == null)")
-                    .addStatement("db = new $T()", DataSession.class)
-                    .addStatement("inDb = false")
-                    .endControlFlow()
-                    .addStatement("boolean finalInDb = inDb")
-                    .addStatement("$T finalDb = db", DataSession.class);
-
-            if (b.getSqlBuilder() instanceof SelectQueryBuilder) {
-                ParameterizedTypeName returnType = ParameterizedTypeName.get(ClassName.get(List.class),
-                        dataModelTypeName.withoutAnnotations());
-
-                MethodSpec completedFunc = MethodSpec.methodBuilder("apply")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(returnType, "r")
-                        .returns(returnType)
-                        .beginControlFlow("if (!finalInDb)")
-                        .addStatement("finalDb.end()")
-                        .endControlFlow()
-                        .addStatement("return r")
-                        .build();
-
-                TypeSpec completedBlock = TypeSpec.anonymousClassBuilder("")
-                        .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Function.class), returnType,
-                                returnType))
-                        .addMethod(completedFunc)
-                        .build();
-
-                MethodSpec failedFunc = MethodSpec.methodBuilder("apply")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(Throwable.class, "ex")
-                        .returns(returnType)
-                        .addStatement("ex.printStackTrace()")
-                        .beginControlFlow("if (!finalInDb)")
-                        .addStatement("finalDb.end()")
-                        .endControlFlow()
-                        .addStatement("return null")
-                        .build();
-
-                TypeSpec failedBlock = TypeSpec.anonymousClassBuilder("")
-                        .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Function.class),
-                                ClassName.get(Throwable.class), returnType))
-                        .addMethod(failedFunc)
-                        .build();
-
-                mb.returns(ParameterizedTypeName.get(ClassName.get(CompletableFuture.class), returnType))
-                        .addStatement("return db.queryList($T.class, getSql(), parameters).thenApply($L).exceptionally($L)",
-                                dataModelTypeName, completedBlock, failedBlock);
-            } else if (b.getSqlBuilder() instanceof UpdateQueryBuilder) {
-                MethodSpec completedFunc = MethodSpec.methodBuilder("apply")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(TypeName.OBJECT, "r")
-                        .returns(TypeName.OBJECT)
-                        .beginControlFlow("if (!finalInDb)")
-                        .addStatement("finalDb.end()")
-                        .endControlFlow()
-                        .addStatement("return r")
-                        .build();
-
-                TypeSpec completedBlock = TypeSpec.anonymousClassBuilder("")
-                        .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Function.class), TypeName.OBJECT,
-                                TypeName.OBJECT))
-                        .addMethod(completedFunc)
-                        .build();
-
-                MethodSpec failedFunc = MethodSpec.methodBuilder("apply")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(Throwable.class, "ex")
-                        .returns(TypeName.OBJECT)
-                        .addStatement("ex.printStackTrace()")
-                        .beginControlFlow("if (!finalInDb)")
-                        .addStatement("finalDb.end()")
-                        .endControlFlow()
-                        .addStatement("return null")
-                        .build();
-
-                TypeSpec failedBlock = TypeSpec.anonymousClassBuilder("")
-                        .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Function.class),
-                                ClassName.get(Throwable.class), TypeName.OBJECT))
-                        .addMethod(failedFunc)
-                        .build();
-
-                mb.returns(ParameterizedTypeName.get(ClassName.get(CompletableFuture.class), TypeName.OBJECT))
-                        .addStatement("return db.executeWithReturning(getSql(), parameters).thenApply($L).exceptionally($L)",
-                                completedBlock, failedBlock);
-            } else {
-
-            }
-
-            testGeneratedClassFullName = dataRepoPkgName + "." + queryContextTypeName;
-
-            MethodSpec constructor = MethodSpec.constructorBuilder()
-                    .addModifiers(Modifier.PUBLIC)
-                    .addStatement("super($T.class, $S, $S)", dataModelTypeName, b.getQueryContextTag(), sql)
-                    .build();
-
-            TypeSpec t = TypeSpec.classBuilder(queryContextTypeName)
-                    .addAnnotation(GeneratedDataContext.class)
-                    .addModifiers(Modifier.FINAL, Modifier.PUBLIC)
-                    .superclass(ParameterizedTypeName.get(ClassName.get(b.getDataContextType()), dataModelTypeName))
-                    .addMethod(constructor)
-                    .addMethod(mb.build())
-                    .build();
+            testGeneratedClassFullName = dataRepoPkgName + "." + cb.getQueryContextTypeName();
+            String fullFilename = dataRepoPkgName + "." + cb.getQueryContextTypeName();
 
             JavaFile f = JavaFile.builder(dataRepoPkgName, t)
                     .build();
-
-            String fullFilename = dataRepoPkgName + "." + queryContextTypeName;
 
             if (testFiles.size() > 0) {
                 testResultContent = f.toString();

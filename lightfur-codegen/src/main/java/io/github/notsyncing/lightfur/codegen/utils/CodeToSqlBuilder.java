@@ -85,7 +85,7 @@ public class CodeToSqlBuilder
                 Generator g = queryMethod.getAnnotation(Generator.class);
 
                 if (g == null) {
-                    continue;
+                    throw new RuntimeException("Method " + m.getName() + " has no generator declared!");
                 }
 
                 CodeGenerator cg = g.value().getConstructor(this.getClass()).newInstance(this);

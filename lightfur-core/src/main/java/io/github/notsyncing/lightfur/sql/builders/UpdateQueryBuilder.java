@@ -51,18 +51,16 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
         return this;
     }
 
+    @Override
     public UpdateQueryBuilder returning()
     {
-        needReturn = true;
-        return this;
+        return (UpdateQueryBuilder) super.returning();
     }
 
+    @Override
     public UpdateQueryBuilder returning(SQLPart expr, String name)
     {
-        needReturn = true;
-        returnExpressions.put(expr, name);
-
-        return this;
+        return (UpdateQueryBuilder) super.returning(expr, name);
     }
 
     @Override

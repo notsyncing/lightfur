@@ -8,6 +8,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.github.notsyncing.lightfur.codegen.annotations.Generator;
+import io.github.notsyncing.lightfur.codegen.contexts.DeleteContext;
 import io.github.notsyncing.lightfur.codegen.contexts.QueryContext;
 import io.github.notsyncing.lightfur.codegen.contexts.UpdateContext;
 import io.github.notsyncing.lightfur.codegen.generators.CodeGenerator;
@@ -71,7 +72,10 @@ public class CodeToSqlBuilder
             } else if (m.getName().equals("insert")) {
 
             } else if (m.getName().equals("delete")) {
+                dataContextType = DeleteContext.class;
+                queryMethods = DeleteContext.class.getMethods();
 
+                sqlBuilder = SQLBuilder.delete().from(dataModelColumnResult.getTable());
             } else {
                 Method queryMethod = Stream.of(queryMethods)
                         .filter(qm -> qm.getName().equals(m.getName()))

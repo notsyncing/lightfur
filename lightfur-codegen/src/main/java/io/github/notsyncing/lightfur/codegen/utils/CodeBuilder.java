@@ -4,6 +4,7 @@ import com.squareup.javapoet.*;
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.annotations.GeneratedDataContext;
 import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
+import io.github.notsyncing.lightfur.sql.base.ReturningQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
 
@@ -93,10 +94,8 @@ public class CodeBuilder
         if (builder.getSqlBuilder() instanceof SelectQueryBuilder) {
             returnType = ParameterizedTypeName.get(ClassName.get(List.class),
                     dataModelTypeName.withoutAnnotations());
-        } else if (builder.getSqlBuilder() instanceof UpdateQueryBuilder) {
+        } else if (builder.getSqlBuilder() instanceof ReturningQueryBuilder) {
             returnType = TypeName.OBJECT;
-        } else {
-
         }
 
         MethodSpec.Builder mb = MethodSpec.methodBuilder("execute")
@@ -119,12 +118,10 @@ public class CodeBuilder
             mb.returns(ParameterizedTypeName.get(ClassName.get(CompletableFuture.class), returnType))
                     .addStatement("return db.queryList($T.class, getSql()" + parameterArgs + ").thenApply($L).exceptionally($L)",
                             dataModelTypeName, completedBlock, failedBlock);
-        } else if (builder.getSqlBuilder() instanceof UpdateQueryBuilder) {
+        } else if (builder.getSqlBuilder() instanceof ReturningQueryBuilder) {
             mb.returns(ParameterizedTypeName.get(ClassName.get(CompletableFuture.class), TypeName.OBJECT))
                     .addStatement("return db.executeWithReturning(getSql()" + parameterArgs + ").thenApply($L).exceptionally($L)",
                             completedBlock, failedBlock);
-        } else {
-
         }
 
         MethodSpec constructor = MethodSpec.constructorBuilder()

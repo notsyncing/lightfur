@@ -5,6 +5,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
 import io.github.notsyncing.lightfur.models.ModelColumnResult;
+import io.github.notsyncing.lightfur.sql.base.ReturningQueryBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
@@ -32,8 +33,8 @@ public class ExecuteGenerator extends CodeGenerator
                 b.select(r.getColumns())
                         .from(r.getTable());
             }
-        } else if (getBuilder().getSqlBuilder() instanceof UpdateQueryBuilder) {
-            UpdateQueryBuilder b = (UpdateQueryBuilder) getBuilder().getSqlBuilder();
+        } else if (getBuilder().getSqlBuilder() instanceof ReturningQueryBuilder) {
+            ReturningQueryBuilder b = (ReturningQueryBuilder) getBuilder().getSqlBuilder();
 
             ModelColumnResult r = getBuilder().getDataModelColumnResult();
             SQLPart keyColumn = r.getKeyColumn();
@@ -41,8 +42,6 @@ public class ExecuteGenerator extends CodeGenerator
             if (keyColumn != null) {
                 b.returning(keyColumn, null);
             }
-        } else {
-
         }
 
         if (method.getArgs().size() > 0) {

@@ -7,7 +7,7 @@ import io.vertx.ext.sql.ResultSet;
 import java.util.concurrent.CompletableFuture;
 
 @DataRepository
-public class TestDataRepository
+public class TestSelectDataRepository
 {
     public CompletableFuture<TestModel> getSimpleData()
     {
@@ -17,7 +17,7 @@ public class TestDataRepository
                 .thenApply(l -> l.size() > 0 ? l.get(0) : null);
     }
 
-    public CompletableFuture<TestModel> getSimpleMappedData()
+    /*public CompletableFuture<TestModel> getSimpleMappedData()
     {
         return Query.get(TestModel.class, "simpleMappedData")
                 .map(TestModel.class, (m, r) -> {
@@ -27,25 +27,5 @@ public class TestDataRepository
                 .take(1)
                 .execute()
                 .thenApply(l -> l.size() > 0 ? l.get(0) : null);
-    }
-
-    public CompletableFuture<ResultSet> updateSimpleData()
-    {
-        return Query.update(TestModel.class, "simpleData")
-                .filter(m -> m.id > 1)
-                .set(m -> m.name = "tested")
-                .execute()
-                .thenApply(o -> (ResultSet) o);
-    }
-
-    public CompletableFuture<ResultSet> updateSimpleDataWithOuterVariable()
-    {
-        String s = "tested";
-
-        return Query.update(TestModel.class, "simpleData_outVar")
-                .filter(m -> m.id > 1)
-                .set(m -> m.name = s)
-                .execute(s)
-                .thenApply(o -> (ResultSet)o);
-    }
+    }*/
 }

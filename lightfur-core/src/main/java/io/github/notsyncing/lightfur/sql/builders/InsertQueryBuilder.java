@@ -47,18 +47,16 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
         return this;
     }
 
+    @Override
     public InsertQueryBuilder returning()
     {
-        needReturn = true;
-        return this;
+        return (InsertQueryBuilder) super.returning();
     }
 
+    @Override
     public InsertQueryBuilder returning(SQLPart expr, String name)
     {
-        needReturn = true;
-        returnExpressions.put(expr, name);
-
-        return this;
+        return (InsertQueryBuilder) super.returning(expr, name);
     }
 
     @Override

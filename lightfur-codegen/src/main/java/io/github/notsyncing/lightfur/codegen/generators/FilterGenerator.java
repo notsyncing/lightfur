@@ -4,6 +4,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
+import io.github.notsyncing.lightfur.sql.builders.DeleteQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
 
@@ -96,6 +97,11 @@ public class FilterGenerator extends CodeGenerator
 
         } else if (getBuilder().getSqlBuilder() instanceof UpdateQueryBuilder) {
             UpdateQueryBuilder b = (UpdateQueryBuilder) getBuilder().getSqlBuilder();
+            LambdaExpr cond = (LambdaExpr) method.getArgs().get(0);
+            ExpressionStmt exp = (ExpressionStmt)cond.getBody();
+            b.where(javaExpToSqlExp(exp.getExpression(), null));
+        } else if (getBuilder().getSqlBuilder() instanceof DeleteQueryBuilder) {
+            DeleteQueryBuilder b = (DeleteQueryBuilder) getBuilder().getSqlBuilder();
             LambdaExpr cond = (LambdaExpr) method.getArgs().get(0);
             ExpressionStmt exp = (ExpressionStmt)cond.getBody();
             b.where(javaExpToSqlExp(exp.getExpression(), null));

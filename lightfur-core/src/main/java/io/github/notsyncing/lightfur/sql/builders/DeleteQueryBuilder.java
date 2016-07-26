@@ -36,8 +36,24 @@ public class DeleteQueryBuilder extends ReturningQueryBuilder implements SQLPart
 
     public DeleteQueryBuilder where(ExpressionBuilder cond)
     {
-        whereConditions.and().beginGroup().expr(cond).endGroup();
+        if (!whereConditions.isEmpty()) {
+            whereConditions.and();
+        }
+
+        whereConditions.beginGroup().expr(cond).endGroup();
         return this;
+    }
+
+    @Override
+    public DeleteQueryBuilder returning()
+    {
+        return (DeleteQueryBuilder) super.returning();
+    }
+
+    @Override
+    public DeleteQueryBuilder returning(SQLPart expr, String name)
+    {
+        return (DeleteQueryBuilder) super.returning(expr, name);
     }
 
     @Override

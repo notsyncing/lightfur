@@ -99,70 +99,78 @@ public class DataRepositoryProcessor extends AbstractProcessor
             return true;
         }
 
-        Element dataRepoElem = roundEnv.getElementsAnnotatedWith(DataRepository.class).stream()
-                .findFirst()
-                .orElse(null);
+        Set<Element> dataRepos = (Set<Element>) roundEnv.getElementsAnnotatedWith(DataRepository.class);
 
-        if (dataRepoElem == null) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Found " + dataRepos.size() + " data repositories.");
+
+        if (dataRepos.size() <= 0) {
             return false;
         }
 
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Running for " + dataRepoElem.asType().toString());
+        for (Element dataRepoElem : dataRepos) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Running for " + dataRepoElem.asType().toString());
 
-        String dataRepoTypeName = dataRepoElem.asType().toString();
-        String dataRepoPkgName = dataRepoTypeName.substring(0, dataRepoTypeName.lastIndexOf("."));
-        FileObject dataRepoSource = getFile(dataRepoTypeName);
+            String dataRepoTypeName = dataRepoElem.asType().toString();
+            String dataRepoPkgName = dataRepoTypeName.substring(0, dataRepoTypeName.lastIndexOf("."));
+            FileObject dataRepoSource = getFile(dataRepoTypeName);
 
-        if (dataRepoSource == null) {
-            return false;
-        }
+            if (dataRepoSource == null) {
+                return false;
+            }
 
-        CompilationUnit dataRepoUnit;
+            CompilationUnit dataRepoUnit;
 
-        try {
-            dataRepoUnit = JavaParser.parse(dataRepoSource.openInputStream());
-        } catch (Exception e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to parse source file: " + e.getMessage());
+            try {
+                dataRepoUnit = JavaParser.parse(dataRepoSource.openInputStream());
+            } catch (Exception e) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to parse source file: " + e.getMessage());
 
-            e.printStackTrace();
-            return false;
-        }
+                e.printStackTrace();
+                return false;
+            }
 
-        ProcessorContext context = new ProcessorContext();
-        context.setProcessor(this);
+            ProcessorContext context = new ProcessorContext();
+            context.setProcessor(this);
 
-        DataRepositoryCodeVisitor visitor = new DataRepositoryCodeVisitor();
-        visitor.visit(dataRepoUnit, context);
+            DataRepositoryCodeVisitor visitor = new DataRepositoryCodeVisitor();
+            visitor.visit(dataRepoUnit, context);
 
-        for (CodeToSqlBuilder b : visitor.getBuilders()) {
-            CodeBuilder cb = new CodeBuilder(b);
-            TypeSpec t = cb.build();
+            try {
+                for (CodeToSqlBuilder b : visitor.getBuilders()) {
+                    CodeBuilder cb = new CodeBuilder(b);
+                    TypeSpec t = cb.build();
 
-            testGeneratedClassFullName = dataRepoPkgName + "." + cb.getQueryContextTypeName();
-            String fullFilename = dataRepoPkgName + "." + cb.getQueryContextTypeName();
+                    testGeneratedClassFullName = dataRepoPkgName + "." + cb.getQueryContextTypeName();
+                    String fullFilename = dataRepoPkgName + "." + cb.getQueryContextTypeName();
 
-            JavaFile f = JavaFile.builder(dataRepoPkgName, t)
-                    .build();
+                    JavaFile f = JavaFile.builder(dataRepoPkgName, t)
+                            .build();
 
-            if (testFiles.size() > 0) {
-                testResultContent = f.toString();
+                    if (testFiles.size() > 0) {
+                        testResultContent = f.toString();
 
-                System.out.println("------------ BEGIN GENERATED CLASS ------------");
-                System.out.print(testResultContent);
-                System.out.println("------------ END GENERATED CLASS ------------");
-            } else {
-                try {
-                    JavaFileObject file = processingEnv.getFiler().createSourceFile(fullFilename);
+                        System.out.println("------------ BEGIN GENERATED CLASS ------------");
+                        System.out.print(testResultContent);
+                        System.out.println("------------ END GENERATED CLASS ------------");
+                    } else {
+                        try {
+                            JavaFileObject file = processingEnv.getFiler().createSourceFile(fullFilename);
 
-                    try (Writer writer = file.openWriter()) {
-                        f.writeTo(writer);
+                            try (Writer writer = file.openWriter()) {
+                                f.writeTo(writer);
+                            }
+
+                            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Generated " + fullFilename);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return false;
+                        }
                     }
-
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Generated " + fullFilename);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Error: " + e.getMessage());
+                return false;
             }
         }
 

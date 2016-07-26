@@ -34,7 +34,7 @@ public class SQLBuilderDeleteTest
     }
 
     @Test
-    public void testSimpleUpdate()
+    public void testSimpleDelete()
     {
         String sql = SQLBuilder.delete().from(tableA)
                 .where(new ExpressionBuilder().expr(columnId_A).gt().literal(2))

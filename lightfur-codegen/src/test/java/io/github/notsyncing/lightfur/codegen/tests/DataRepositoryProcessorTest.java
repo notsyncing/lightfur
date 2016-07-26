@@ -1,14 +1,15 @@
 package io.github.notsyncing.lightfur.codegen.tests;
 
 import com.google.testing.compile.JavaFileObjects;
+import io.github.notsyncing.lightfur.codegen.tests.toys.TestDeleteDataRepository;
+import io.github.notsyncing.lightfur.codegen.tests.toys.TestUpdateDataRepository;
 import io.github.notsyncing.lightfur.dsl.DataContext;
 import io.github.notsyncing.lightfur.codegen.DataRepositoryProcessor;
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.DatabaseManager;
-import io.github.notsyncing.lightfur.codegen.tests.toys.TestDataRepository;
+import io.github.notsyncing.lightfur.codegen.tests.toys.TestSelectDataRepository;
 import io.github.notsyncing.lightfur.codegen.tests.toys.TestModel;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -29,12 +30,14 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
+import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -109,14 +112,20 @@ public class DataRepositoryProcessorTest
     @Test
     public void testCompile() throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException, ExecutionException, InterruptedException
     {
-        JavaFileObject file = createTestFile(TestDataRepository.class.getTypeName());
+        JavaFileObject file1 = createTestFile(TestSelectDataRepository.class.getTypeName());
+        JavaFileObject file2 = createTestFile(TestUpdateDataRepository.class.getTypeName());
+        JavaFileObject file3 = createTestFile(TestDeleteDataRepository.class.getTypeName());
+        //JavaFileObject file4 = createTestFile(TestInsertDataRepository.class.getTypeName());
 
         DataRepositoryProcessor processor = new DataRepositoryProcessor();
-        processor.addTestFile(file);
+        processor.addTestFile(file1);
+        processor.addTestFile(file2);
+        processor.addTestFile(file3);
+        //processor.addTestFile(file4);
         processor.addTestFile(createTestFile(TestModel.class.getTypeName()));
 
-        assert_().about(javaSource())
-                .that(file)
+        assert_().about(javaSources())
+                .that(Arrays.asList(file1, file2, file3/*, file4*/))
                 .processedWith(processor)
                 .compilesWithoutError();
 
@@ -151,7 +160,7 @@ public class DataRepositoryProcessorTest
     @Test
     public void testQueryContextExecute(TestContext context) throws ExecutionException, InterruptedException
     {
-        TestDataRepository repo = new TestDataRepository();
+        TestSelectDataRepository repo = new TestSelectDataRepository();
         Async async = context.async();
 
         DataSession db = new DataSession();
@@ -174,7 +183,7 @@ public class DataRepositoryProcessorTest
     @Test
     public void testUpdateContextExecute(TestContext context) throws ExecutionException, InterruptedException
     {
-        TestDataRepository repo = new TestDataRepository();
+        TestUpdateDataRepository repo = new TestUpdateDataRepository();
         Async async = context.async();
 
         DataSession db = new DataSession();

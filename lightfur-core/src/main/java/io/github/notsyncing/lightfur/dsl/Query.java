@@ -10,6 +10,7 @@ public class Query
 {
     private static Map<String, IQueryContext> queryContextMap = new ConcurrentHashMap<>();
     private static Map<String, IUpdateContext> updateContextMap = new ConcurrentHashMap<>();
+    private static Map<String, IDeleteContext> deleteContextMap = new ConcurrentHashMap<>();
 
     public static void addDataContextImplementation(final String tag, DataContext context)
     {
@@ -17,6 +18,10 @@ public class Query
             queryContextMap.put(tag, (IQueryContext) context);
         } else if (context instanceof IUpdateContext) {
             updateContextMap.put(tag, (IUpdateContext) context);
+        } else if (context instanceof IDeleteContext) {
+            deleteContextMap.put(tag, (IDeleteContext) context);
+        } else {
+
         }
 
         System.out.println("Registered QueryContext instance at " + context.toString() + " for tag " + tag);
@@ -57,5 +62,16 @@ public class Query
         }
 
         return updateContextMap.get(tag);
+    }
+
+    public static <T extends TableDefineModel> IDeleteContext<T> delete(Class<T> modelClass, final String tag)
+    {
+        if (!deleteContextMap.containsKey(tag)) {
+            throw new RuntimeException("No DeleteContext implementation found with tag " + tag +
+                    ", please check if you have enabled lightfur annotation processor, " +
+                    "and specified @DataRepository on your class containing Query!");
+        }
+
+        return deleteContextMap.get(tag);
     }
 }

@@ -112,7 +112,11 @@ public class SelectQueryBuilder implements SQLPart
 
     public SelectQueryBuilder where(ExpressionBuilder conditions)
     {
-        whereConditions.and().beginGroup().expr(conditions).endGroup();
+        if (!whereConditions.isEmpty()) {
+            whereConditions.and();
+        }
+
+        whereConditions.beginGroup().expr(conditions).endGroup();
         return this;
     }
 

@@ -2,15 +2,12 @@ package io.github.notsyncing.lightfur.codegen.generators;
 
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
-import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
 import io.github.notsyncing.lightfur.models.ModelColumnResult;
 import io.github.notsyncing.lightfur.sql.base.ReturningQueryBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
-import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
 
-import javax.xml.crypto.Data;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +27,7 @@ public class ExecuteGenerator extends CodeGenerator
             if (b.getSelectColumns().size() <= 0) {
                 ModelColumnResult r = getBuilder().getDataModelColumnResult();
 
-                b.select(r.getColumns())
+                b.select((List<SQLPart>)(List<?>)r.getColumns())
                         .from(r.getTable());
             }
         } else if (getBuilder().getSqlBuilder() instanceof ReturningQueryBuilder) {
@@ -55,7 +52,7 @@ public class ExecuteGenerator extends CodeGenerator
                     })
                     .collect(Collectors.toList());
 
-            getBuilder().setExecuteParameters(params);
+            getBuilder().addExecuteParameters(params);
         }
     }
 }

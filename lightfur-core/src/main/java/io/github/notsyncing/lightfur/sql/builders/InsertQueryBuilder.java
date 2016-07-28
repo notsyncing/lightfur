@@ -1,5 +1,6 @@
 package io.github.notsyncing.lightfur.sql.builders;
 
+import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.github.notsyncing.lightfur.sql.base.SQLUtils;
 import io.github.notsyncing.lightfur.sql.base.ReturningQueryBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
@@ -44,6 +45,30 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
     {
         Collections.addAll(columns, c);
         Collections.addAll(values, v);
+        return this;
+    }
+
+    public InsertQueryBuilder ignore(ColumnModel c)
+    {
+        int i = columns.indexOf(c);
+        columns.remove(i);
+        values.remove(i);
+        return this;
+    }
+
+    public InsertQueryBuilder ignore(String columnName)
+    {
+        int i = columns.stream()
+                .filter(c -> c.getColumn().equals(columnName))
+                .map(c -> columns.indexOf(c))
+                .findFirst()
+                .orElse(-1);
+
+        if (i >= 0) {
+            columns.remove(i);
+            values.remove(i);
+        }
+
         return this;
     }
 

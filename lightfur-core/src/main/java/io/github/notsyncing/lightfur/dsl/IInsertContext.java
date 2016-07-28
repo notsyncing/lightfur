@@ -3,16 +3,16 @@ package io.github.notsyncing.lightfur.dsl;
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.entity.TableDefineModel;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface IUpdateContext<T extends TableDefineModel>
+public interface IInsertContext<T extends TableDefineModel>
 {
-    IUpdateContext<T> set(Consumer<T> setter);
+    IInsertContext<T> values(T data);
 
-    IUpdateContext<T> filter(Predicate<T> predicate);
+    IInsertContext<T> ignore(Function<T, Object> columnExpr);
 
     CompletableFuture<Object> execute(DataSession db, Object... parameters);
 

@@ -11,7 +11,7 @@ public class TestDeleteDataRepository
 {
     public CompletableFuture<ResultSet> deleteSimpleData()
     {
-        return Query.delete(TestModel.class, "simpleData")
+        return Query.remove(TestModel.class, "simpleData")
                 .filter(m -> m.id > 1)
                 .execute()
                 .thenApply(o -> (ResultSet) o);

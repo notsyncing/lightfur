@@ -1,6 +1,7 @@
 package io.github.notsyncing.lightfur.codegen.tests;
 
 import io.github.notsyncing.lightfur.DatabaseManager;
+import io.github.notsyncing.lightfur.codegen.contexts.InsertContext;
 import io.github.notsyncing.lightfur.codegen.contexts.UpdateContext;
 import io.github.notsyncing.lightfur.codegen.tests.toys.TestModel;
 import io.github.notsyncing.lightfur.dsl.Query;
@@ -10,10 +11,8 @@ import org.junit.Test;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
-public class UpdateContextTest
+public class InsertContextTest
 {
     private DatabaseManager db;
 
@@ -24,26 +23,24 @@ public class UpdateContextTest
     }
 
     @Test
-    public void testUpdateSimpleData()
+    public void testInsertSimpleData()
     {
-        String expected = "UPDATE \"test_table\"\n" +
-                "SET \"name\" = ('tested')\n" +
-                "WHERE (\"test_table\".\"id\" > 1)\n" +
+        String expected = "INSERT INTO \"test_table\" (\"name\", \"flag\")\n" +
+                "VALUES (?, ?)\n" +
                 "RETURNING \"test_table\".\"id\"";
 
-        UpdateContext<TestModel> q = (UpdateContext<TestModel>) Query.update(TestModel.class, "simpleData");
+        InsertContext<TestModel> q = (InsertContext<TestModel>) Query.add(TestModel.class, "simpleData");
         assertEquals(expected, q.getSql());
     }
 
     @Test
-    public void testUpdateSimpleDataWithOuterVariable()
+    public void testInsertSimpleDataWithIgnore()
     {
-        String expected = "UPDATE \"test_table\"\n" +
-                "SET \"name\" = (?)\n" +
-                "WHERE (\"test_table\".\"id\" > 1)\n" +
+        String expected = "INSERT INTO \"test_table\" (\"flag\")\n" +
+                "VALUES (?)\n" +
                 "RETURNING \"test_table\".\"id\"";
 
-        UpdateContext<TestModel> q = (UpdateContext<TestModel>) Query.update(TestModel.class, "simpleData_outVar");
+        InsertContext<TestModel> q = (InsertContext<TestModel>) Query.add(TestModel.class, "simpleData_ignore");
         assertEquals(expected, q.getSql());
     }
 }

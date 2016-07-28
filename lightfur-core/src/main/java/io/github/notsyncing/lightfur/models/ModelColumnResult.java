@@ -11,7 +11,7 @@ import java.util.List;
 public class ModelColumnResult
 {
     private TableModel table;
-    private List<SQLPart> columns = new ArrayList<>();
+    private List<ColumnModel> columns = new ArrayList<>();
 
     public TableModel getTable()
     {
@@ -23,21 +23,20 @@ public class ModelColumnResult
         this.table = table;
     }
 
-    public List<SQLPart> getColumns()
+    public List<ColumnModel> getColumns()
     {
         return columns;
     }
 
-    public void setColumns(List<SQLPart> columns)
+    public void setColumns(List<ColumnModel> columns)
     {
         this.columns = columns;
     }
 
-    public SQLPart getKeyColumn()
+    public ColumnModel getKeyColumn()
     {
         return columns.stream()
-                .filter(c -> (c instanceof ColumnModel) && ((ColumnModel)c).isPrimaryKey())
-                .map(c -> (ColumnModel)c)
+                .filter(ColumnModel::isPrimaryKey)
                 .findFirst()
                 .orElse(null);
     }

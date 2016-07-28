@@ -10,9 +10,12 @@ import io.github.notsyncing.lightfur.entity.TableDefineModel;
 public class TestModel implements DataModel, TableDefineModel
 {
     @Column("id")
-    @PrimaryKey
+    @PrimaryKey(autoIncrement = true)
     public int id;
 
     @Column("name")
     public String name;
+
+    @Column("flag")
+    public int flag;
 }

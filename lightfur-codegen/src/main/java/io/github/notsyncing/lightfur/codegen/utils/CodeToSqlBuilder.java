@@ -9,6 +9,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import io.github.notsyncing.lightfur.codegen.annotations.Generator;
 import io.github.notsyncing.lightfur.codegen.contexts.DeleteContext;
+import io.github.notsyncing.lightfur.codegen.contexts.InsertContext;
 import io.github.notsyncing.lightfur.codegen.contexts.QueryContext;
 import io.github.notsyncing.lightfur.codegen.contexts.UpdateContext;
 import io.github.notsyncing.lightfur.codegen.generators.CodeGenerator;
@@ -18,6 +19,7 @@ import io.github.notsyncing.lightfur.codegen.models.ProcessorContext;
 import io.github.notsyncing.lightfur.sql.SQLBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
 
+import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -38,7 +40,7 @@ public class CodeToSqlBuilder
     private String queryContextTag;
     private ProcessorContext context;
     private ModelColumnResult dataModelColumnResult;
-    private List<String> executeParameters;
+    private List<String> executeParameters = new ArrayList<>();
 
     public CodeToSqlBuilder(MethodCallExpr expr, ProcessorContext context, String packageName,
                             List<String> importClasses) throws IllegalAccessException, InstantiationException, IOException, ParseException, NoSuchMethodException, InvocationTargetException
@@ -52,8 +54,8 @@ public class CodeToSqlBuilder
         Method[] queryMethods = null;
 
         for (MethodCallExpr m : callList) {
-            if ((m.getName().equals("get")) || (m.getName().equals("update")) || (m.getName().equals("insert"))
-                    || (m.getName().equals("delete"))) {
+            if ((m.getName().equals("get")) || (m.getName().equals("update")) || (m.getName().equals("add"))
+                    || (m.getName().equals("remove"))) {
                 dataModelType = getDataModelType(packageName, importClasses, m);
                 dataModelColumnResult = makeDataModelColumnResult(context);
                 queryContextTag = ((StringLiteralExpr) m.getArgs().get(1)).getValue();
@@ -69,27 +71,40 @@ public class CodeToSqlBuilder
                 queryMethods = UpdateContext.class.getMethods();
 
                 sqlBuilder = SQLBuilder.update(dataModelColumnResult.getTable());
-            } else if (m.getName().equals("insert")) {
+            } else if (m.getName().equals("add")) {
+                dataContextType = InsertContext.class;
+                queryMethods = InsertContext.class.getMethods();
 
-            } else if (m.getName().equals("delete")) {
+                sqlBuilder = SQLBuilder.insert().into(dataModelColumnResult.getTable());
+            } else if (m.getName().equals("remove")) {
                 dataContextType = DeleteContext.class;
                 queryMethods = DeleteContext.class.getMethods();
 
                 sqlBuilder = SQLBuilder.delete().from(dataModelColumnResult.getTable());
             } else {
+                if (queryMethods == null) {
+                    String msg = "No query methods on DataContext extracted from " + m;
+                    context.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
+                    throw new RuntimeException(msg);
+                }
+
                 Method queryMethod = Stream.of(queryMethods)
                         .filter(qm -> qm.getName().equals(m.getName()))
                         .findFirst()
                         .orElse(null);
 
                 if (queryMethod == null) {
-                    throw new RuntimeException("Method " + m.getName() + " is not found on QueryContext!");
+                    String msg = "Method " + m.getName() + " is not found on QueryContext!";
+                    context.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
+                    throw new RuntimeException(msg);
                 }
 
                 Generator g = queryMethod.getAnnotation(Generator.class);
 
                 if (g == null) {
-                    throw new RuntimeException("Method " + m.getName() + " has no generator declared!");
+                    String msg = "Method " + m.getName() + " has no generator declared!";
+                    context.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
+                    throw new RuntimeException(msg);
                 }
 
                 CodeGenerator cg = g.value().getConstructor(this.getClass()).newInstance(this);
@@ -103,9 +118,9 @@ public class CodeToSqlBuilder
         return executeParameters;
     }
 
-    public void setExecuteParameters(List<String> executeParameters)
+    public void addExecuteParameters(List<String> executeParameters)
     {
-        this.executeParameters = executeParameters;
+        this.executeParameters.addAll(executeParameters);
     }
 
     private ModelColumnResult makeDataModelColumnResult(ProcessorContext context) throws ParseException, IOException

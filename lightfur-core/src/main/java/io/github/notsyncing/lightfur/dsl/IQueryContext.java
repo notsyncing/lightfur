@@ -11,10 +11,6 @@ import java.util.function.Predicate;
 
 public interface IQueryContext<T extends DataModel>
 {
-    String getTag();
-
-    Class<T> getModelClass();
-
     IQueryContext<T> filter(Predicate<T> predicate);
 
     IQueryContext<T> sorted(Consumer<T> field);

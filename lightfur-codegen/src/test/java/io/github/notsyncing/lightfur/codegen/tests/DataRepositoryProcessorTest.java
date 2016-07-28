@@ -1,14 +1,11 @@
 package io.github.notsyncing.lightfur.codegen.tests;
 
 import com.google.testing.compile.JavaFileObjects;
-import io.github.notsyncing.lightfur.codegen.tests.toys.TestDeleteDataRepository;
-import io.github.notsyncing.lightfur.codegen.tests.toys.TestUpdateDataRepository;
+import io.github.notsyncing.lightfur.codegen.tests.toys.*;
 import io.github.notsyncing.lightfur.dsl.DataContext;
 import io.github.notsyncing.lightfur.codegen.DataRepositoryProcessor;
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.DatabaseManager;
-import io.github.notsyncing.lightfur.codegen.tests.toys.TestSelectDataRepository;
-import io.github.notsyncing.lightfur.codegen.tests.toys.TestModel;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -63,7 +60,7 @@ public class DataRepositoryProcessorTest
                 .thenCompose(c -> {
                     CompletableFuture f = new CompletableFuture();
 
-                    c.execute("CREATE TABLE test_table (id SERIAL PRIMARY KEY, name TEXT)", h -> {
+                    c.execute("CREATE TABLE test_table (id SERIAL PRIMARY KEY, name TEXT, flag INTEGER)", h -> {
                         c.close();
 
                         if (h.succeeded()) {
@@ -115,17 +112,17 @@ public class DataRepositoryProcessorTest
         JavaFileObject file1 = createTestFile(TestSelectDataRepository.class.getTypeName());
         JavaFileObject file2 = createTestFile(TestUpdateDataRepository.class.getTypeName());
         JavaFileObject file3 = createTestFile(TestDeleteDataRepository.class.getTypeName());
-        //JavaFileObject file4 = createTestFile(TestInsertDataRepository.class.getTypeName());
+        JavaFileObject file4 = createTestFile(TestInsertDataRepository.class.getTypeName());
 
         DataRepositoryProcessor processor = new DataRepositoryProcessor();
         processor.addTestFile(file1);
         processor.addTestFile(file2);
         processor.addTestFile(file3);
-        //processor.addTestFile(file4);
+        processor.addTestFile(file4);
         processor.addTestFile(createTestFile(TestModel.class.getTypeName()));
 
         assert_().about(javaSources())
-                .that(Arrays.asList(file1, file2, file3/*, file4*/))
+                .that(Arrays.asList(file1, file2, file3, file4))
                 .processedWith(processor)
                 .compilesWithoutError();
 
@@ -205,6 +202,41 @@ public class DataRepositoryProcessorTest
 
                                 context.assertEquals("test1", o1.getString("name"));
                                 context.assertEquals("tested", o2.getString("name"));
+
+                                async.complete();
+                            })
+                            .exceptionally(ex -> {
+                                d.end();
+                                context.fail(ex);
+                                return null;
+                            });
+                })
+                .exceptionally(ex -> {
+                    context.fail(ex);
+                    return null;
+                });
+    }
+
+    @Test
+    public void testInsertContextExecute(TestContext context) throws ExecutionException, InterruptedException
+    {
+        TestInsertDataRepository repo = new TestInsertDataRepository();
+        Async async = context.async();
+
+        repo.insertSimpleData()
+                .thenAccept(m -> {
+                    context.assertNotNull(m);
+
+                    DataSession d = new DataSession();
+                    d.query("SELECT * FROM test_table")
+                            .thenAccept(r -> {
+                                d.end();
+
+                                JsonObject o1 = r.getRows().get(0);
+
+                                context.assertNotEquals(3, o1.getInteger("id"));
+                                context.assertEquals("test", o1.getString("name"));
+                                context.assertEquals(2, o1.getInteger("flag"));
 
                                 async.complete();
                             })

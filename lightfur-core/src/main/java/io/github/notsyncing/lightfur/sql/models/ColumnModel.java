@@ -7,7 +7,10 @@ public class ColumnModel extends DatabaseItemModel implements SQLPart
 {
     private TableModel table;
     private String column;
+    private String fieldName;
+    private String modelType;
     private boolean primaryKey;
+    private boolean autoIncrement;
 
     public ColumnModel()
     {
@@ -39,6 +42,26 @@ public class ColumnModel extends DatabaseItemModel implements SQLPart
         this.column = column;
     }
 
+    public String getFieldName()
+    {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName)
+    {
+        this.fieldName = fieldName;
+    }
+
+    public String getModelType()
+    {
+        return modelType;
+    }
+
+    public void setModelType(String modelType)
+    {
+        this.modelType = modelType;
+    }
+
     public boolean isPrimaryKey()
     {
         return primaryKey;
@@ -47,6 +70,16 @@ public class ColumnModel extends DatabaseItemModel implements SQLPart
     public void setPrimaryKey(boolean primaryKey)
     {
         this.primaryKey = primaryKey;
+    }
+
+    public boolean isAutoIncrement()
+    {
+        return autoIncrement;
+    }
+
+    public void setAutoIncrement(boolean autoIncrement)
+    {
+        this.autoIncrement = autoIncrement;
     }
 
     @Override

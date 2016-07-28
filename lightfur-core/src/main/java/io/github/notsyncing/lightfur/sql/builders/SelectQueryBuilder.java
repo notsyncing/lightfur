@@ -3,6 +3,7 @@ package io.github.notsyncing.lightfur.sql.builders;
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
+import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.JoinClauseInfo;
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo;
 import io.github.notsyncing.lightfur.sql.models.TableModel;

@@ -131,6 +131,8 @@ public class DataRepositoryProcessor extends AbstractProcessor
 
             ProcessorContext context = new ProcessorContext();
             context.setProcessor(this);
+            context.setFiler(processingEnv.getFiler());
+            context.setMessager(processingEnv.getMessager());
 
             DataRepositoryCodeVisitor visitor = new DataRepositoryCodeVisitor();
             visitor.visit(dataRepoUnit, context);

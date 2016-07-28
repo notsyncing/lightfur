@@ -2,7 +2,6 @@ package io.github.notsyncing.lightfur.codegen.tests;
 
 import io.github.notsyncing.lightfur.DatabaseManager;
 import io.github.notsyncing.lightfur.codegen.contexts.DeleteContext;
-import io.github.notsyncing.lightfur.codegen.contexts.QueryContext;
 import io.github.notsyncing.lightfur.codegen.tests.toys.TestModel;
 import io.github.notsyncing.lightfur.dsl.Query;
 import org.junit.Before;
@@ -27,7 +26,7 @@ public class DeleteContextTest
                 "WHERE (\"test_table\".\"id\" > 1)\n" +
                 "RETURNING \"test_table\".\"id\"";
 
-        DeleteContext<TestModel> q = (DeleteContext<TestModel>) Query.delete(TestModel.class, "simpleData");
+        DeleteContext<TestModel> q = (DeleteContext<TestModel>) Query.remove(TestModel.class, "simpleData");
         assertEquals(expected, q.getSql());
     }
 }

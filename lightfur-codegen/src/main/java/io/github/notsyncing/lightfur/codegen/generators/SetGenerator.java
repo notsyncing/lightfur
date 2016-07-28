@@ -6,11 +6,15 @@ import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
 import io.github.notsyncing.lightfur.models.ModelColumnResult;
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
+import io.github.notsyncing.lightfur.sql.builders.InsertQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 
 public class SetGenerator extends CodeGenerator
 {
+    private ColumnModel setColumn;
+    private SQLPart setValue;
+
     public SetGenerator(CodeToSqlBuilder builder)
     {
         super(builder);
@@ -22,23 +26,29 @@ public class SetGenerator extends CodeGenerator
         CodeToSqlBuilder builder = getBuilder();
 
         if (!(builder.getSqlBuilder() instanceof UpdateQueryBuilder)) {
-            throw new RuntimeException("set must be used in UPDATE clause!");
+            throw new RuntimeException("set can only be used in UPDATE!");
         }
 
-        UpdateQueryBuilder b = (UpdateQueryBuilder)builder.getSqlBuilder();
-        LambdaExpr setter = (LambdaExpr)method.getArgs().get(0);
-        ExpressionStmt exp = (ExpressionStmt)setter.getBody();
-        AssignExpr setExp = (AssignExpr)exp.getExpression();
+        UpdateQueryBuilder b = (UpdateQueryBuilder) builder.getSqlBuilder();
+        extractSetColumnInfo(method, builder);
 
-        FieldAccessExpr field = (FieldAccessExpr)setExp.getTarget();
-        ColumnModel column = resolveColumn(field);
+        b.set(setColumn, setValue);
+    }
 
-        if (column == null) {
+    private void extractSetColumnInfo(MethodCallExpr method, CodeToSqlBuilder builder)
+    {
+        LambdaExpr setter = (LambdaExpr) method.getArgs().get(0);
+        ExpressionStmt exp = (ExpressionStmt) setter.getBody();
+        AssignExpr setExp = (AssignExpr) exp.getExpression();
+
+        FieldAccessExpr field = (FieldAccessExpr) setExp.getTarget();
+        setColumn = resolveColumn(field);
+
+        if (setColumn == null) {
             throw new RuntimeException("Column " + field.getField() + " is not found on model " + builder.getDataModelType());
         }
 
         Expression value = setExp.getValue();
-        SQLPart setValue;
 
         if (value instanceof StringLiteralExpr) {
             String v = ((StringLiteralExpr) value).getValue();
@@ -47,9 +57,7 @@ public class SetGenerator extends CodeGenerator
             String n = ((NameExpr) value).getName();
             setValue = new ExpressionBuilder().namedParameterReference(n);
         } else {
-            throw new RuntimeException("Unsupported set target value: " + value + ", to column " + column);
+            throw new RuntimeException("Unsupported set target value: " + value + ", to column " + setColumn);
         }
-
-        b.set(column, setValue);
     }
 }

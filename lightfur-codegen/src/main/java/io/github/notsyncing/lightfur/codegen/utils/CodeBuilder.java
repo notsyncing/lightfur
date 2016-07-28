@@ -3,14 +3,16 @@ package io.github.notsyncing.lightfur.codegen.utils;
 import com.squareup.javapoet.*;
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.annotations.GeneratedDataContext;
-import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
 import io.github.notsyncing.lightfur.sql.base.ReturningQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
-import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
+import io.github.notsyncing.lightfur.utils.StringUtils;
+import scala.collection.mutable.MultiMap;
 
 import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -19,9 +21,23 @@ import java.util.stream.Collectors;
 
 public class CodeBuilder
 {
+    private static class ParamIndexEntry
+    {
+        public int index;
+        public String field;
+        public String castType;
+
+        public ParamIndexEntry(int index, String field, String castType)
+        {
+            this.index = index;
+            this.field = field;
+            this.castType = castType;
+        }
+    }
+
     private CodeToSqlBuilder builder;
     private String queryContextTypeName;
-    private List<Integer> paramIndexList = new ArrayList<>();
+    private List<ParamIndexEntry> paramIndexMap = new ArrayList<>();
 
     public CodeBuilder(CodeToSqlBuilder builder)
     {
@@ -80,8 +96,14 @@ public class CodeBuilder
 
         sql = processSqlNamedParameters(sql);
 
-        String parameterArgs = paramIndexList.stream()
-                .map(i -> "parameters[" + i + "]")
+        String parameterArgs = paramIndexMap.stream()
+                .map(p -> {
+                    if (StringUtils.isEmpty(p.castType)) {
+                        return "parameters[" + p.index + "]" + p.field;
+                    } else {
+                        return "((" + p.castType + ")" + "(parameters[" + p.index + "]))" + p.field;
+                    }
+                })
                 .collect(Collectors.joining(","));
 
         if (!parameterArgs.isEmpty()) {
@@ -141,7 +163,7 @@ public class CodeBuilder
     private String processSqlNamedParameters(String sql)
     {
         List<String> sqlNamedParams = new ArrayList<>();
-        Pattern sqlNamedParamPattern = Pattern.compile(":([a-zA-Z_][a-zA-Z0-9_]*)");
+        Pattern sqlNamedParamPattern = Pattern.compile(":([a-zA-Z_][a-zA-Z0-9_@]*)");
         Matcher m = sqlNamedParamPattern.matcher(sql);
 
         while (m.find()) {
@@ -157,19 +179,38 @@ public class CodeBuilder
         for (String p : sqlNamedParams) {
             boolean found = false;
 
+            String name = p;
+            String field = "";
+            String cast = null;
+
+            if (p.contains("_")) {
+                name = p.substring(0, p.indexOf("_"));
+
+                int end = p.indexOf("@");
+
+                if (end <= 0) {
+                    end = p.length();
+                } else {
+                    cast = p.substring(end + 1);
+                }
+
+                field = p.substring(p.indexOf("_"), end).replaceAll("_", ".");
+            }
+
             for (int i = 0; i < builder.getExecuteParameters().size(); i++) {
-                if (builder.getExecuteParameters().get(i).equals(p)) {
+                if (builder.getExecuteParameters().get(i).equals(name)) {
                     found = true;
-                    paramIndexList.add(i);
+                    paramIndexMap.add(new ParamIndexEntry(i, field, cast));
                     break;
                 }
             }
 
             if (!found) {
-                throw new RuntimeException("Required parameter " + p + " not found in SQL: " + sql);
+                throw new RuntimeException("Required parameter " + name + " (" + p + ") not found in SQL: " + sql);
             }
 
             sql = m.replaceFirst("?");
+            m.reset(sql);
         }
 
         return sql;

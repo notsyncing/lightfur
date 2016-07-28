@@ -11,6 +11,7 @@ public class Query
     private static Map<String, IQueryContext> queryContextMap = new ConcurrentHashMap<>();
     private static Map<String, IUpdateContext> updateContextMap = new ConcurrentHashMap<>();
     private static Map<String, IDeleteContext> deleteContextMap = new ConcurrentHashMap<>();
+    private static Map<String, IInsertContext> insertContextMap = new ConcurrentHashMap<>();
 
     public static void addDataContextImplementation(final String tag, DataContext context)
     {
@@ -20,8 +21,10 @@ public class Query
             updateContextMap.put(tag, (IUpdateContext) context);
         } else if (context instanceof IDeleteContext) {
             deleteContextMap.put(tag, (IDeleteContext) context);
+        } else if (context instanceof IInsertContext) {
+            insertContextMap.put(tag, (IInsertContext) context);
         } else {
-
+            throw new RuntimeException("Unsupported DataContext type: " + context.getClass() + " at " + context.toString());
         }
 
         System.out.println("Registered QueryContext instance at " + context.toString() + " for tag " + tag);
@@ -64,7 +67,7 @@ public class Query
         return updateContextMap.get(tag);
     }
 
-    public static <T extends TableDefineModel> IDeleteContext<T> delete(Class<T> modelClass, final String tag)
+    public static <T extends TableDefineModel> IDeleteContext<T> remove(Class<T> modelClass, final String tag)
     {
         if (!deleteContextMap.containsKey(tag)) {
             throw new RuntimeException("No DeleteContext implementation found with tag " + tag +
@@ -73,5 +76,16 @@ public class Query
         }
 
         return deleteContextMap.get(tag);
+    }
+
+    public static <T extends TableDefineModel> IInsertContext<T> add(Class<T> modelClass, final String tag)
+    {
+        if (!insertContextMap.containsKey(tag)) {
+            throw new RuntimeException("No InsertContext implementation found with tag " + tag +
+                    ", please check if you have enabled lightfur annotation processor, " +
+                    "and specified @DataRepository on your class containing Query!");
+        }
+
+        return insertContextMap.get(tag);
     }
 }

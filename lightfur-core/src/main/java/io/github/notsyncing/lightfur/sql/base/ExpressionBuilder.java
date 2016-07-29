@@ -165,4 +165,10 @@ public class ExpressionBuilder implements SQLPart
         buf.append("?");
         return this;
     }
+
+    public ExpressionBuilder raw(String s)
+    {
+        buf.append(s);
+        return this;
+    }
 }

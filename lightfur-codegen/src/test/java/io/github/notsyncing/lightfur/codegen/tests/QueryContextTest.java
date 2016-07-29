@@ -53,4 +53,25 @@ public class QueryContextTest
         QueryContext<TestModel> q = (QueryContext<TestModel>)Query.get(TestModel.class, "simpleData_cond");
         assertEquals(expected, q.getSql());
     }
+
+    @Test
+    public void testQuerySimpleDataSorted()
+    {
+        String expected = "SELECT \"test_table\".\"id\", \"test_table\".\"name\", \"test_table\".\"flag\"\n" +
+                "FROM \"test_table\"\n" +
+                "ORDER BY \"test_table\".\"id\" DESC";
+
+        QueryContext<TestModel> q = (QueryContext<TestModel>)Query.get(TestModel.class, "simpleData_sorted");
+        assertEquals(expected, q.getSql());
+    }
+
+    @Test
+    public void testQuerySimpleDataCount()
+    {
+        String expected = "SELECT COUNT(*)\n" +
+                "FROM \"test_table\"";
+
+        QueryContext<TestModel> q = (QueryContext<TestModel>)Query.get(TestModel.class, "simpleData_count");
+        assertEquals(expected, q.getSql());
+    }
 }

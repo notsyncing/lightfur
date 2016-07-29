@@ -6,11 +6,13 @@ import io.github.notsyncing.lightfur.codegen.generators.*;
 import io.github.notsyncing.lightfur.dsl.DataContext;
 import io.github.notsyncing.lightfur.dsl.IQueryContext;
 import io.github.notsyncing.lightfur.entity.DataModel;
+import io.github.notsyncing.lightfur.sql.models.wrappers.LongWrapper;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class QueryContext<T extends DataModel> extends DataContext implements IQueryContext<T>
@@ -35,7 +37,8 @@ public class QueryContext<T extends DataModel> extends DataContext implements IQ
         return this;
     }
 
-    public QueryContext<T> sorted(Consumer<T> field)
+    @Generator(SortedGenerator.class)
+    public QueryContext<T> sorted(Function<T, Object> field, boolean desc)
     {
         return this;
     }
@@ -58,9 +61,10 @@ public class QueryContext<T extends DataModel> extends DataContext implements IQ
         return new QueryContext<>(targetClass, getTag(), getSql());
     }
 
-    public QueryContext<T> count()
+    @Generator(CountGenerator.class)
+    public QueryContext<LongWrapper> count()
     {
-        return this;
+        return new QueryContext<>(LongWrapper.class, getTag(), getSql());
     }
 
     @Generator(ExecuteGenerator.class)

@@ -2,6 +2,7 @@ package io.github.notsyncing.lightfur.codegen.tests.toys;
 
 import io.github.notsyncing.lightfur.annotations.DataRepository;
 import io.github.notsyncing.lightfur.dsl.Query;
+import io.github.notsyncing.lightfur.sql.models.wrappers.LongWrapper;
 import io.vertx.ext.sql.ResultSet;
 
 import java.util.concurrent.CompletableFuture;
@@ -35,5 +36,21 @@ public class TestSelectDataRepository
                 .filter(m -> m.id > 1)
                 .execute()
                 .thenApply(l -> l.size() > 0 ? l.get(0) : null);
+    }
+
+    public CompletableFuture<TestModel> getSimpleDataSorted()
+    {
+        return Query.get(TestModel.class, "simpleData_sorted")
+                .sorted(m -> m.id, true)
+                .execute()
+                .thenApply(l -> l.size() > 0 ? l.get(0) : null);
+    }
+
+    public CompletableFuture<Long> getSimpleDataCount()
+    {
+        return Query.get(TestModel.class, "simpleData_count")
+                .count()
+                .execute()
+                .thenApply(r -> r.size() > 0 ? r.get(0).getValue() : null);
     }
 }

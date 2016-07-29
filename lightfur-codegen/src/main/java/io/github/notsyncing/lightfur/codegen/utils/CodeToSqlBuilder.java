@@ -13,6 +13,7 @@ import io.github.notsyncing.lightfur.codegen.contexts.DeleteContext;
 import io.github.notsyncing.lightfur.codegen.contexts.InsertContext;
 import io.github.notsyncing.lightfur.codegen.contexts.QueryContext;
 import io.github.notsyncing.lightfur.codegen.contexts.UpdateContext;
+import io.github.notsyncing.lightfur.codegen.enums.QueryFuncType;
 import io.github.notsyncing.lightfur.codegen.generators.CodeGenerator;
 import io.github.notsyncing.lightfur.dsl.DataContext;
 import io.github.notsyncing.lightfur.models.ModelColumnResult;
@@ -43,6 +44,7 @@ public class CodeToSqlBuilder
     private ModelColumnResult dataModelColumnResult;
     private List<String> executeParameters = new ArrayList<>();
     private String packageName;
+    private QueryFuncType generatedQueryType = QueryFuncType.List;
 
     public CodeToSqlBuilder(MethodCallExpr expr, ProcessorContext context, String packageName,
                             List<String> importClasses) throws IllegalAccessException, InstantiationException, IOException, ParseException, NoSuchMethodException, InvocationTargetException
@@ -175,6 +177,11 @@ public class CodeToSqlBuilder
         dataModelType = resolveDataModelType(simpleType);
     }
 
+    public void setDataModelType(Class<?> type)
+    {
+        dataModelType = type.getName();
+    }
+
     public SQLPart getSqlBuilder()
     {
         return sqlBuilder;
@@ -193,6 +200,16 @@ public class CodeToSqlBuilder
     public Class<? extends DataContext> getDataContextType()
     {
         return dataContextType;
+    }
+
+    public QueryFuncType getGeneratedQueryType()
+    {
+        return generatedQueryType;
+    }
+
+    public void setGeneratedQueryType(QueryFuncType generatedQueryType)
+    {
+        this.generatedQueryType = generatedQueryType;
     }
 
     public String build()

@@ -6,13 +6,11 @@ import io.github.notsyncing.lightfur.annotations.GeneratedDataContext;
 import io.github.notsyncing.lightfur.sql.base.ReturningQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.utils.StringUtils;
+import io.vertx.ext.sql.ResultSet;
 import scala.collection.mutable.MultiMap;
 
 import javax.lang.model.element.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -70,21 +68,32 @@ public class CodeBuilder
                 .build();
     }
 
-    private TypeSpec generateCompletedBlock(TypeName returnType)
+    private TypeSpec generateCompletedBlock(TypeName returnType, boolean convertToList, TypeName innerType)
     {
-        MethodSpec completedFunc = MethodSpec.methodBuilder("apply")
+        MethodSpec.Builder completedFuncBuilder = MethodSpec.methodBuilder("apply")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(returnType, "r")
+                .addParameter(innerType == null ? returnType : TypeName.OBJECT, "r")
                 .returns(returnType)
                 .beginControlFlow("if (!finalInDb)")
                 .addStatement("finalDb.end()")
-                .endControlFlow()
-                .addStatement("return r")
-                .build();
+                .endControlFlow();
+
+        if (convertToList) {
+            completedFuncBuilder.addStatement("return $T.asList(($T) r)", Arrays.class, innerType);
+        } else {
+            if (innerType != null) {
+                completedFuncBuilder.addStatement("return ($T) r", innerType);
+            } else {
+                completedFuncBuilder.addStatement("return r");
+            }
+        }
+
+        MethodSpec completedFunc = completedFuncBuilder.build();
 
         return TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Function.class), returnType, returnType))
+                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Function.class),
+                        innerType == null ? returnType : TypeName.OBJECT, returnType))
                 .addMethod(completedFunc)
                 .build();
     }
@@ -133,14 +142,42 @@ public class CodeBuilder
                 .addStatement("boolean finalInDb = inDb")
                 .addStatement("$T finalDb = db", DataSession.class);
 
-        TypeSpec completedBlock = generateCompletedBlock(returnType);
+        TypeSpec completedBlock;
         TypeSpec failedBlock = generateFailedBlock(returnType);
 
         if (builder.getSqlBuilder() instanceof SelectQueryBuilder) {
+            String queryFunc = "";
+            Object[] queryParams = null;
+
+            switch (builder.getGeneratedQueryType()) {
+                case List:
+                    queryFunc = "queryList($T.class, getSql()";
+                    completedBlock = generateCompletedBlock(returnType, false, null);
+                    queryParams = new Object[] { dataModelTypeName, completedBlock, failedBlock };
+                    break;
+                case First:
+                    queryFunc = "queryFirst($T.class, getSql()";
+                    completedBlock = generateCompletedBlock(returnType, false, null);
+                    queryParams = new Object[] { dataModelTypeName, completedBlock, failedBlock };
+                    break;
+                case FirstValue:
+                    queryFunc = "queryFirstValue(getSql()";
+                    completedBlock = generateCompletedBlock(returnType, true, dataModelTypeName);
+                    queryParams = new Object[] { completedBlock, failedBlock };
+                    break;
+                case Raw:
+                    queryFunc = "query(getSql()";
+                    completedBlock = generateCompletedBlock(returnType, false, ClassName.get(ResultSet.class));
+                    queryParams = new Object[] { completedBlock, failedBlock };
+                    break;
+            }
+
             mb.returns(ParameterizedTypeName.get(ClassName.get(CompletableFuture.class), returnType))
-                    .addStatement("return db.queryList($T.class, getSql()" + parameterArgs + ").thenApply($L).exceptionally($L)",
-                            dataModelTypeName, completedBlock, failedBlock);
+                    .addStatement("return db." + queryFunc + parameterArgs + ").thenApply($L).exceptionally($L)",
+                            queryParams);
         } else if (builder.getSqlBuilder() instanceof ReturningQueryBuilder) {
+            completedBlock = generateCompletedBlock(returnType, false, null);
+
             mb.returns(ParameterizedTypeName.get(ClassName.get(CompletableFuture.class), TypeName.OBJECT))
                     .addStatement("return db.executeWithReturning(getSql()" + parameterArgs + ").thenApply($L).exceptionally($L)",
                             completedBlock, failedBlock);

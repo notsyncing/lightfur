@@ -19,7 +19,7 @@ public interface IQueryContext<T extends DataModel>
 
     IQueryContext<T> skip(long n);
 
-    <R> IQueryContext<T> map(Class<R> targetClass, BiConsumer<T, R> mapper);
+    <R extends DataModel> IQueryContext<R> map(Class<R> targetClass, BiConsumer<T, R> mapper);
 
     IQueryContext<T> count();
 

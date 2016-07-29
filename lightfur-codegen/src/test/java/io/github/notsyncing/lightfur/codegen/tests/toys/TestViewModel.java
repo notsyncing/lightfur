@@ -7,7 +7,7 @@ import io.github.notsyncing.lightfur.entity.DataModel;
 import io.github.notsyncing.lightfur.entity.TableDefineModel;
 
 @Table("test_table")
-public class TestModel implements DataModel, TableDefineModel
+public class TestViewModel implements DataModel, TableDefineModel
 {
     @Column("id")
     @PrimaryKey(autoIncrement = true)
@@ -15,7 +15,4 @@ public class TestModel implements DataModel, TableDefineModel
 
     @Column("name")
     public String name;
-
-    @Column("flag")
-    public Integer flag;
 }

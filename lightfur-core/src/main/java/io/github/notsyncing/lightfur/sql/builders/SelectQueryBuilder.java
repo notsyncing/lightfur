@@ -32,6 +32,11 @@ public class SelectQueryBuilder implements SQLPart
         return selectColumns;
     }
 
+    public void setSelectColumns(List<SQLPart> selectColumns)
+    {
+        this.selectColumns = selectColumns;
+    }
+
     public SelectQueryBuilder from(TableModel... tables)
     {
         if ((tables == null) || (tables.length <= 0)) {

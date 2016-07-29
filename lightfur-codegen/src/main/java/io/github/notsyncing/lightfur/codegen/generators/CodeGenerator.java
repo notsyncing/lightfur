@@ -24,8 +24,7 @@ public abstract class CodeGenerator
     protected ColumnModel resolveColumn(FieldAccessExpr expr)
     {
         return builder.getDataModelColumnResult().getColumns().stream()
-                .filter(c -> ((ColumnModel)c).getColumn().equals(expr.getField()))
-                .map(c -> (ColumnModel)c)
+                .filter(c -> c.getColumn().equals(expr.getField()))
                 .findFirst()
                 .orElse(null);
     }

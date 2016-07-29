@@ -2,6 +2,7 @@ package io.github.notsyncing.lightfur.sql.models;
 
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
 import io.github.notsyncing.lightfur.sql.base.SQLUtils;
+import io.netty.util.internal.StringUtil;
 
 public class ColumnModel extends DatabaseItemModel implements SQLPart
 {
@@ -112,6 +113,10 @@ public class ColumnModel extends DatabaseItemModel implements SQLPart
         buf.append(".");
 
         buf.append(SQLUtils.escapeName(column));
+
+        if (!StringUtil.isNullOrEmpty(getAlias())) {
+            buf.append(" AS ").append(SQLUtils.escapeName(getAlias()));
+        }
 
         return buf.toString();
     }

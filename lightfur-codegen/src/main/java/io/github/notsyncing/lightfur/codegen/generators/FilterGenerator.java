@@ -94,7 +94,10 @@ public class FilterGenerator extends CodeGenerator
     public void generate(MethodCallExpr method)
     {
         if (getBuilder().getSqlBuilder() instanceof SelectQueryBuilder) {
-
+            SelectQueryBuilder b = (SelectQueryBuilder) getBuilder().getSqlBuilder();
+            LambdaExpr cond = (LambdaExpr) method.getArgs().get(0);
+            ExpressionStmt exp = (ExpressionStmt)cond.getBody();
+            b.where(javaExpToSqlExp(exp.getExpression(), null));
         } else if (getBuilder().getSqlBuilder() instanceof UpdateQueryBuilder) {
             UpdateQueryBuilder b = (UpdateQueryBuilder) getBuilder().getSqlBuilder();
             LambdaExpr cond = (LambdaExpr) method.getArgs().get(0);
@@ -106,7 +109,7 @@ public class FilterGenerator extends CodeGenerator
             ExpressionStmt exp = (ExpressionStmt)cond.getBody();
             b.where(javaExpToSqlExp(exp.getExpression(), null));
         } else {
-
+            throw new RuntimeException("filter can only be used in SELECT, UPDATE or DELETE!");
         }
     }
 }

@@ -161,13 +161,14 @@ public class DataRepositoryProcessorTest
         Async async = context.async();
 
         DataSession db = new DataSession();
-        db.execute("INSERT INTO test_table (name) VALUES (?)", "test").get();
+        db.execute("INSERT INTO test_table (name, flag) VALUES (?, ?)", "test", 2).get();
         db.end();
 
         repo.getSimpleData()
                 .thenAccept(m -> {
                     context.assertNotNull(m);
                     context.assertEquals("test", m.name);
+                    context.assertEquals(2, m.flag);
 
                     async.complete();
                 })

@@ -17,15 +17,23 @@ public class TestSelectDataRepository
                 .thenApply(l -> l.size() > 0 ? l.get(0) : null);
     }
 
-    /*public CompletableFuture<TestModel> getSimpleMappedData()
+    public CompletableFuture<TestViewModel> getSimpleMappedData()
     {
-        return Query.get(TestModel.class, "simpleMappedData")
-                .map(TestModel.class, (m, r) -> {
+        return Query.get(TestModel.class, "simpleData_mapped")
+                .map(TestViewModel.class, (m, r) -> {
                     m.id = r.id;
                     m.name = r.name;
                 })
                 .take(1)
                 .execute()
                 .thenApply(l -> l.size() > 0 ? l.get(0) : null);
-    }*/
+    }
+
+    public CompletableFuture<TestModel> getSimpleDataWithCondition()
+    {
+        return Query.get(TestModel.class, "simpleData_cond")
+                .filter(m -> m.id > 1)
+                .execute()
+                .thenApply(l -> l.size() > 0 ? l.get(0) : null);
+    }
 }

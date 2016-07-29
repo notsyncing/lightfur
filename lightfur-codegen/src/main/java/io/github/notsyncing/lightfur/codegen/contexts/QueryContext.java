@@ -2,8 +2,7 @@ package io.github.notsyncing.lightfur.codegen.contexts;
 
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.codegen.annotations.Generator;
-import io.github.notsyncing.lightfur.codegen.generators.ExecuteGenerator;
-import io.github.notsyncing.lightfur.codegen.generators.TakeGenerator;
+import io.github.notsyncing.lightfur.codegen.generators.*;
 import io.github.notsyncing.lightfur.dsl.DataContext;
 import io.github.notsyncing.lightfur.dsl.IQueryContext;
 import io.github.notsyncing.lightfur.entity.DataModel;
@@ -30,6 +29,7 @@ public class QueryContext<T extends DataModel> extends DataContext implements IQ
         return modelClass;
     }
 
+    @Generator(FilterGenerator.class)
     public QueryContext<T> filter(Predicate<T> predicate)
     {
         return this;
@@ -46,14 +46,16 @@ public class QueryContext<T extends DataModel> extends DataContext implements IQ
         return this;
     }
 
+    @Generator(SkipGenerator.class)
     public QueryContext<T> skip(long n)
     {
         return this;
     }
 
-    public <R> QueryContext<T> map(Class<R> targetClass, BiConsumer<T, R> mapper)
+    @Generator(MapGenerator.class)
+    public <R extends DataModel> QueryContext<R> map(Class<R> targetClass, BiConsumer<T, R> mapper)
     {
-        return this;
+        return new QueryContext<>(targetClass, getTag(), getSql());
     }
 
     public QueryContext<T> count()

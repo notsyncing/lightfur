@@ -7,6 +7,7 @@ import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.type.Type;
 import io.github.notsyncing.lightfur.codegen.annotations.Generator;
 import io.github.notsyncing.lightfur.codegen.contexts.DeleteContext;
 import io.github.notsyncing.lightfur.codegen.contexts.InsertContext;
@@ -41,11 +42,13 @@ public class CodeToSqlBuilder
     private ProcessorContext context;
     private ModelColumnResult dataModelColumnResult;
     private List<String> executeParameters = new ArrayList<>();
+    private String packageName;
 
     public CodeToSqlBuilder(MethodCallExpr expr, ProcessorContext context, String packageName,
                             List<String> importClasses) throws IllegalAccessException, InstantiationException, IOException, ParseException, NoSuchMethodException, InvocationTargetException
     {
         this.queryExpr = expr;
+        this.packageName = packageName;
         this.importClasses = importClasses;
         this.context = context;
 
@@ -56,7 +59,7 @@ public class CodeToSqlBuilder
         for (MethodCallExpr m : callList) {
             if ((m.getName().equals("get")) || (m.getName().equals("update")) || (m.getName().equals("add"))
                     || (m.getName().equals("remove"))) {
-                dataModelType = getDataModelType(packageName, importClasses, m);
+                dataModelType = resolveDataModelType(m);
                 dataModelColumnResult = makeDataModelColumnResult(context);
                 queryContextTag = ((StringLiteralExpr) m.getArgs().get(1)).getValue();
             }
@@ -130,13 +133,17 @@ public class CodeToSqlBuilder
         return SQLColumnListGenerator.fromDataModel(modelSource);
     }
 
-    private String getDataModelType(String packageName, List<String> importClasses, MethodCallExpr m)
+    private String resolveDataModelType(String modelSimpleType)
     {
-        String modelSimpleType = ((ClassExpr) m.getArgs().get(0)).getType().toString();
         return importClasses.stream()
                 .filter(s -> s.endsWith("." + modelSimpleType))
                 .findFirst()
                 .orElse(packageName + "." + modelSimpleType);
+    }
+
+    private String resolveDataModelType(MethodCallExpr m)
+    {
+        return resolveDataModelType(((ClassExpr) m.getArgs().get(0)).getType().toString());
     }
 
     private void queryExpressionToCallList()
@@ -163,9 +170,9 @@ public class CodeToSqlBuilder
         return dataModelType;
     }
 
-    public void setDataModelType(String type)
+    public void setDataModelType(String simpleType)
     {
-        dataModelType = type;
+        dataModelType = resolveDataModelType(simpleType);
     }
 
     public SQLPart getSqlBuilder()

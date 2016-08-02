@@ -54,15 +54,17 @@ public class DatabaseManager
      * @param username 数据库用户名
      * @param password 该数据库用户的密码
      * @param databaseName 要连接的数据库的名称
+     * @param maxPoolSize 连接池大小
      */
-    public void init(String host, int port, String username, String password, String databaseName)
+    public void init(String host, int port, String username, String password, String databaseName, int maxPoolSize)
     {
         configs = new JsonObject()
                 .put("host", host)
                 .put("port", port)
                 .put("username", username)
                 .put("password", password)
-                .put("database", databaseName);
+                .put("database", databaseName)
+                .put("maxPoolSize", maxPoolSize);
 
         client = PostgreSQLClient.createNonShared(vertx, configs);
     }
@@ -75,7 +77,7 @@ public class DatabaseManager
      */
     public void init(String username, String password, String databaseName)
     {
-        init("localhost", 5432, username, password, databaseName);
+        init("localhost", 5432, username, password, databaseName, 10);
     }
 
     /**

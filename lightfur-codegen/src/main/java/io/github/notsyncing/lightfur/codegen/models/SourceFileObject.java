@@ -1,7 +1,5 @@
 package io.github.notsyncing.lightfur.codegen.models;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import javax.tools.FileObject;
 import java.io.*;
 import java.net.URI;
@@ -51,7 +49,7 @@ public class SourceFileObject implements FileObject
     @Override
     public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException
     {
-        throw new NotImplementedException();
+        throw new RuntimeException("Not implemented");
     }
 
     @Override

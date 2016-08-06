@@ -6,7 +6,13 @@ public class LightfurConfigBuilder
 
     public LightfurConfigBuilder()
     {
-
+        config.setDatabase("postgres");
+        config.setEnableDatabaseVersioning(false);
+        config.setMaxPoolSize(10);
+        config.setUsername("postgres");
+        config.setPassword(null);
+        config.setHost("localhost");
+        config.setPort(5432);
     }
 
     public LightfurConfigBuilder host(String host)

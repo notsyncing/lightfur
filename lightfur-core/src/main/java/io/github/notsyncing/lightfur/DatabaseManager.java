@@ -1,12 +1,16 @@
 package io.github.notsyncing.lightfur;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import io.github.lukehutch.fastclasspathscanner.matchprocessor.FileMatchContentsProcessor;
+import io.github.lukehutch.fastclasspathscanner.matchprocessor.FileMatchProcessor;
+import io.github.lukehutch.fastclasspathscanner.matchprocessor.FileMatchProcessorWithContext;
 import io.github.notsyncing.lightfur.annotations.GeneratedDataContext;
 import io.github.notsyncing.lightfur.common.LightfurConfig;
 import io.github.notsyncing.lightfur.common.LightfurConfigBuilder;
 import io.github.notsyncing.lightfur.dsl.DataContext;
 import io.github.notsyncing.lightfur.dsl.IQueryContext;
 import io.github.notsyncing.lightfur.dsl.Query;
+import io.github.notsyncing.lightfur.versioning.DatabaseVersionManager;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
@@ -14,6 +18,9 @@ import io.vertx.ext.asyncsql.AsyncSQLClient;
 import io.vertx.ext.asyncsql.PostgreSQLClient;
 import io.vertx.ext.sql.SQLConnection;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -26,18 +33,14 @@ public class DatabaseManager
     private Vertx vertx;
     private AsyncSQLClient client;
     private LightfurConfig configs;
+    private FastClasspathScanner cpScanner;
 
     private DatabaseManager()
     {
-        new FastClasspathScanner()
+        cpScanner = new FastClasspathScanner()
                 .matchClassesWithAnnotation(GeneratedDataContext.class,
                         c -> Query.addDataContextImplementation((Class<? extends DataContext>)c))
                 .scan();
-
-        VertxOptions opts = new VertxOptions()
-                .setBlockedThreadCheckInterval(60 * 60 * 1000);
-
-        vertx = Vertx.vertx(opts);
     }
 
     /**
@@ -49,14 +52,31 @@ public class DatabaseManager
         return instance;
     }
 
+    public LightfurConfig getConfigs()
+    {
+        return configs;
+    }
+
     /**
      * 设置到数据库的连接参数
      * @param config 相关配置
      */
-    public void init(LightfurConfig config)
+    public CompletableFuture<Void> init(LightfurConfig config)
     {
+        VertxOptions opts = new VertxOptions()
+                .setBlockedThreadCheckInterval(60 * 60 * 1000);
+
+        vertx = Vertx.vertx(opts);
+
         configs = config;
         client = PostgreSQLClient.createNonShared(vertx, configs.toVertxConfig());
+
+        if (config.isEnableDatabaseVersioning()) {
+            DatabaseVersionManager versionManager = new DatabaseVersionManager(this, cpScanner);
+            return versionManager.upgradeToLatest();
+        }
+
+        return CompletableFuture.completedFuture(null);
     }
 
     /**
@@ -68,7 +88,7 @@ public class DatabaseManager
      * @param databaseName 要连接的数据库的名称
      * @param maxPoolSize 连接池大小
      */
-    public void init(String host, int port, String username, String password, String databaseName, int maxPoolSize)
+    public CompletableFuture<Void> init(String host, int port, String username, String password, String databaseName, int maxPoolSize)
     {
         LightfurConfig config = new LightfurConfigBuilder()
                 .host(host)
@@ -79,7 +99,7 @@ public class DatabaseManager
                 .maxPoolSize(maxPoolSize)
                 .build();
 
-        init(config);
+        return init(config);
     }
 
     /**
@@ -88,27 +108,27 @@ public class DatabaseManager
      * @param password 该数据库用户的密码
      * @param databaseName 要连接的数据库的名称
      */
-    public void init(String username, String password, String databaseName)
+    public CompletableFuture<Void> init(String username, String password, String databaseName)
     {
-        init("localhost", 5432, username, password, databaseName, 10);
+        return init("localhost", 5432, username, password, databaseName, 10);
     }
 
     /**
      * 设置到数据库的连接参数，主机默认为 localhost，端口默认为 5432，用户名默认为 postgres，密码默认为空
      * @param databaseName 要连接的数据库的名称
      */
-    public void init(String databaseName)
+    public CompletableFuture<Void> init(String databaseName)
     {
-        init("postgres", null, databaseName);
+        return init("postgres", null, databaseName);
     }
 
     /**
      * 异步关闭数据库客户端
      * @return 指示数据库客户端关闭是否完成的 CompletableFuture 对象
      */
-    public CompletableFuture close()
+    public CompletableFuture<Void> close()
     {
-        CompletableFuture f = new CompletableFuture();
+        CompletableFuture<Void> f = new CompletableFuture<>();
 
         client.close(r -> {
             if (r.failed()) {
@@ -116,7 +136,14 @@ public class DatabaseManager
                 return;
             }
 
-            f.complete(r.result());
+            vertx.close(r2 -> {
+                if (r2.failed()) {
+                    f.completeExceptionally(r2.cause());
+                    return;
+                }
+
+                f.complete(r2.result());
+            });
         });
 
         return f;
@@ -233,9 +260,26 @@ public class DatabaseManager
      * 设置/切换要连接到的数据库
      * @param databaseName 要连接到的数据库名称
      */
-    public void setDatabase(String databaseName)
+    public CompletableFuture<Void> setDatabase(String databaseName)
     {
-        configs.setDatabase(databaseName);
-        client = PostgreSQLClient.createNonShared(vertx, configs.toVertxConfig());
+        CompletableFuture<Void> f = new CompletableFuture<>();
+
+        if (client != null) {
+            client.close(r -> {
+                if (!r.succeeded()) {
+                    f.completeExceptionally(r.cause());
+                    return;
+                }
+
+                f.complete(r.result());
+            });
+        } else {
+            f.complete(null);
+        }
+
+        return f.thenAccept(r -> {
+            configs.setDatabase(databaseName);
+            client = PostgreSQLClient.createNonShared(vertx, configs.toVertxConfig());
+        });
     }
 }

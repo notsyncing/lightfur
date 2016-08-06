@@ -2,6 +2,8 @@ package io.github.notsyncing.lightfur;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.notsyncing.lightfur.annotations.GeneratedDataContext;
+import io.github.notsyncing.lightfur.common.LightfurConfig;
+import io.github.notsyncing.lightfur.common.LightfurConfigBuilder;
 import io.github.notsyncing.lightfur.dsl.DataContext;
 import io.github.notsyncing.lightfur.dsl.IQueryContext;
 import io.github.notsyncing.lightfur.dsl.Query;
@@ -23,7 +25,7 @@ public class DatabaseManager
 
     private Vertx vertx;
     private AsyncSQLClient client;
-    private JsonObject configs;
+    private LightfurConfig configs;
 
     private DatabaseManager()
     {
@@ -49,6 +51,16 @@ public class DatabaseManager
 
     /**
      * 设置到数据库的连接参数
+     * @param config 相关配置
+     */
+    public void init(LightfurConfig config)
+    {
+        configs = config;
+        client = PostgreSQLClient.createNonShared(vertx, configs.toVertxConfig());
+    }
+
+    /**
+     * 设置到数据库的连接参数
      * @param host 数据库主机名/IP地址
      * @param port 数据库端口号
      * @param username 数据库用户名
@@ -58,15 +70,16 @@ public class DatabaseManager
      */
     public void init(String host, int port, String username, String password, String databaseName, int maxPoolSize)
     {
-        configs = new JsonObject()
-                .put("host", host)
-                .put("port", port)
-                .put("username", username)
-                .put("password", password)
-                .put("database", databaseName)
-                .put("maxPoolSize", maxPoolSize);
+        LightfurConfig config = new LightfurConfigBuilder()
+                .host(host)
+                .port(port)
+                .username(username)
+                .password(password)
+                .database(databaseName)
+                .maxPoolSize(maxPoolSize)
+                .build();
 
-        client = PostgreSQLClient.createNonShared(vertx, configs);
+        init(config);
     }
 
     /**
@@ -222,7 +235,7 @@ public class DatabaseManager
      */
     public void setDatabase(String databaseName)
     {
-        configs.put("database", databaseName);
-        client = PostgreSQLClient.createNonShared(vertx, configs);
+        configs.setDatabase(databaseName);
+        client = PostgreSQLClient.createNonShared(vertx, configs.toVertxConfig());
     }
 }

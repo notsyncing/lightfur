@@ -10,6 +10,7 @@ public class DbVersionUpdateInfo
 {
     private String database;
     private Path path;
+    private String id;
     private int version;
     private JsonObject data;
 
@@ -33,6 +34,16 @@ public class DbVersionUpdateInfo
         this.path = path;
     }
 
+    public String getId()
+    {
+        return id;
+    }
+
+    public void setId(String id)
+    {
+        this.id = id;
+    }
+
     public int getVersion()
     {
         return version;
@@ -54,6 +65,7 @@ public class DbVersionUpdateInfo
 
         this.version = data.getInteger("version");
         this.database = data.getString("database");
+        this.id = data.getString("id");
     }
 
     public String getUpdateContent() throws IOException

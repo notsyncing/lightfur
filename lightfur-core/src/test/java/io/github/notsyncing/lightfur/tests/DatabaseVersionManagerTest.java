@@ -96,7 +96,8 @@ public class DatabaseVersionManagerTest
                                 String s = r2.result().getRows().get(0).getString("data");
                                 JsonObject d = new JsonObject(s);
 
-                                context.assertEquals(2, d.getInteger("version"));
+                                context.assertTrue(d.containsKey("lightfur.test"));
+                                context.assertEquals(2, d.getJsonObject("lightfur.test").getInteger("version"));
 
                                 c.close(h -> {
                                     if (h.failed()) {
@@ -141,7 +142,7 @@ public class DatabaseVersionManagerTest
 
                     String sql = "CREATE SCHEMA lightfur;\n" +
                             "CREATE TABLE lightfur.version_data (data JSONB);\n" +
-                            "INSERT INTO lightfur.version_data (data) VALUES ('{\"version\":1}');\n" +
+                            "INSERT INTO lightfur.version_data (data) VALUES ('{\"lightfur.test\":{\"version\":1}}');\n" +
                             "CREATE TABLE test (id SERIAL);";
 
                     c.query(sql, r -> {
@@ -203,7 +204,8 @@ public class DatabaseVersionManagerTest
                                 String s = r2.result().getRows().get(0).getString("data");
                                 JsonObject d = new JsonObject(s);
 
-                                context.assertEquals(2, d.getInteger("version"));
+                                context.assertTrue(d.containsKey("lightfur.test"));
+                                context.assertEquals(2, d.getJsonObject("lightfur.test").getInteger("version"));
 
                                 c.close(h -> {
                                     if (h.failed()) {

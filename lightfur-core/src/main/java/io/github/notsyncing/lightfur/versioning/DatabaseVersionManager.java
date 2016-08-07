@@ -52,20 +52,24 @@ public class DatabaseVersionManager
                 .thenCompose(r -> getCurrentDatabaseVersionData())
                 .thenCompose(r -> {
                     versionData = r;
-                    final int[] currVer = { r.getInteger("version") };
-
                     List<DbVersionUpdateInfo> updates = collectUpdateFiles(dbName);
 
                     CompletableFuture<Void> f = CompletableFuture.completedFuture(null);
 
                     for (DbVersionUpdateInfo u : updates) {
-                        if (u.getVersion() <= currVer[0]) {
+                        int currVer = -1;
+
+                        if (versionData.containsKey(u.getId())) {
+                            currVer = versionData.getJsonObject(u.getId()).getInteger("version");
+                        }
+
+                        if (u.getVersion() <= currVer) {
                             continue;
                         }
 
                         f = f.thenCompose(r2 -> {
                             try {
-                                return doUpdate(u).thenAccept(r3 -> currVer[0] = r3.getVersion());
+                                return doUpdate(u);
                             } catch (IOException e) {
                                 e.printStackTrace();
 
@@ -131,7 +135,6 @@ public class DatabaseVersionManager
     private CompletableFuture<Void> initLightfurTables()
     {
         JsonObject initData = new JsonObject();
-        initData.put("version", -1);
 
         CompletableFuture<Void> f = new CompletableFuture<>();
 
@@ -216,7 +219,7 @@ public class DatabaseVersionManager
             info.setData(data);
             info.setPath(absolutePath);
 
-            if (!info.getDatabase().equals(databaseName)) {
+            if ((!info.getDatabase().equals(databaseName)) && (!info.getDatabase().equals("$"))) {
                 return;
             }
 
@@ -228,9 +231,9 @@ public class DatabaseVersionManager
         return files;
     }
 
-    private CompletableFuture<DbVersionUpdateInfo> doUpdate(DbVersionUpdateInfo info) throws IOException
+    private CompletableFuture<Void> doUpdate(DbVersionUpdateInfo info) throws IOException
     {
-        CompletableFuture<DbVersionUpdateInfo> f = new CompletableFuture<>();
+        CompletableFuture<Void> f = new CompletableFuture<>();
 
         conn.query(info.getUpdateContent(), r -> {
             if (r.failed()) {
@@ -238,7 +241,11 @@ public class DatabaseVersionManager
                 return;
             }
 
-            versionData.put("version", info.getVersion());
+            if (!versionData.containsKey(info.getId())) {
+                versionData.put(info.getId(), new JsonObject());
+            }
+
+            versionData.getJsonObject(info.getId()).put("version", info.getVersion());
 
             conn.updateWithParams("UPDATE lightfur.version_data SET data = ?::jsonb", new JsonArray().add(versionData.toString()), r2 -> {
                 if (r2.failed()) {
@@ -246,7 +253,7 @@ public class DatabaseVersionManager
                     return;
                 }
 
-                f.complete(info);
+                f.complete(null);
             });
         });
 

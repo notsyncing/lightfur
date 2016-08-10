@@ -26,6 +26,7 @@ public class DataSession
     private DatabaseManager mgr;
     private SQLConnection conn = null;
     private CompletableFuture<Void> connFuture;
+    private boolean inTransaction = false;
 
     /**
      * 实例化一个数据操作会话
@@ -34,6 +35,11 @@ public class DataSession
     {
         mgr = DatabaseManager.getInstance();
         connFuture = mgr.getConnection().thenAccept(c -> conn = c);
+    }
+
+    public boolean isInTransaction()
+    {
+        return inTransaction;
     }
 
     private CompletableFuture<SQLConnection> ensureConnection()
@@ -52,6 +58,7 @@ public class DataSession
 
             c.setAutoCommit(autoCommit, r -> {
                 if (r.succeeded()) {
+                    inTransaction = !autoCommit;
                     f.complete(r.result());
                 } else {
                     r.cause().printStackTrace();

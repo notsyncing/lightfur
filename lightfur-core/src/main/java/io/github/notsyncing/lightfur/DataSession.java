@@ -297,10 +297,21 @@ public class DataSession
      * 结束当前数据会话，并关闭数据库连接
      * 在执行此函数之后，当前数据会话对象上的所有后续操作将失败
      * 要再次操作，请调用 {@link DataSession#DataSession()} 开始一个新的数据会话
+     * @return 指示是否关闭连接的 CompletableFuture 对象
      */
-    public void end()
+    public CompletableFuture<Void> end()
     {
-        conn.close();
+        CompletableFuture<Void> f = new CompletableFuture<>();
+
+        conn.close(r -> {
+            if (r.failed()) {
+                f.completeExceptionally(r.cause());
+            } else {
+                f.complete(r.result());
+            }
+        });
+
+        return f;
     }
 
     /**

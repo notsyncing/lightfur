@@ -37,7 +37,7 @@ public class DatabaseManager
 
     private DatabaseManager()
     {
-        cpScanner = new FastClasspathScanner();
+        cpScanner = new FastClasspathScanner("-com.github.mauricio", "-scala");
         cpScanner.matchClassesWithAnnotation(GeneratedDataContext.class,
                 c -> Query.addDataContextImplementation((Class<? extends DataContext>)c))
         .scan();

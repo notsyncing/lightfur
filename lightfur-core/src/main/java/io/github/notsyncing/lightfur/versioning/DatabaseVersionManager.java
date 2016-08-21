@@ -217,7 +217,7 @@ public class DatabaseVersionManager
             JsonObject data = new JsonObject(json);
             DbVersionUpdateInfo info = new DbVersionUpdateInfo();
             info.setData(data);
-            info.setPath(absolutePath.toPath());
+            info.setPath(absolutePath.toPath().resolve(relativePathStr));
 
             if ((!info.getDatabase().equals(databaseName)) && (!info.getDatabase().equals("$"))) {
                 return;

@@ -4,7 +4,7 @@ import io.github.notsyncing.lightfur.sql.base.SQLUtils;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.utils.StringUtils;
 
-public class TableModel extends DatabaseItemModel
+public class TableModel extends DatabaseItemModel implements Cloneable
 {
     private String name;
     private SelectQueryBuilder subQuery;
@@ -58,5 +58,11 @@ public class TableModel extends DatabaseItemModel
         }
 
         return buf.toString();
+    }
+
+    @Override
+    public TableModel clone() throws CloneNotSupportedException
+    {
+        return (TableModel) super.clone();
     }
 }

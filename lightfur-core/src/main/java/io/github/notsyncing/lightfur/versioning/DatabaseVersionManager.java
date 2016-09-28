@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+// TODO: Add hooks during version update
+
 public class DatabaseVersionManager
 {
     private DatabaseManager db;

@@ -114,6 +114,11 @@ public class ExpressionBuilder implements SQLPart
         return operator("=");
     }
 
+    public ExpressionBuilder eqNull()
+    {
+        return is().literal("NULL");
+    }
+
     public ExpressionBuilder gt()
     {
         return operator(">");
@@ -139,6 +144,11 @@ public class ExpressionBuilder implements SQLPart
         return operator("<>");
     }
 
+    public ExpressionBuilder neNull()
+    {
+        return is().not().literal("NULL");
+    }
+
     public ExpressionBuilder in()
     {
         return operator("IN");
@@ -152,6 +162,11 @@ public class ExpressionBuilder implements SQLPart
     public ExpressionBuilder like()
     {
         return operator("LIKE");
+    }
+
+    public ExpressionBuilder is()
+    {
+        return operator("IS");
     }
 
     public ExpressionBuilder namedParameterReference(String name)

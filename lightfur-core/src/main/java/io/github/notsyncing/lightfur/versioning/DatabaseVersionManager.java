@@ -1,22 +1,20 @@
 package io.github.notsyncing.lightfur.versioning;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import io.github.lukehutch.fastclasspathscanner.matchprocessor.FileMatchProcessorWithContext;
 import io.github.notsyncing.lightfur.DatabaseManager;
-import io.github.notsyncing.lightfur.utils.FutureUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import static java.util.stream.Collectors.*;
 
 // TODO: Add hooks during version update
 
@@ -55,32 +53,54 @@ public class DatabaseVersionManager
                 .thenCompose(r -> {
                     versionData = r;
                     List<DbVersionUpdateInfo> updates = collectUpdateFiles(dbName);
+                    Map<String, List<DbVersionUpdateInfo>> updateMap = updates.stream()
+                            .collect(groupingBy(DbVersionUpdateInfo::getId, mapping(u -> u, toList())));
 
-                    CompletableFuture<Void> f = CompletableFuture.completedFuture(null);
+                    final CompletableFuture<Void>[] co = new CompletableFuture[]{CompletableFuture.completedFuture(null)};
 
-                    for (DbVersionUpdateInfo u : updates) {
-                        int currVer = -1;
+                    updateMap.forEach((id, list) -> {
+                        co[0] = co[0].thenCompose(r2 -> {
+                            DbVersionUpdateInfo maxFullVersion = list.stream()
+                                    .filter(DbVersionUpdateInfo::isFullVersion)
+                                    .max((u1, u2) -> u1.getVersion() - u2.getVersion())
+                                    .orElse(null);
 
-                        if (versionData.containsKey(u.getId())) {
-                            currVer = versionData.getJsonObject(u.getId()).getInteger("version");
-                        }
+                            final int[] currVersion = {-1};
 
-                        if (u.getVersion() <= currVer) {
-                            continue;
-                        }
-
-                        f = f.thenCompose(r2 -> {
-                            try {
-                                return doUpdate(u);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-
-                                return FutureUtils.failed(e);
+                            if (versionData.containsKey(id)) {
+                                currVersion[0] = versionData.getJsonObject(id).getInteger("version");
                             }
-                        });
-                    }
 
-                    return f;
+                            final CompletableFuture<Void>[] c = new CompletableFuture[]{null};
+
+                            if ((currVersion[0] < 0) && (maxFullVersion != null)) {
+                                c[0] = doUpdate(maxFullVersion).thenAccept(x -> currVersion[0] = maxFullVersion.getVersion());
+                            } else {
+                                c[0] = CompletableFuture.completedFuture(null);
+                            }
+
+                            c[0] = c[0].thenCompose(x -> {
+                                final CompletableFuture<Void>[] f = new CompletableFuture[]{CompletableFuture.completedFuture(null)};
+
+                                list.stream()
+                                        .filter(u -> !u.isFullVersion())
+                                        .sorted((u1, u2) -> u1.getVersion() - u2.getVersion())
+                                        .forEach(u -> {
+                                            if (u.getVersion() <= currVersion[0]) {
+                                                return;
+                                            }
+
+                                            f[0] = f[0].thenCompose(x2 -> doUpdate(u));
+                                        });
+
+                                return f[0];
+                            });
+
+                            return c[0];
+                        });
+                    });
+
+                    return co[0];
                 })
                 .thenCompose(r -> {
                     CompletableFuture<Void> f = new CompletableFuture<>();
@@ -228,36 +248,38 @@ public class DatabaseVersionManager
             files.add(info);
         }).scan();
 
-        files.sort((c1, c2) -> c1.getVersion() - c2.getVersion());
-
         return files;
     }
 
-    private CompletableFuture<Void> doUpdate(DbVersionUpdateInfo info) throws IOException
+    private CompletableFuture<Void> doUpdate(DbVersionUpdateInfo info)
     {
         CompletableFuture<Void> f = new CompletableFuture<>();
 
-        conn.query(info.getUpdateContent(), r -> {
-            if (r.failed()) {
-                f.completeExceptionally(r.cause());
-                return;
-            }
-
-            if (!versionData.containsKey(info.getId())) {
-                versionData.put(info.getId(), new JsonObject());
-            }
-
-            versionData.getJsonObject(info.getId()).put("version", info.getVersion());
-
-            conn.updateWithParams("UPDATE lightfur.version_data SET data = ?::jsonb", new JsonArray().add(versionData.toString()), r2 -> {
-                if (r2.failed()) {
-                    f.completeExceptionally(r2.cause());
+        try {
+            conn.query(info.getUpdateContent(), r -> {
+                if (r.failed()) {
+                    f.completeExceptionally(r.cause());
                     return;
                 }
 
-                f.complete(null);
+                if (!versionData.containsKey(info.getId())) {
+                    versionData.put(info.getId(), new JsonObject());
+                }
+
+                versionData.getJsonObject(info.getId()).put("version", info.getVersion());
+
+                conn.updateWithParams("UPDATE lightfur.version_data SET data = ?::jsonb", new JsonArray().add(versionData.toString()), r2 -> {
+                    if (r2.failed()) {
+                        f.completeExceptionally(r2.cause());
+                        return;
+                    }
+
+                    f.complete(null);
+                });
             });
-        });
+        } catch (IOException e) {
+            f.completeExceptionally(e);
+        }
 
         return f;
     }

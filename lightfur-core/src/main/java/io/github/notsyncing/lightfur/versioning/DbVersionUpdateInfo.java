@@ -12,6 +12,7 @@ public class DbVersionUpdateInfo
     private Path path;
     private String id;
     private int version;
+    private boolean fullVersion;
     private JsonObject data;
 
     public String getDatabase()
@@ -54,6 +55,16 @@ public class DbVersionUpdateInfo
         this.version = version;
     }
 
+    public boolean isFullVersion()
+    {
+        return fullVersion;
+    }
+
+    public void setFullVersion(boolean fullVersion)
+    {
+        this.fullVersion = fullVersion;
+    }
+
     public JsonObject getData()
     {
         return data;
@@ -66,6 +77,7 @@ public class DbVersionUpdateInfo
         this.version = data.getInteger("version");
         this.database = data.getString("database");
         this.id = data.getString("id");
+        this.fullVersion = data.getBoolean("full_version", false);
     }
 
     public String getUpdateContent() throws IOException

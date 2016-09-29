@@ -23,6 +23,42 @@ public class DatabaseVersionManagerTest
     private DatabaseManager db;
     private static final String TEST_DB = "lightfur_upgrade_test";
 
+    private LightfurConfig config = new LightfurConfigBuilder()
+            .database("postgres")
+            .username("postgres")
+            .password(null)
+            .host("localhost")
+            .port(5432)
+            .maxPoolSize(10)
+            .databaseVersioning(true)
+            .build();
+
+    private LightfurConfig configTest = new LightfurConfigBuilder()
+            .database(TEST_DB)
+            .username("postgres")
+            .password(null)
+            .host("localhost")
+            .port(5432)
+            .maxPoolSize(10)
+            .databaseVersioning(true)
+            .build();
+
+    @Before
+    public void setUp(TestContext context)
+    {
+        Async async = context.async();
+
+        db = DatabaseManager.getInstance();
+
+        db.init(config).thenCompose(r -> db.dropDatabase(TEST_DB, true))
+                .thenCompose(r -> db.close())
+                .thenAccept(r -> async.complete())
+                .exceptionally(ex -> {
+                    context.fail((Throwable)ex);
+                    return null;
+                });
+    }
+
     @After
     public void tearDown(TestContext context)
     {
@@ -33,7 +69,6 @@ public class DatabaseVersionManagerTest
                 .thenAccept(r -> async.complete())
                 .exceptionally(ex -> {
                     context.fail((Throwable)ex);
-                    async.complete();
                     return null;
                 });
     }
@@ -43,18 +78,9 @@ public class DatabaseVersionManagerTest
     {
         Async async = context.async();
 
-        LightfurConfig config = new LightfurConfigBuilder()
-                .database(TEST_DB)
-                .username("postgres")
-                .password(null)
-                .host("localhost")
-                .port(5432)
-                .maxPoolSize(10)
-                .databaseVersioning(true)
-                .build();
-
         db = DatabaseManager.getInstance();
-        db.init(config)
+
+        db.init(configTest)
                 .thenCompose(r -> db.getConnection())
                 .thenAccept(c -> {
                     c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
@@ -121,16 +147,6 @@ public class DatabaseVersionManagerTest
     public void testUpdateDatabaseFromVersion(TestContext context)
     {
         Async async = context.async();
-
-        LightfurConfig config = new LightfurConfigBuilder()
-                .database("postgres")
-                .username("postgres")
-                .password(null)
-                .host("localhost")
-                .port(5432)
-                .maxPoolSize(10)
-                .databaseVersioning(false)
-                .build();
 
         db = DatabaseManager.getInstance();
 
@@ -206,6 +222,76 @@ public class DatabaseVersionManagerTest
 
                                 context.assertTrue(d.containsKey("lightfur.test"));
                                 context.assertEquals(2, d.getJsonObject("lightfur.test").getInteger("version"));
+
+                                c.close(h -> {
+                                    if (h.failed()) {
+                                        context.fail(h.cause());
+                                    }
+
+                                    async.complete();
+                                });
+                            });
+                        });
+                    });
+                })
+                .exceptionally(ex -> {
+                    context.fail(ex);
+                    async.complete();
+                    return null;
+                });
+    }
+
+    @Test
+    public void testUpdateDatabaseFromBaseWithFullVersion(TestContext context)
+    {
+        Async async = context.async();
+
+        db = DatabaseManager.getInstance();
+
+        db.init(configTest)
+                .thenCompose(r -> db.getConnection())
+                .thenAccept(c -> {
+                    c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
+                        c.close();
+
+                        if (result.failed()) {
+                            context.fail(result.cause());
+                            return;
+                        }
+
+                        ResultSet data = result.result();
+                        context.assertEquals(1, data.getNumRows());
+                        context.assertEquals(1, data.getResults().get(0).getInteger(0));
+
+                        c.query("SELECT column_name FROM information_schema.columns WHERE table_name = 'test_full' AND table_catalog = '" + TEST_DB + "'", r -> {
+                            if (r.failed()) {
+                                context.fail(r.cause());
+                                return;
+                            }
+
+                            ResultSet data2 = r.result();
+                            List<String> columns = data2.getRows().stream()
+                                    .map(o -> o.getString("column_name"))
+                                    .collect(Collectors.toList());
+
+                            context.assertEquals(5, columns.size());
+                            context.assertTrue(columns.contains("id"));
+                            context.assertTrue(columns.contains("name"));
+                            context.assertTrue(columns.contains("flag"));
+                            context.assertTrue(columns.contains("last_date"));
+                            context.assertTrue(columns.contains("details"));
+
+                            c.query("SELECT data::text FROM lightfur.version_data", r2 -> {
+                                if (r2.failed()) {
+                                    context.fail(r2.cause());
+                                    return;
+                                }
+
+                                String s = r2.result().getRows().get(0).getString("data");
+                                JsonObject d = new JsonObject(s);
+
+                                context.assertTrue(d.containsKey("lightfur.test_full"));
+                                context.assertEquals(2, d.getJsonObject("lightfur.test_full").getInteger("version"));
 
                                 c.close(h -> {
                                     if (h.failed()) {

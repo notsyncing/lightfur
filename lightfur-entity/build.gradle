@@ -72,7 +72,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId 'io.github.notsyncing.lightfur'
-            artifactId 'lightfur-core'
+            artifactId 'lightfur-entity'
             version ver
             from components.java
 

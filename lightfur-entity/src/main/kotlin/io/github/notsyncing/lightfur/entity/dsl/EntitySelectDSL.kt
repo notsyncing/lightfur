@@ -6,13 +6,9 @@ import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
 import io.github.notsyncing.lightfur.sql.models.TableModel
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.KProperty0
 
 // TODO: Implement aggregate functions and case-when clause
 // TODO: Implement accessing of sub-query fields (possible through EntitySelectDSL::finalModel)
-// TODO: Implement complex condition expression e.g. r.F(r::flag) + 1 > r.F(r::id)
 
 class EntitySelectDSL(private var finalModel: EntityModel? = null) : EntityBaseDSL() {
     private var finalTableModel: TableModel? = null

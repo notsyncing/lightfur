@@ -19,7 +19,7 @@ dependencies {
     compile group: 'com.squareup', name: 'javapoet', version: '1.7.0'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile 'io.vertx:vertx-unit:3.3.2'
+    testCompile 'io.vertx:vertx-unit:3.3.3'
     testCompile 'org.slf4j:slf4j-api:1.7.21'
     testCompile 'com.google.testing.compile:compile-testing:0.8'
     testCompile group: 'commons-io', name: 'commons-io', version: '2.5'

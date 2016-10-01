@@ -62,6 +62,15 @@ public class DataMapperTest
         public int b;
     }
 
+    public static class TestLongObject
+    {
+        @Column("id")
+        public long id;
+
+        @Column("list")
+        public long[] list;
+    }
+
     @Test
     public void testMap() throws InstantiationException, IllegalAccessException, ParseException
     {
@@ -104,5 +113,22 @@ public class DataMapperTest
         assertEquals(2, o.complexArray[1].b);
 
         assertTrue(new BigDecimal("92375947293472934923794729345345345433.2345345345").equals(o.longNumber));
+    }
+
+    @Test
+    public void testMapLong() throws InstantiationException, IllegalAccessException
+    {
+        ResultSet r = new ResultSet();
+        r.setColumnNames(Arrays.asList("id", "list"));
+
+        JsonArray arr = new JsonArray();
+        arr.add(19839L);
+        arr.add("{78998,325345,3678346}");
+        r.setResults(Arrays.asList(arr));
+
+        TestLongObject o = DataMapper.map(TestLongObject.class, r);
+        assertNotNull(o);
+        assertEquals(19839L, o.id);
+        assertArrayEquals(new long[] { 78998L, 325345L, 3678346L }, o.list);
     }
 }

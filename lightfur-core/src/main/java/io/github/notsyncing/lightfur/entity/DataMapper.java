@@ -71,11 +71,11 @@ public class DataMapper
         }
 
         if ((clazz.equals(long.class)) || (clazz.equals(Long.class))) {
-            return Byte.parseByte(value);
+            return Long.parseLong(value);
         }
 
         if ((clazz.equals(char.class)) || (clazz.equals(Char.class))) {
-            return Byte.parseByte(value);
+            return value.charAt(0);
         }
 
         return value;

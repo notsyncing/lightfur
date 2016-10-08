@@ -7,9 +7,7 @@ object EntityDSL {
 
     fun insert(insertModel: EntityModel) = EntityInsertDSL(insertModel)
 
-    fun update() {
-
-    }
+    fun update(updateModel: EntityModel) = EntityUpdateDSL(updateModel)
 
     fun delete() {
 

@@ -28,6 +28,17 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
         return this;
     }
 
+    public UpdateQueryBuilder set(ColumnModel c, Object v)
+    {
+        if (v instanceof SQLPart) {
+            return set(c, (SQLPart)v);
+        }
+
+        setColumns.put(c, new ExpressionBuilder().literal(v.toString()));
+
+        return this;
+    }
+
     public UpdateQueryBuilder from(TableModel t)
     {
         fromTables.add(t);

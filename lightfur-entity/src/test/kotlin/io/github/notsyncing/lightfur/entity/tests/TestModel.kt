@@ -33,6 +33,7 @@ fun test() {
             .from()
             .where { r.F(r::flag) gt 3 }
             .orderBy(r.F(r::flag) desc true, r.F(r::name) desc false)
+            .having { sum(r.F(r::id)) gt 2 or count(r.F(r::id)) lt 4 }
             .skip(3)
             .take(10)
 

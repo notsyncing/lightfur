@@ -329,3 +329,8 @@ infix fun ExpressionBuilder.eq(next: EntityFieldInfo): ExpressionBuilder {
 infix fun ExpressionBuilder.eq(next: Any): ExpressionBuilder {
     return this.eq().literal(next.toString())
 }
+
+fun ExpressionBuilder.field(f: EntityFieldInfo): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(f)
+    return this.column(column)
+}

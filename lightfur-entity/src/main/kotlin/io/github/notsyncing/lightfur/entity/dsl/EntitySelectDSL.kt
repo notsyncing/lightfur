@@ -3,6 +3,7 @@ package io.github.notsyncing.lightfur.entity.dsl
 import io.github.notsyncing.lightfur.entity.EntityFieldInfo
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
+import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
 
@@ -97,6 +98,21 @@ class EntitySelectDSL(var resultModel: EntityModel) : EntityBaseDSL() {
 
     fun take(count: Int): EntitySelectDSL {
         builder.limit(count)
+
+        return this
+    }
+
+    fun map(sourceColumn: EntityFieldInfo, asColumn: EntityFieldInfo): EntitySelectDSL {
+        val sc = getColumnModelFromEntityFieldInfo(sourceColumn)
+        val asc = getColumnModelFromEntityFieldInfo(asColumn)
+        builder.selectAs(sc, asc)
+
+        return this
+    }
+
+    fun map(sourceExpr: SQLPart, asColumn: EntityFieldInfo): EntitySelectDSL {
+        val asc = getColumnModelFromEntityFieldInfo(asColumn)
+        builder.selectAs(sourceExpr, asc)
 
         return this
     }

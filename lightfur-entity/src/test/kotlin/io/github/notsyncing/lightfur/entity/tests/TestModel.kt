@@ -39,6 +39,7 @@ fun test() {
             .take(10)
 
     EntityDSL.select(r)
-        .from(EntityDSL.select(r2).from())
-        .where { r2.F(r2::id) gt 4 }
+            .map(sum(r.F(r2::id)), r.F(r::id))
+            .from(EntityDSL.select(r2).from())
+            .where { r2.F(r2::id) gt 4 }
 }

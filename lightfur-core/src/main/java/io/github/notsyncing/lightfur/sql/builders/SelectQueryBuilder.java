@@ -1,13 +1,14 @@
 package io.github.notsyncing.lightfur.sql.builders;
 
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
-import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
+import io.github.notsyncing.lightfur.sql.base.SQLUtils;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.JoinClauseInfo;
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +18,7 @@ public class SelectQueryBuilder implements SQLPart
 {
     private List<TableModel> fromTables = new ArrayList<>();
     private List<SQLPart> selectColumns = new ArrayList<>();
+    private List<AbstractMap.SimpleEntry<SQLPart, ColumnModel>> selectAsColumns = new ArrayList<>();
     private List<JoinClauseInfo> joinClauses = new ArrayList<>();
     private ExpressionBuilder whereConditions = new ExpressionBuilder();
     private List<SQLPart> groupColumns = new ArrayList<>();
@@ -77,6 +79,23 @@ public class SelectQueryBuilder implements SQLPart
         }
 
         selectColumns.addAll(columns);
+        return this;
+    }
+
+    public SelectQueryBuilder selectAs(SQLPart source, ColumnModel asColumn)
+    {
+        selectColumns.removeIf(p -> {
+            if (!(p instanceof ColumnModel)) {
+                return false;
+            }
+
+            ColumnModel c = (ColumnModel)p;
+
+            return (c.getModelType().equals(asColumn.getModelType())) && (c.getFieldName().equals(asColumn.getFieldName()));
+        });
+
+        selectAsColumns.add(new AbstractMap.SimpleEntry<>(source, asColumn));
+
         return this;
     }
 
@@ -182,6 +201,14 @@ public class SelectQueryBuilder implements SQLPart
         buf.append(selectColumns.stream()
                 .map(SQLPart::toString)
                 .collect(Collectors.joining(", ")));
+
+        if (selectAsColumns.size() > 0) {
+            buf.append(", ");
+
+            buf.append(selectAsColumns.stream()
+                    .map(p -> "(" + p.getKey().toString() + ") AS " + SQLUtils.escapeName(p.getValue().getColumn()))
+                    .collect(Collectors.joining(", ")));
+        }
 
         if (fromTables.size() > 0) {
             buf.append("\nFROM ");

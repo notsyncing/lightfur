@@ -7,7 +7,7 @@ import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
 
-class EntitySelectDSL(var resultModel: EntityModel) : EntityBaseDSL() {
+class EntitySelectDSL(val resultModel: EntityModel) : EntityBaseDSL() {
     private val builder = SelectQueryBuilder()
 
     fun from(tableModel: EntityModel? = null): EntitySelectDSL {

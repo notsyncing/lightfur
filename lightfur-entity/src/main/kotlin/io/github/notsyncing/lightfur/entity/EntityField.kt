@@ -3,8 +3,9 @@ package io.github.notsyncing.lightfur.entity
 import io.github.notsyncing.lightfur.entity.utils.EntityFieldUtils
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty0
 
-class EntityField<T>(private val property: KProperty<T>) {
+class EntityField<T>(private val property: KProperty0<T>) {
     private var data: T? = null
 
     companion object {
@@ -24,7 +25,7 @@ class EntityField<T>(private val property: KProperty<T>) {
             return
         }
 
-        thisRef.changedDataMap[property.name] = value
+        thisRef.changedDataMap[property as KProperty0<*>] = value
         data = value
     }
 }

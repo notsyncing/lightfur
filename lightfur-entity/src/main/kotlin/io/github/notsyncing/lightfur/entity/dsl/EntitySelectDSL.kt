@@ -6,8 +6,6 @@ import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
 
-// TODO: Implement SQL functions and case-when clause
-
 class EntitySelectDSL(var resultModel: EntityModel) : EntityBaseDSL() {
     private val builder = SelectQueryBuilder()
 

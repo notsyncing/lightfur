@@ -2,6 +2,8 @@ package io.github.notsyncing.lightfur.entity
 
 import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
+import io.github.notsyncing.lightfur.sql.base.SQLPart
+import io.github.notsyncing.lightfur.sql.builders.CaseWhenBuilder
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
 
 infix fun EntityFieldInfo.eq(value: EntityFieldInfo): ExpressionBuilder {
@@ -13,6 +15,17 @@ infix fun EntityFieldInfo.eq(value: EntityFieldInfo): ExpressionBuilder {
             .column(column1)
             .eq()
             .column(column2)
+            .endGroup()
+}
+
+infix fun EntityFieldInfo.eq(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .column(column)
+            .eq()
+            .expr(value)
             .endGroup()
 }
 
@@ -44,6 +57,17 @@ infix fun EntityFieldInfo.neq(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
+infix fun EntityFieldInfo.neq(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .column(column)
+            .ne()
+            .expr(value)
+            .endGroup()
+}
+
 infix fun EntityFieldInfo.neq(value: Any?): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
 
@@ -72,6 +96,17 @@ infix fun EntityFieldInfo.gt(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
+infix fun EntityFieldInfo.gt(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .column(column)
+            .gt()
+            .expr(value)
+            .endGroup()
+}
+
 infix fun EntityFieldInfo.gt(value: Any): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
 
@@ -94,6 +129,18 @@ infix fun EntityFieldInfo.lt(value: EntityFieldInfo): ExpressionBuilder {
             .column(column2)
             .endGroup()
 }
+
+infix fun EntityFieldInfo.lt(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .column(column)
+            .lt()
+            .expr(value)
+            .endGroup()
+}
+
 
 infix fun EntityFieldInfo.lt(value: Any): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
@@ -118,6 +165,17 @@ infix fun EntityFieldInfo.gte(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
+infix fun EntityFieldInfo.gte(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .column(column)
+            .gte()
+            .expr(value)
+            .endGroup()
+}
+
 infix fun EntityFieldInfo.gte(value: Any): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
 
@@ -138,6 +196,17 @@ infix fun EntityFieldInfo.lte(value: EntityFieldInfo): ExpressionBuilder {
             .column(column1)
             .lte()
             .column(column2)
+            .endGroup()
+}
+
+infix fun EntityFieldInfo.lte(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .column(column)
+            .lte()
+            .expr(value)
             .endGroup()
 }
 
@@ -180,6 +249,17 @@ operator fun EntityFieldInfo.plus(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
+operator fun EntityFieldInfo.plus(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .column(column)
+            .operator("+")
+            .expr(value)
+            .endGroup()
+}
+
 operator fun EntityFieldInfo.plus(value: Any): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
 
@@ -200,6 +280,17 @@ operator fun EntityFieldInfo.minus(value: EntityFieldInfo): ExpressionBuilder {
             .column(column1)
             .operator("-")
             .column(column2)
+            .endGroup()
+}
+
+operator fun EntityFieldInfo.minus(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .column(column)
+            .operator("-")
+            .expr(value)
             .endGroup()
 }
 
@@ -226,6 +317,17 @@ operator fun EntityFieldInfo.times(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
+operator fun EntityFieldInfo.times(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .column(column)
+            .operator("*")
+            .expr(value)
+            .endGroup()
+}
+
 operator fun EntityFieldInfo.times(value: Any): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
 
@@ -249,6 +351,17 @@ operator fun EntityFieldInfo.div(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
+operator fun EntityFieldInfo.div(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .column(column)
+            .operator("/")
+            .expr(value)
+            .endGroup()
+}
+
 operator fun EntityFieldInfo.div(value: Any): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
 
@@ -260,7 +373,7 @@ operator fun EntityFieldInfo.div(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun ExpressionBuilder.gt(next: ExpressionBuilder): ExpressionBuilder {
+infix fun ExpressionBuilder.gt(next: SQLPart): ExpressionBuilder {
     return this.gt().expr(next)
 }
 
@@ -274,7 +387,7 @@ infix fun ExpressionBuilder.gt(next: Any): ExpressionBuilder {
     return this.gt().literal(next.toString())
 }
 
-infix fun ExpressionBuilder.gte(next: ExpressionBuilder): ExpressionBuilder {
+infix fun ExpressionBuilder.gte(next: SQLPart): ExpressionBuilder {
     return this.gte().expr(next)
 }
 
@@ -288,7 +401,7 @@ infix fun ExpressionBuilder.gte(next: Any): ExpressionBuilder {
     return this.gte().literal(next.toString())
 }
 
-infix fun ExpressionBuilder.lt(next: ExpressionBuilder): ExpressionBuilder {
+infix fun ExpressionBuilder.lt(next: SQLPart): ExpressionBuilder {
     return this.lt().expr(next)
 }
 
@@ -302,7 +415,7 @@ infix fun ExpressionBuilder.lt(next: Any): ExpressionBuilder {
     return this.lt().literal(next.toString())
 }
 
-infix fun ExpressionBuilder.lte(next: ExpressionBuilder): ExpressionBuilder {
+infix fun ExpressionBuilder.lte(next: SQLPart): ExpressionBuilder {
     return this.lte().expr(next)
 }
 
@@ -316,7 +429,7 @@ infix fun ExpressionBuilder.lte(next: Any): ExpressionBuilder {
     return this.lte().literal(next.toString())
 }
 
-infix fun ExpressionBuilder.eq(next: ExpressionBuilder): ExpressionBuilder {
+infix fun ExpressionBuilder.eq(next: SQLPart): ExpressionBuilder {
     return this.eq().expr(next)
 }
 
@@ -333,4 +446,73 @@ infix fun ExpressionBuilder.eq(next: Any): ExpressionBuilder {
 fun ExpressionBuilder.field(f: EntityFieldInfo): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(f)
     return this.column(column)
+}
+
+class case {
+    private val builder = CaseWhenBuilder()
+
+    fun on(expr: ExpressionBuilder): case {
+        builder.`when`(expr)
+        return this
+    }
+
+    fun then(p: SQLPart): case {
+        builder.then(p)
+        return this
+    }
+
+    fun then(l: Int): case {
+        builder.then(ExpressionBuilder().literal(l))
+        return this
+    }
+
+    fun then(l: Long): case {
+        builder.then(ExpressionBuilder().literal(l))
+        return this
+    }
+
+    fun then(l: Boolean): case {
+        builder.then(ExpressionBuilder().literal(l))
+        return this
+    }
+
+    fun then(l: String): case {
+        builder.then(ExpressionBuilder().literal(l))
+        return this
+    }
+
+    fun then(l: Double): case {
+        builder.then(ExpressionBuilder().literal(l))
+        return this
+    }
+
+    fun otherwise(p: SQLPart): CaseWhenBuilder {
+        builder.elseThen(p)
+        return builder
+    }
+
+    fun otherwise(p: Int): CaseWhenBuilder {
+        builder.elseThen(ExpressionBuilder().literal(p))
+        return builder
+    }
+
+    fun otherwise(p: Long): CaseWhenBuilder {
+        builder.elseThen(ExpressionBuilder().literal(p))
+        return builder
+    }
+
+    fun otherwise(p: Boolean): CaseWhenBuilder {
+        builder.elseThen(ExpressionBuilder().literal(p))
+        return builder
+    }
+
+    fun otherwise(p: String): CaseWhenBuilder {
+        builder.elseThen(ExpressionBuilder().literal(p))
+        return builder
+    }
+
+    fun otherwise(p: Double): CaseWhenBuilder {
+        builder.elseThen(ExpressionBuilder().literal(p))
+        return builder
+    }
 }

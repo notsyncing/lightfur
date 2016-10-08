@@ -5,34 +5,17 @@ import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
-import io.github.notsyncing.lightfur.sql.models.TableModel
 
-// TODO: Implement aggregate functions and case-when clause
-// TODO: Implement accessing of sub-query fields (possible through EntitySelectDSL::finalModel)
+// TODO: Implement SQL functions and case-when clause
 
-class EntitySelectDSL(private var finalModel: EntityModel? = null) : EntityBaseDSL() {
-    private var finalTableModel: TableModel? = null
+class EntitySelectDSL(var resultModel: EntityModel) : EntityBaseDSL() {
     private val builder = SelectQueryBuilder()
 
-    init {
-        if (finalModel != null) {
-            finalTableModel = getTableModelFromEntityModel(finalModel!!)
-        }
-    }
-
-    fun from(model: EntityModel? = null): EntitySelectDSL {
-        var m = model
-
-        if (finalModel == null) {
-            finalModel = model
-        }
-
-        if (model == null) {
-            m = finalModel
-        }
+    fun from(tableModel: EntityModel? = null): EntitySelectDSL {
+        var m = tableModel
 
         if (m == null) {
-            throw RuntimeException("You must at least specify one model in either select() or from()!")
+            m = resultModel
         }
 
         builder.from(getTableModelFromEntityModel(m))
@@ -42,10 +25,6 @@ class EntitySelectDSL(private var finalModel: EntityModel? = null) : EntityBaseD
 
     fun from(subQuery: EntitySelectDSL): EntitySelectDSL {
         val m = getTableModelFromSubQuery(subQuery)
-
-        if (finalTableModel == null) {
-            finalTableModel = m
-        }
 
         builder.from(m)
 

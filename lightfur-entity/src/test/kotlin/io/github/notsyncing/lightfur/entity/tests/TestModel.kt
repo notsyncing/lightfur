@@ -11,7 +11,15 @@ class TestModel : EntityModel(table = "test_table") {
     var flag: Int by field(this::flag)
 }
 
+class TestModel2 : EntityModel(table = "test_table2") {
+    var id: Int by field(this::id, primaryKey = true)
+
+    var details: String by field(this::details)
+}
+
 val r = TestModel()
+
+val r2 = TestModel2()
 
 fun test() {
     r.F(r::flag) eq r.F(r::name)
@@ -27,4 +35,8 @@ fun test() {
             .orderBy(r.F(r::flag) desc true, r.F(r::name) desc false)
             .skip(3)
             .take(10)
+
+    EntityDSL.select(r)
+        .from(EntityDSL.select(r2).from())
+        .where { r2.F(r2::id) gt 4 }
 }

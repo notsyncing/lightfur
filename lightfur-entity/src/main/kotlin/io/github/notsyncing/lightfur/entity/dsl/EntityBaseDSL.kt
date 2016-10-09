@@ -8,6 +8,8 @@ import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
 
 abstract class EntityBaseDSL {
+    abstract protected val builder: SQLPart
+
     companion object {
         @JvmStatic
         protected fun getTableModelFromEntityModel(m: EntityModel): TableModel {
@@ -44,5 +46,11 @@ abstract class EntityBaseDSL {
         }
     }
 
-    abstract fun toSQLPart(): SQLPart
+    fun execute() {
+
+    }
+
+    open fun toSQLPart() = builder
+
+    open fun toSQL() = builder.toString()
 }

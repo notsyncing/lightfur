@@ -7,7 +7,7 @@ import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 
 class EntityUpdateDSL(val updateModel: EntityModel) : EntityBaseDSL() {
-    private val builder = UpdateQueryBuilder()
+    override val builder = UpdateQueryBuilder()
 
     init {
         builder.on(getTableModelFromEntityModel(updateModel))
@@ -38,6 +38,4 @@ class EntityUpdateDSL(val updateModel: EntityModel) : EntityBaseDSL() {
 
         return this
     }
-
-    override fun toSQLPart() = builder
 }

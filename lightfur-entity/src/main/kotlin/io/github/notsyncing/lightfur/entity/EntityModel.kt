@@ -66,11 +66,7 @@ abstract class EntityModel(val database: String? = null,
         return EntityDSL.insert(this).values()
     }
 
-    fun update() {
+    fun update() = EntityDSL.update(this)
 
-    }
-
-    fun delete() {
-
-    }
+    fun delete() = EntityDSL.delete(this)
 }

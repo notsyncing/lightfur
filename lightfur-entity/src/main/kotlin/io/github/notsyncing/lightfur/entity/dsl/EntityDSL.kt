@@ -9,7 +9,5 @@ object EntityDSL {
 
     fun update(updateModel: EntityModel) = EntityUpdateDSL(updateModel)
 
-    fun delete() {
-
-    }
+    fun delete(deleteModel: EntityModel) = EntityDeleteDSL(deleteModel)
 }

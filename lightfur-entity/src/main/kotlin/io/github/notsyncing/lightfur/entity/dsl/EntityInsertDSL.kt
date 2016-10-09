@@ -6,7 +6,7 @@ import io.github.notsyncing.lightfur.sql.builders.InsertQueryBuilder
 // TODO: Write primary key back to insertModel after insertion
 
 class EntityInsertDSL(val insertModel: EntityModel) : EntityBaseDSL() {
-    private val builder = InsertQueryBuilder()
+    override val builder = InsertQueryBuilder()
 
     init {
         val tableModel = getTableModelFromEntityModel(insertModel)
@@ -27,6 +27,4 @@ class EntityInsertDSL(val insertModel: EntityModel) : EntityBaseDSL() {
 
         return this
     }
-
-    override fun toSQLPart() = builder
 }

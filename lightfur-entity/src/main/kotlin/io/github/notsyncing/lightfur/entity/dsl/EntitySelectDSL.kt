@@ -10,6 +10,10 @@ import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
 class EntitySelectDSL(val resultModel: EntityModel) : EntityBaseDSL() {
     override val builder = SelectQueryBuilder()
 
+    init {
+        resultModel.fieldInfo.forEach { builder.select(getColumnModelFromEntityFieldInfo(it.value)) }
+    }
+
     fun from(tableModel: EntityModel? = null): EntitySelectDSL {
         var m = tableModel
 

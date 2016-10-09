@@ -6,6 +6,7 @@ import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
+import kotlin.reflect.KProperty0
 
 class EntitySelectDSL(val resultModel: EntityModel) : EntityBaseDSL() {
     override val builder = SelectQueryBuilder()
@@ -19,6 +20,8 @@ class EntitySelectDSL(val resultModel: EntityModel) : EntityBaseDSL() {
 
         if (m == null) {
             m = resultModel
+        } else {
+            builder.selectColumns.clear()
         }
 
         builder.from(getTableModelFromEntityModel(m))
@@ -29,6 +32,7 @@ class EntitySelectDSL(val resultModel: EntityModel) : EntityBaseDSL() {
     fun from(subQuery: EntitySelectDSL): EntitySelectDSL {
         val m = getTableModelFromSubQuery(subQuery)
 
+        builder.selectColumns.clear()
         builder.from(m)
 
         return this
@@ -114,10 +118,18 @@ class EntitySelectDSL(val resultModel: EntityModel) : EntityBaseDSL() {
         return this
     }
 
+    fun map(sourceColumn: EntityFieldInfo, asColumn: KProperty0<*>): EntitySelectDSL {
+        return map(sourceColumn, resultModel.fieldInfo[asColumn]!!)
+    }
+
     fun map(sourceExpr: SQLPart, asColumn: EntityFieldInfo): EntitySelectDSL {
         val asc = getColumnModelFromEntityFieldInfo(asColumn)
         builder.selectAs(sourceExpr, asc)
 
         return this
+    }
+
+    fun map(sourceExpr: SQLPart, asColumn: KProperty0<*>): EntitySelectDSL {
+        return map(sourceExpr, resultModel.fieldInfo[asColumn]!!)
     }
 }

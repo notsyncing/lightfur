@@ -203,7 +203,9 @@ public class SelectQueryBuilder implements SQLPart
                 .collect(Collectors.joining(", ")));
 
         if (selectAsColumns.size() > 0) {
-            buf.append(", ");
+            if (selectColumns.size() > 0) {
+                buf.append(", ");
+            }
 
             buf.append(selectAsColumns.stream()
                     .map(p -> "(" + p.getKey().toString() + ") AS " + SQLUtils.escapeName(p.getValue().getColumn()))

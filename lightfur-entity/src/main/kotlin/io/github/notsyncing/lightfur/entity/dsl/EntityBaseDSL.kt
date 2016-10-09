@@ -18,7 +18,7 @@ abstract class EntityBaseDSL {
             table.name = m.table
             table.database = m.database
             table.schema = m.schema
-            table.alias = "${m.javaClass.simpleName}@${m.hashCode()}"
+            table.alias = "${m.javaClass.simpleName}_${m.hashCode()}"
 
             return table
         }
@@ -27,7 +27,7 @@ abstract class EntityBaseDSL {
         protected fun getTableModelFromSubQuery(s: EntitySelectDSL): TableModel {
             val table = TableModel()
             table.subQuery = s.toSQLPart() as SelectQueryBuilder
-            table.alias = "${s.javaClass.simpleName}@${s.hashCode()}"
+            table.alias = "${s.javaClass.simpleName}_${s.hashCode()}"
 
             return table
         }
@@ -36,7 +36,7 @@ abstract class EntityBaseDSL {
         fun getColumnModelFromEntityFieldInfo(info: EntityFieldInfo): ColumnModel {
             val c = ColumnModel()
             c.table = EntityGlobal.tableModels[info.entity.javaClass]!!.clone()
-            c.table.alias = "${info.entity.javaClass.simpleName}@${info.entity.hashCode()}"
+            c.table.alias = "${info.entity.javaClass.simpleName}_${info.entity.hashCode()}"
             c.modelType = info.entity.javaClass.canonicalName
             c.column = info.dbColumn
             c.fieldName = info.name

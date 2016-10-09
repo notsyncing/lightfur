@@ -17,6 +17,8 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
     private SelectQueryBuilder select;
     private List<ColumnModel> columns = new ArrayList<>();
     private List<Object> values = new ArrayList<>();
+    private boolean needOnConflict = false;
+    private SQLPart onConflictDo = null;
 
     public InsertQueryBuilder into(TableModel t)
     {
@@ -73,6 +75,19 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
         return this;
     }
 
+    public InsertQueryBuilder skipExisting()
+    {
+        needOnConflict = true;
+        return this;
+    }
+
+    public InsertQueryBuilder whenExists(SQLPart alterOp)
+    {
+        needOnConflict = true;
+        onConflictDo = alterOp;
+        return this;
+    }
+
     @Override
     public InsertQueryBuilder returning()
     {
@@ -126,6 +141,16 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
                     .collect(Collectors.joining(", ")));
 
             buf.append(")");
+        }
+
+        if (needOnConflict) {
+            buf.append("\nON CONFLICT DO ");
+
+            if (onConflictDo == null) {
+                buf.append("NOTHING");
+            } else {
+                buf.append(onConflictDo.toString());
+            }
         }
 
         appendReturningClause(buf);

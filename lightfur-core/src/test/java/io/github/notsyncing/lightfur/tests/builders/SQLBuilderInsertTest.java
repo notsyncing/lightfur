@@ -63,4 +63,19 @@ public class SQLBuilderInsertTest
 
         assertEquals(expected, sql);
     }
+
+    @Test
+    public void testInsertSkipExisting()
+    {
+        String sql = SQLBuilder.insert().into(tableA)
+                .column(columnId_A, "1")
+                .skipExisting()
+                .toString();
+
+        String expected = "INSERT INTO \"test_table\" (\"id\")\n" +
+                "VALUES ('1')\n" +
+                "ON CONFLICT DO NOTHING";
+
+        assertEquals(expected, sql);
+    }
 }

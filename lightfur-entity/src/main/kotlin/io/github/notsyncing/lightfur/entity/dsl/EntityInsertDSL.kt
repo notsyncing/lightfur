@@ -40,4 +40,14 @@ class EntityInsertDSL<F: EntityModel>(val insertModel: F) : EntityBaseDSL<F>(ins
 
         return this
     }
+
+    fun skipExisting(): EntityInsertDSL<F> {
+        builder.skipExisting()
+        return this
+    }
+
+    fun whenExists(alterOp: EntityUpdateDSL<*>): EntityInsertDSL<F> {
+        builder.whenExists(alterOp.toSQLPart())
+        return this
+    }
 }

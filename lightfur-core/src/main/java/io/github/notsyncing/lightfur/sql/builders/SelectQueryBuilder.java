@@ -200,6 +200,7 @@ public class SelectQueryBuilder implements SQLPart
 
         buf.append(selectColumns.stream()
                 .map(SQLPart::toString)
+                .sorted()
                 .collect(Collectors.joining(", ")));
 
         if (selectAsColumns.size() > 0) {

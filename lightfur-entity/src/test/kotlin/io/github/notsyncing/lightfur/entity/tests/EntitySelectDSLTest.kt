@@ -24,7 +24,7 @@ class EntitySelectDSLTest {
                 .toSQL()
 
         val h = m.hashCode()
-        val expected = """SELECT "TestModel_$h"."flag", "TestModel_$h"."name", "TestModel_$h"."id"
+        val expected = """SELECT "TestModel_$h"."flag", "TestModel_$h"."id", "TestModel_$h"."name"
 FROM "test_table" AS "TestModel_$h""""
 
         Assert.assertEquals(expected, s)
@@ -58,7 +58,7 @@ FROM "test_table" AS "TestModel_$hs""""
                 .toSQL()
 
         val h = m.hashCode()
-        val expected = """SELECT "TestModel_$h"."flag", "TestModel_$h"."name", "TestModel_$h"."id"
+        val expected = """SELECT "TestModel_$h"."flag", "TestModel_$h"."id", "TestModel_$h"."name"
 FROM "test_table" AS "TestModel_$h"
 WHERE (("TestModel_$h"."id" > 4))"""
 

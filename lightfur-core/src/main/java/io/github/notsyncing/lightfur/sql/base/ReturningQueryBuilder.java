@@ -1,7 +1,5 @@
 package io.github.notsyncing.lightfur.sql.base;
 
-import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,10 +47,18 @@ public abstract class ReturningQueryBuilder implements SQLPart
         return this;
     }
 
+    public ReturningQueryBuilder returning(SQLPart expr)
+    {
+        needReturn = true;
+        returnExpressions.put(expr, null);
+
+        return this;
+    }
+
     public ReturningQueryBuilder returning(SQLPart expr, String name)
     {
         needReturn = true;
-        returnExpressions.put(expr, name);
+        returnExpressions.put(expr, SQLUtils.escapeName(name));
 
         return this;
     }

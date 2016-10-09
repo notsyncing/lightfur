@@ -24,7 +24,8 @@ class EntityInsertDSLTest {
                 .toSQL()
 
         val expected = """INSERT INTO "test_table" ("flag", "name")
-VALUES ('3', 'test')"""
+VALUES ('3', 'test')
+RETURNING "id""""
 
         Assert.assertEquals(expected, s)
     }

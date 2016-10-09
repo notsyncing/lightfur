@@ -4,7 +4,7 @@ import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import io.github.notsyncing.lightfur.sql.builders.DeleteQueryBuilder
 
-class EntityDeleteDSL(val deleteModel: EntityModel) : EntityBaseDSL() {
+class EntityDeleteDSL<F: EntityModel>(val deleteModel: F) : EntityBaseDSL<F>(deleteModel, isQuery = true) {
     override val builder = DeleteQueryBuilder()
 
     init {
@@ -12,12 +12,12 @@ class EntityDeleteDSL(val deleteModel: EntityModel) : EntityBaseDSL() {
         builder.from(t)
     }
 
-    fun using(model: EntityModel): EntityDeleteDSL {
+    fun using(model: EntityModel): EntityDeleteDSL<F> {
         builder.using(getTableModelFromEntityModel(model))
         return this
     }
 
-    fun where(conditions: () -> ExpressionBuilder): EntityDeleteDSL {
+    fun where(conditions: () -> ExpressionBuilder): EntityDeleteDSL<F> {
         builder.where(conditions())
 
         return this

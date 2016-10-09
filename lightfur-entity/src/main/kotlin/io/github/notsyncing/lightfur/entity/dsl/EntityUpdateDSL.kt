@@ -6,7 +6,7 @@ import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 
-class EntityUpdateDSL(val updateModel: EntityModel) : EntityBaseDSL() {
+class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(updateModel) {
     override val builder = UpdateQueryBuilder()
 
     init {
@@ -24,22 +24,22 @@ class EntityUpdateDSL(val updateModel: EntityModel) : EntityBaseDSL() {
         }
     }
 
-    fun set(f: EntityFieldInfo, source: EntityFieldInfo): EntityUpdateDSL {
+    fun set(f: EntityFieldInfo, source: EntityFieldInfo): EntityUpdateDSL<F> {
         builder.set(getColumnModelFromEntityFieldInfo(f), getColumnModelFromEntityFieldInfo(source))
         return this
     }
 
-    fun set(f: EntityFieldInfo, expr: SQLPart): EntityUpdateDSL {
+    fun set(f: EntityFieldInfo, expr: SQLPart): EntityUpdateDSL<F> {
         builder.set(getColumnModelFromEntityFieldInfo(f), expr)
         return this
     }
 
-    fun from(model: EntityModel): EntityUpdateDSL {
+    fun from(model: EntityModel): EntityUpdateDSL<F> {
         builder.from(getTableModelFromEntityModel(model))
         return this
     }
 
-    fun where(conditions: () -> ExpressionBuilder): EntityUpdateDSL {
+    fun where(conditions: () -> ExpressionBuilder): EntityUpdateDSL<F> {
         builder.where(conditions())
 
         return this

@@ -80,8 +80,24 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
     }
 
     @Override
+    public InsertQueryBuilder returning(SQLPart expr)
+    {
+        if (expr instanceof ColumnModel) {
+            ((ColumnModel) expr).getTable().setAlias(null);
+            ((ColumnModel) expr).getTable().setName(null);
+        }
+
+        return (InsertQueryBuilder) super.returning(expr);
+    }
+
+    @Override
     public InsertQueryBuilder returning(SQLPart expr, String name)
     {
+        if (expr instanceof ColumnModel) {
+            ((ColumnModel) expr).getTable().setAlias(null);
+            ((ColumnModel) expr).getTable().setName(null);
+        }
+
         return (InsertQueryBuilder) super.returning(expr, name);
     }
 

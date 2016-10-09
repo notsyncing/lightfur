@@ -1,5 +1,6 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
+import io.github.notsyncing.lightfur.DataSession
 import io.github.notsyncing.lightfur.entity.EntityFieldInfo
 import io.github.notsyncing.lightfur.entity.EntityGlobal
 import io.github.notsyncing.lightfur.entity.EntityModel
@@ -7,8 +8,12 @@ import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
+import kotlinx.coroutines.async
+import kotlin.reflect.KMutableProperty0
 
-abstract class EntityBaseDSL {
+abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
+                                             private val isQuery: Boolean = false,
+                                             private val isInsert: Boolean = false) {
     abstract protected val builder: SQLPart
 
     companion object {
@@ -24,7 +29,7 @@ abstract class EntityBaseDSL {
         }
 
         @JvmStatic
-        protected fun getTableModelFromSubQuery(s: EntitySelectDSL): TableModel {
+        protected fun getTableModelFromSubQuery(s: EntitySelectDSL<*>): TableModel {
             val table = TableModel()
             table.subQuery = s.toSQLPart() as SelectQueryBuilder
             table.alias = "${s.javaClass.simpleName}_${s.hashCode()}"
@@ -47,8 +52,27 @@ abstract class EntityBaseDSL {
         }
     }
 
-    fun execute() {
+    fun execute(session: DataSession? = null) = async<Pair<List<F>, Int>> {
+        val sql = toSQL()
+        val db = session ?: DataSession()
 
+        if (isQuery) {
+            val r = await(db.queryList(finalModel.javaClass, sql))
+            return@async Pair(r, r.size)
+        } else if (isInsert) {
+            val r = await(db.executeWithReturning(sql))
+
+            if (r.numRows == 1) {
+                val pkf = finalModel.primaryKeyField as KMutableProperty0<Any>
+                pkf.set(r.results[0].getValue(0))
+            }
+
+            return@async Pair(listOf(finalModel), r.numRows)
+        } else {
+            val u = await(db.execute(sql))
+
+            return@async Pair(listOf(finalModel), u.updated)
+        }
     }
 
     open fun toSQLPart() = builder

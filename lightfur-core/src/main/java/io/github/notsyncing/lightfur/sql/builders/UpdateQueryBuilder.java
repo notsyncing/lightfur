@@ -69,6 +69,12 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
     }
 
     @Override
+    public UpdateQueryBuilder returning(SQLPart expr)
+    {
+        return (UpdateQueryBuilder) super.returning(expr);
+    }
+
+    @Override
     public UpdateQueryBuilder returning(SQLPart expr, String name)
     {
         return (UpdateQueryBuilder) super.returning(expr, name);

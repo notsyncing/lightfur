@@ -51,6 +51,12 @@ public class DeleteQueryBuilder extends ReturningQueryBuilder implements SQLPart
     }
 
     @Override
+    public DeleteQueryBuilder returning(SQLPart expr)
+    {
+        return (DeleteQueryBuilder) super.returning(expr);
+    }
+
+    @Override
     public DeleteQueryBuilder returning(SQLPart expr, String name)
     {
         return (DeleteQueryBuilder) super.returning(expr, name);

@@ -105,12 +105,12 @@ public class ColumnModel extends DatabaseItemModel implements SQLPart
         }
 
         if (tableHasAlias) {
-            buf.append(SQLUtils.escapeName(table.getAlias()));
+            buf.append(SQLUtils.escapeName(table.getAlias())).append(".");
         } else {
-            buf.append(SQLUtils.escapeName(table.getName()));
+            if (table.getName() != null) {
+                buf.append(SQLUtils.escapeName(table.getName())).append(".");
+            }
         }
-
-        buf.append(".");
 
         buf.append(SQLUtils.escapeName(column));
 

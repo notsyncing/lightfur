@@ -1,4 +1,4 @@
-package io.github.notsyncing.lightfur.entity.tests
+package io.github.notsyncing.lightfur.entity.tests.toys
 
 import io.github.notsyncing.lightfur.entity.*
 import io.github.notsyncing.lightfur.entity.dsl.EntityDSL

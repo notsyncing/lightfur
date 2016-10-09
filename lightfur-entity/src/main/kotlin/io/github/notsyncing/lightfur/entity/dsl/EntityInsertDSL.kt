@@ -2,6 +2,7 @@ package io.github.notsyncing.lightfur.entity.dsl
 
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.builders.InsertQueryBuilder
+import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 
 // TODO: Write primary key back to insertModel after insertion
 
@@ -17,7 +18,7 @@ class EntityInsertDSL(val insertModel: EntityModel) : EntityBaseDSL() {
         insertModel.fieldInfo.map { p -> getColumnModelFromEntityFieldInfo(p.value) }
                 .forEach { c -> builder.column(c) }
 
-        builder.select(query.toSQLPart())
+        builder.select(query.toSQLPart() as SelectQueryBuilder)
         return this
     }
 

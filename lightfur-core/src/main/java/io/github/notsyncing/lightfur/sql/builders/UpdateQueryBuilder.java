@@ -34,7 +34,7 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
             return set(c, (SQLPart)v);
         }
 
-        setColumns.put(c, new ExpressionBuilder().literal(v.toString()));
+        setColumns.put(c, new ExpressionBuilder().literal(v));
 
         return this;
     }

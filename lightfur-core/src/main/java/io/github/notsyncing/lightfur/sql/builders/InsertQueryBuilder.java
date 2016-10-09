@@ -1,13 +1,14 @@
 package io.github.notsyncing.lightfur.sql.builders;
 
-import io.github.notsyncing.lightfur.annotations.entity.Column;
-import io.github.notsyncing.lightfur.sql.base.SQLUtils;
 import io.github.notsyncing.lightfur.sql.base.ReturningQueryBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
+import io.github.notsyncing.lightfur.sql.base.SQLUtils;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
@@ -89,7 +90,7 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
     {
         StringBuilder buf = new StringBuilder();
 
-        buf.append("INSERT INTO ").append(table);
+        buf.append("INSERT INTO ").append(table.toStringWithoutAlias());
 
         buf.append(" (");
 

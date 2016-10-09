@@ -34,8 +34,7 @@ public class TableModel extends DatabaseItemModel implements Cloneable
         return subQuery != null;
     }
 
-    @Override
-    public String toString()
+    private String toString(boolean needAlias)
     {
         StringBuilder buf = new StringBuilder();
 
@@ -53,11 +52,22 @@ public class TableModel extends DatabaseItemModel implements Cloneable
             buf.append("(").append(subQuery).append(")");
         }
 
-        if (getAlias() != null) {
+        if ((needAlias) && (getAlias() != null)) {
             buf.append(" AS ").append(SQLUtils.escapeName(getAlias()));
         }
 
         return buf.toString();
+    }
+
+    @Override
+    public String toString()
+    {
+        return toString(true);
+    }
+
+    public String toStringWithoutAlias()
+    {
+        return toString(false);
     }
 
     @Override

@@ -3,7 +3,6 @@ package io.github.notsyncing.lightfur.tests.builders;
 import io.github.notsyncing.lightfur.sql.SQLBuilder;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
-import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
 import org.junit.Test;
 
@@ -23,6 +22,7 @@ public class SQLBuilderInsertTest
     public SQLBuilderInsertTest()
     {
         tableA.setName("test_table");
+        tableA.setAlias("test_alias");
 
         columnId_A.setColumn("id");
         columnName_A.setColumn("name");

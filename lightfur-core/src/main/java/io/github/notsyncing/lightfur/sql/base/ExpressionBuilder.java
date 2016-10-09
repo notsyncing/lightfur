@@ -93,6 +93,25 @@ public class ExpressionBuilder implements SQLPart
         return this;
     }
 
+    public ExpressionBuilder literal(Object l)
+    {
+        if (l instanceof String) {
+            return literal((String)l);
+        } else if ((l.getClass() == int.class) || (l instanceof Integer)) {
+            return literal((int)l);
+        } else if ((l.getClass() == double.class) || (l instanceof Double)) {
+            return literal((double)l);
+        } else if ((l.getClass() == float.class) || (l instanceof Float)) {
+            return literal((float)l);
+        } else if ((l.getClass() == boolean.class) || (l instanceof Boolean)) {
+            return literal((boolean)l);
+        } else if ((l.getClass() == long.class) || (l instanceof Long)) {
+            return literal((long)l);
+        }
+
+        return literal(l.toString());
+    }
+
     public ExpressionBuilder operator(String op)
     {
         buf.append(" ").append(op).append(" ");

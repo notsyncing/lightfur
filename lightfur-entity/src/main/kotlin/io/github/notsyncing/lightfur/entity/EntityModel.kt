@@ -4,12 +4,13 @@ import io.github.notsyncing.lightfur.entity.dsl.EntityDSL
 import io.github.notsyncing.lightfur.entity.dsl.EntityInsertDSL
 import io.github.notsyncing.lightfur.sql.models.TableModel
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
 
 abstract class EntityModel(val database: String? = null,
                            val schema: String? = null,
                            val table: String) {
-    val changedDataMap = ConcurrentHashMap<KProperty0<*>, Any?>()
+    val changedDataMap = ConcurrentHashMap<KProperty<*>, Any?>()
     val fieldMap = ConcurrentHashMap<KProperty0<*>, EntityField<*>>()
     val fieldInfo = ConcurrentHashMap<KProperty0<*>, EntityFieldInfo>()
 

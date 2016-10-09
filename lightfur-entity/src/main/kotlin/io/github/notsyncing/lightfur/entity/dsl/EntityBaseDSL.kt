@@ -4,6 +4,7 @@ import io.github.notsyncing.lightfur.entity.EntityFieldInfo
 import io.github.notsyncing.lightfur.entity.EntityGlobal
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.base.SQLPart
+import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
 
@@ -25,7 +26,7 @@ abstract class EntityBaseDSL {
         @JvmStatic
         protected fun getTableModelFromSubQuery(s: EntitySelectDSL): TableModel {
             val table = TableModel()
-            table.subQuery = s.toSQLPart()
+            table.subQuery = s.toSQLPart() as SelectQueryBuilder
             table.alias = "${s.javaClass.simpleName}@${s.hashCode()}"
 
             return table

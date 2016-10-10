@@ -1,6 +1,7 @@
 package io.github.notsyncing.lightfur;
 
 import io.github.notsyncing.lightfur.entity.DataMapper;
+import io.github.notsyncing.lightfur.entity.ReflectDataMapper;
 import io.github.notsyncing.lightfur.models.PageResult;
 import io.github.notsyncing.lightfur.utils.FutureUtils;
 import io.github.notsyncing.lightfur.utils.PageUtils;
@@ -12,8 +13,6 @@ import io.vertx.ext.sql.UpdateResult;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -27,12 +26,20 @@ public class DataSession
     private SQLConnection conn = null;
     private CompletableFuture<Void> connFuture;
     private boolean inTransaction = false;
+    private DataMapper dataMapper;
 
     /**
      * 实例化一个数据操作会话
      */
     public DataSession()
     {
+        this(new ReflectDataMapper());
+    }
+
+    public DataSession(DataMapper dataMapper)
+    {
+        this.dataMapper = dataMapper;
+
         mgr = DatabaseManager.getInstance();
         connFuture = mgr.getConnection().thenAccept(c -> conn = c);
     }
@@ -326,7 +333,7 @@ public class DataSession
     {
         return query(sql, params).thenCompose(r -> {
             try {
-                return CompletableFuture.completedFuture(DataMapper.map(clazz, r));
+                return CompletableFuture.completedFuture(dataMapper.map(clazz, r));
             } catch (Exception e) {
                 CompletableFuture<T> f = new CompletableFuture<>();
                 f.completeExceptionally(e);
@@ -347,7 +354,7 @@ public class DataSession
     {
         return query(sql, params).thenCompose(r -> {
             try {
-                return CompletableFuture.completedFuture(DataMapper.mapToList(clazz, r));
+                return CompletableFuture.completedFuture(dataMapper.mapToList(clazz, r));
             } catch (Exception e) {
                 CompletableFuture<List<T>> f = new CompletableFuture<>();
                 f.completeExceptionally(e);

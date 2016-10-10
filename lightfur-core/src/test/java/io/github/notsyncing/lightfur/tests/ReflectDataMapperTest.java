@@ -1,11 +1,12 @@
 package io.github.notsyncing.lightfur.tests;
 
 import io.github.notsyncing.lightfur.annotations.entity.Column;
-import io.github.notsyncing.lightfur.entity.DataMapper;
+import io.github.notsyncing.lightfur.entity.ReflectDataMapper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -18,8 +19,10 @@ import java.util.Arrays;
 import static org.junit.Assert.*;
 
 @RunWith(VertxUnitRunner.class)
-public class DataMapperTest
+public class ReflectDataMapperTest
 {
+    private ReflectDataMapper dataMapper;
+
     public enum TestEnum
     {
         TypeA,
@@ -71,6 +74,12 @@ public class DataMapperTest
         public long[] list;
     }
 
+    @Before
+    public void setUp()
+    {
+        dataMapper = new ReflectDataMapper();
+    }
+
     @Test
     public void testMap() throws InstantiationException, IllegalAccessException, ParseException
     {
@@ -89,7 +98,7 @@ public class DataMapperTest
         arr.add("92375947293472934923794729345345345433.2345345345");
         r.setResults(Arrays.asList(arr));
 
-        TestObject o = DataMapper.map(TestObject.class, r);
+        TestObject o = dataMapper.map(TestObject.class, r);
         assertNotNull(o);
         assertEquals(1, o.id);
         assertEquals("test", o.name);
@@ -126,7 +135,7 @@ public class DataMapperTest
         arr.add("{78998,325345,3678346}");
         r.setResults(Arrays.asList(arr));
 
-        TestLongObject o = DataMapper.map(TestLongObject.class, r);
+        TestLongObject o = dataMapper.map(TestLongObject.class, r);
         assertNotNull(o);
         assertEquals(19839L, o.id);
         assertArrayEquals(new long[] { 78998L, 325345L, 3678346L }, o.list);

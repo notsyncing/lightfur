@@ -22,13 +22,32 @@ class EntityDeleteDSLTest {
         m.name = "test"
 
         val q = EntityDeleteDSL(m)
-                .where { m.F(m::id) eq 2 }
+                .where { m.F(m::flag) eq 2 }
         val s = q.toSQL()
         val p = q.toSQLParameters()
 
         val h = m.hashCode()
         val expected = """DELETE FROM "test_table" AS "TestModel_$h"
-WHERE (("TestModel_$h"."id" = ?))"""
+WHERE (("TestModel_$h"."flag" = ?))"""
+
+        Assert.assertEquals(expected, s)
+        Assert.assertArrayEquals(arrayOf(2), p.toTypedArray())
+    }
+
+    @Test
+    fun testSimpleDeleteWithPrimaryKey() {
+        val m = TestModel()
+        m.id = 2
+        m.flag = 3
+        m.name = "test"
+
+        val q = EntityDeleteDSL(m)
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
+
+        val h = m.hashCode()
+        val expected = """DELETE FROM "test_table" AS "TestModel_$h"
+WHERE ("TestModel_$h"."id" = ?)"""
 
         Assert.assertEquals(expected, s)
         Assert.assertArrayEquals(arrayOf(2), p.toTypedArray())

@@ -7,9 +7,18 @@ import io.github.notsyncing.lightfur.sql.builders.DeleteQueryBuilder
 class EntityDeleteDSL<F: EntityModel>(val deleteModel: F) : EntityBaseDSL<F>(deleteModel, isQuery = true) {
     override val builder = DeleteQueryBuilder()
 
+    private var firstWhere = true
+
     init {
         val t = getTableModelFromEntityModel(deleteModel)
         builder.from(t)
+
+        for ((i, v) in deleteModel.primaryKeyFieldInfos.withIndex()) {
+            val c = getColumnModelFromEntityFieldInfo(v)
+            val value = deleteModel.primaryKeyFields[i].get()
+
+            builder.where(ExpressionBuilder().column(c).eq().parameter(value))
+        }
     }
 
     fun using(model: EntityModel): EntityDeleteDSL<F> {
@@ -18,6 +27,11 @@ class EntityDeleteDSL<F: EntityModel>(val deleteModel: F) : EntityBaseDSL<F>(del
     }
 
     fun where(conditions: () -> ExpressionBuilder): EntityDeleteDSL<F> {
+        if (firstWhere) {
+            builder.clearWhere()
+            firstWhere = false
+        }
+
         builder.where(conditions())
 
         return this

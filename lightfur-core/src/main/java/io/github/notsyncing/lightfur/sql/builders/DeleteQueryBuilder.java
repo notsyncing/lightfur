@@ -44,6 +44,12 @@ public class DeleteQueryBuilder extends ReturningQueryBuilder implements SQLPart
         return this;
     }
 
+    public DeleteQueryBuilder clearWhere()
+    {
+        whereConditions = new ExpressionBuilder();
+        return this;
+    }
+
     @Override
     public DeleteQueryBuilder returning()
     {

@@ -2,7 +2,6 @@ package io.github.notsyncing.lightfur.sql.builders;
 
 import io.github.notsyncing.lightfur.sql.base.ReturningQueryBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
-import io.github.notsyncing.lightfur.sql.base.SQLUtils;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
 
@@ -133,12 +132,24 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
 
         if (select != null) {
             buf.append("\n").append(select.toString());
+            getParameters().addAll(select.getParameters());
         } else {
             buf.append("\nVALUES (");
 
-            buf.append(values.stream()
-                    .map(SQLUtils::valueToSQL)
-                    .collect(Collectors.joining(", ")));
+            for (Object o : values) {
+                if (o instanceof SQLPart) {
+                    String v = o.toString();
+                    buf.append(v).append(", ");
+
+                    getParameters().addAll(((SQLPart) o).getParameters());
+                } else {
+                    buf.append("?, ");
+
+                    getParameters().add(o);
+                }
+            }
+
+            buf.delete(buf.length() - 2, buf.length());
 
             buf.append(")");
         }
@@ -150,6 +161,7 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
                 buf.append("NOTHING");
             } else {
                 buf.append(onConflictDo.toString());
+                getParameters().addAll(onConflictDo.getParameters());
             }
         }
 

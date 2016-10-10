@@ -21,14 +21,16 @@ class EntityDeleteDSLTest {
         m.flag = 3
         m.name = "test"
 
-        val s = EntityDeleteDSL(m)
+        val q = EntityDeleteDSL(m)
                 .where { m.F(m::id) eq 2 }
-                .toSQL()
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
 
         val h = m.hashCode()
         val expected = """DELETE FROM "test_table" AS "TestModel_$h"
-WHERE (("TestModel_$h"."id" = 2))"""
+WHERE (("TestModel_$h"."id" = ?))"""
 
         Assert.assertEquals(expected, s)
+        Assert.assertArrayEquals(arrayOf(2), p.toTypedArray())
     }
 }

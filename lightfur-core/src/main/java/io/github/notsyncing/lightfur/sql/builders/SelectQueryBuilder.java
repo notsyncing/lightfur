@@ -8,13 +8,10 @@ import io.github.notsyncing.lightfur.sql.models.JoinClauseInfo;
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class SelectQueryBuilder implements SQLPart
+public class SelectQueryBuilder extends QueryBuilder implements SQLPart
 {
     private List<TableModel> fromTables = new ArrayList<>();
     private List<SQLPart> selectColumns = new ArrayList<>();
@@ -186,6 +183,7 @@ public class SelectQueryBuilder implements SQLPart
     @Override
     public String toString()
     {
+        getParameters().clear();
         StringBuilder buf = new StringBuilder();
 
         buf.append("SELECT ");
@@ -200,8 +198,11 @@ public class SelectQueryBuilder implements SQLPart
 
         buf.append(selectColumns.stream()
                 .map(SQLPart::toString)
-                .sorted()
                 .collect(Collectors.joining(", ")));
+
+        for (SQLPart p : selectColumns) {
+            getParameters().addAll(p.getParameters());
+        }
 
         if (selectAsColumns.size() > 0) {
             if (selectColumns.size() > 0) {
@@ -211,6 +212,10 @@ public class SelectQueryBuilder implements SQLPart
             buf.append(selectAsColumns.stream()
                     .map(p -> "(" + p.getKey().toString() + ") AS " + SQLUtils.escapeName(p.getValue().getColumn()))
                     .collect(Collectors.joining(", ")));
+
+            for (Map.Entry<SQLPart, ColumnModel> p : selectAsColumns) {
+                getParameters().addAll(p.getKey().getParameters());
+            }
         }
 
         if (fromTables.size() > 0) {
@@ -219,17 +224,34 @@ public class SelectQueryBuilder implements SQLPart
             buf.append(fromTables.stream()
                     .map(TableModel::toString)
                     .collect(Collectors.joining(", ")));
+
+            for (TableModel t : fromTables) {
+                if (!t.isSubQuery()) {
+                    continue;
+                }
+
+                getParameters().addAll(t.getSubQuery().getParameters());
+            }
         }
 
         if (joinClauses.size() > 0) {
             buf.append("\n");
 
             buf.append(joinClauses.stream()
-                .map(JoinClauseInfo::toString)
-                .collect(Collectors.joining("\n")));
+                    .map(JoinClauseInfo::toString)
+                    .collect(Collectors.joining("\n")));
+
+            for (JoinClauseInfo j : joinClauses) {
+                if (j.getTargetTable().isSubQuery()) {
+                    getParameters().addAll(j.getTargetTable().getSubQuery().getParameters());
+                }
+
+                getParameters().addAll(j.getJoinCondition().getParameters());
+            }
         }
 
         if (!whereConditions.isEmpty()) {
+            getParameters().addAll(whereConditions.getParameters());
             buf.append("\nWHERE ").append(whereConditions);
         }
 
@@ -237,11 +259,12 @@ public class SelectQueryBuilder implements SQLPart
             buf.append("\nGROUP BY ");
 
             buf.append(groupColumns.stream()
-                .map(SQLPart::toString)
-                .collect(Collectors.joining("\n")));
+                    .map(SQLPart::toString)
+                    .collect(Collectors.joining("\n")));
         }
 
         if (!havingConditions.isEmpty()) {
+            getParameters().addAll(havingConditions.getParameters());
             buf.append("\nHAVING ").append(havingConditions);
         }
 
@@ -249,16 +272,18 @@ public class SelectQueryBuilder implements SQLPart
             buf.append("\nORDER BY ");
 
             buf.append(orderByColumns.stream()
-                .map(OrderByColumnInfo::toString)
-                .collect(Collectors.joining(", ")));
+                    .map(OrderByColumnInfo::toString)
+                    .collect(Collectors.joining(", ")));
         }
 
         if (limit >= 0) {
-            buf.append("\nLIMIT ").append(limit);
+            getParameters().add(limit);
+            buf.append("\nLIMIT ?");
         }
 
         if (offset >= 0) {
-            buf.append("\nOFFSET ").append(offset);
+            getParameters().add(offset);
+            buf.append("\nOFFSET ?");
         }
 
         return buf.toString();

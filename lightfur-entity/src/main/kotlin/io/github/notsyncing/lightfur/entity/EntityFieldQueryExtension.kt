@@ -39,7 +39,7 @@ infix fun EntityFieldInfo.eq(value: Any?): ExpressionBuilder {
     if (value == null) {
         b.eqNull()
     } else {
-        b.eq().literal(value)
+        b.eq().parameter(value)
     }
 
     return b.endGroup()
@@ -78,7 +78,7 @@ infix fun EntityFieldInfo.neq(value: Any?): ExpressionBuilder {
     if (value == null) {
         b.neNull()
     } else {
-        b.ne().literal(value)
+        b.ne().parameter(value)
     }
 
     return b.endGroup()
@@ -114,7 +114,7 @@ infix fun EntityFieldInfo.gt(value: Any): ExpressionBuilder {
             .beginGroup()
             .column(column)
             .gt()
-            .literal(value)
+            .parameter(value)
             .endGroup()
 }
 
@@ -149,7 +149,7 @@ infix fun EntityFieldInfo.lt(value: Any): ExpressionBuilder {
             .beginGroup()
             .column(column)
             .lt()
-            .literal(value)
+            .parameter(value)
             .endGroup()
 }
 
@@ -183,7 +183,7 @@ infix fun EntityFieldInfo.gte(value: Any): ExpressionBuilder {
             .beginGroup()
             .column(column)
             .gte()
-            .literal(value)
+            .parameter(value)
             .endGroup()
 }
 
@@ -217,7 +217,7 @@ infix fun EntityFieldInfo.lte(value: Any): ExpressionBuilder {
             .beginGroup()
             .column(column)
             .lte()
-            .literal(value)
+            .parameter(value)
             .endGroup()
 }
 
@@ -267,7 +267,7 @@ operator fun EntityFieldInfo.plus(value: Any): ExpressionBuilder {
             .beginGroup()
             .column(column)
             .operator("+")
-            .literal(value)
+            .parameter(value)
             .endGroup()
 }
 
@@ -301,7 +301,7 @@ operator fun EntityFieldInfo.minus(value: Any): ExpressionBuilder {
             .beginGroup()
             .column(column)
             .operator("-")
-            .literal(value)
+            .parameter(value)
             .endGroup()
 }
 
@@ -335,7 +335,7 @@ operator fun EntityFieldInfo.times(value: Any): ExpressionBuilder {
             .beginGroup()
             .column(column)
             .operator("*")
-            .literal(value)
+            .parameter(value)
             .endGroup()
 }
 
@@ -369,7 +369,7 @@ operator fun EntityFieldInfo.div(value: Any): ExpressionBuilder {
             .beginGroup()
             .column(column)
             .operator("/")
-            .literal(value)
+            .parameter(value)
             .endGroup()
 }
 
@@ -384,7 +384,7 @@ infix fun ExpressionBuilder.gt(next: EntityFieldInfo): ExpressionBuilder {
 }
 
 infix fun ExpressionBuilder.gt(next: Any): ExpressionBuilder {
-    return this.gt().literal(next)
+    return this.gt().parameter(next)
 }
 
 infix fun ExpressionBuilder.gte(next: SQLPart): ExpressionBuilder {
@@ -398,7 +398,7 @@ infix fun ExpressionBuilder.gte(next: EntityFieldInfo): ExpressionBuilder {
 }
 
 infix fun ExpressionBuilder.gte(next: Any): ExpressionBuilder {
-    return this.gte().literal(next)
+    return this.gte().parameter(next)
 }
 
 infix fun ExpressionBuilder.lt(next: SQLPart): ExpressionBuilder {
@@ -412,7 +412,7 @@ infix fun ExpressionBuilder.lt(next: EntityFieldInfo): ExpressionBuilder {
 }
 
 infix fun ExpressionBuilder.lt(next: Any): ExpressionBuilder {
-    return this.lt().literal(next)
+    return this.lt().parameter(next)
 }
 
 infix fun ExpressionBuilder.lte(next: SQLPart): ExpressionBuilder {
@@ -426,7 +426,7 @@ infix fun ExpressionBuilder.lte(next: EntityFieldInfo): ExpressionBuilder {
 }
 
 infix fun ExpressionBuilder.lte(next: Any): ExpressionBuilder {
-    return this.lte().literal(next)
+    return this.lte().parameter(next)
 }
 
 infix fun ExpressionBuilder.eq(next: SQLPart): ExpressionBuilder {
@@ -440,7 +440,7 @@ infix fun ExpressionBuilder.eq(next: EntityFieldInfo): ExpressionBuilder {
 }
 
 infix fun ExpressionBuilder.eq(next: Any): ExpressionBuilder {
-    return this.eq().literal(next)
+    return this.eq().parameter(next)
 }
 
 fun ExpressionBuilder.field(f: EntityFieldInfo): ExpressionBuilder {
@@ -462,27 +462,27 @@ class case {
     }
 
     fun then(l: Int): case {
-        builder.then(ExpressionBuilder().literal(l))
+        builder.then(ExpressionBuilder().parameter(l))
         return this
     }
 
     fun then(l: Long): case {
-        builder.then(ExpressionBuilder().literal(l))
+        builder.then(ExpressionBuilder().parameter(l))
         return this
     }
 
     fun then(l: Boolean): case {
-        builder.then(ExpressionBuilder().literal(l))
+        builder.then(ExpressionBuilder().parameter(l))
         return this
     }
 
     fun then(l: String): case {
-        builder.then(ExpressionBuilder().literal(l))
+        builder.then(ExpressionBuilder().parameter(l))
         return this
     }
 
     fun then(l: Double): case {
-        builder.then(ExpressionBuilder().literal(l))
+        builder.then(ExpressionBuilder().parameter(l))
         return this
     }
 
@@ -492,27 +492,27 @@ class case {
     }
 
     fun otherwise(p: Int): CaseWhenBuilder {
-        builder.elseThen(ExpressionBuilder().literal(p))
+        builder.elseThen(ExpressionBuilder().parameter(p))
         return builder
     }
 
     fun otherwise(p: Long): CaseWhenBuilder {
-        builder.elseThen(ExpressionBuilder().literal(p))
+        builder.elseThen(ExpressionBuilder().parameter(p))
         return builder
     }
 
     fun otherwise(p: Boolean): CaseWhenBuilder {
-        builder.elseThen(ExpressionBuilder().literal(p))
+        builder.elseThen(ExpressionBuilder().parameter(p))
         return builder
     }
 
     fun otherwise(p: String): CaseWhenBuilder {
-        builder.elseThen(ExpressionBuilder().literal(p))
+        builder.elseThen(ExpressionBuilder().parameter(p))
         return builder
     }
 
     fun otherwise(p: Double): CaseWhenBuilder {
-        builder.elseThen(ExpressionBuilder().literal(p))
+        builder.elseThen(ExpressionBuilder().parameter(p))
         return builder
     }
 }

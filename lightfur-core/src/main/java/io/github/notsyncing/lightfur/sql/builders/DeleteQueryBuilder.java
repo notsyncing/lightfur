@@ -75,10 +75,18 @@ public class DeleteQueryBuilder extends ReturningQueryBuilder implements SQLPart
             buf.append(usingTables.stream()
                 .map(TableModel::toString)
                 .collect(Collectors.joining(", ")));
+
+            for (TableModel t : usingTables) {
+                if (t.isSubQuery()) {
+                    getParameters().addAll(t.getSubQuery().getParameters());
+                }
+            }
         }
 
         if (!whereConditions.isEmpty()) {
             buf.append("\nWHERE ").append(whereConditions);
+
+            getParameters().addAll(whereConditions.getParameters());
         }
 
         appendReturningClause(buf);

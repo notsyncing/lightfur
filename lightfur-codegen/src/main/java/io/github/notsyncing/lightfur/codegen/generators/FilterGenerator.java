@@ -82,7 +82,7 @@ public class FilterGenerator extends CodeGenerator
                 throw new RuntimeException("Unsupported literal expression: " + javaExp);
             }
         } else if (javaExp instanceof NameExpr) {
-            sqlExp.namedParameterReference(((NameExpr) javaExp).getName());
+            sqlExp.namedParameter(((NameExpr) javaExp).getName(), null);
         } else {
             throw new RuntimeException("Unsupported expression: " + javaExp);
         }

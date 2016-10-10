@@ -1,10 +1,12 @@
 package io.github.notsyncing.lightfur.sql.base;
 
+import io.github.notsyncing.lightfur.sql.builders.QueryBuilder;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class ReturningQueryBuilder implements SQLPart
+public abstract class ReturningQueryBuilder extends QueryBuilder implements SQLPart
 {
     protected boolean needReturn = false;
     protected Map<SQLPart, String> returnExpressions = new LinkedHashMap<>();
@@ -37,6 +39,10 @@ public abstract class ReturningQueryBuilder implements SQLPart
                                 })
                                 .collect(Collectors.joining(", "))
                 );
+
+                for (SQLPart p : returnExpressions.keySet()) {
+                    getParameters().addAll(p.getParameters());
+                }
             }
         }
     }

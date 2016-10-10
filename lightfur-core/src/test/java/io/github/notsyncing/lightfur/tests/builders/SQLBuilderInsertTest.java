@@ -1,11 +1,15 @@
 package io.github.notsyncing.lightfur.tests.builders;
 
 import io.github.notsyncing.lightfur.sql.SQLBuilder;
+import io.github.notsyncing.lightfur.sql.builders.QueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
 import org.junit.Test;
 
+import java.util.List;
+
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class SQLBuilderInsertTest
@@ -37,14 +41,16 @@ public class SQLBuilderInsertTest
     @Test
     public void testSimpleInsert()
     {
-        String sql = SQLBuilder.insert().into(tableA)
-                .column(columnId_A, "1").column(columnName_A, "a")
-                .toString();
+        QueryBuilder query = SQLBuilder.insert().into(tableA)
+                .column(columnId_A, "1").column(columnName_A, "a");
+        String sql = query.toString();
+        List<Object> params = query.getParameters();
 
         String expected = "INSERT INTO \"test_table\" (\"id\", \"name\")\n" +
-                "VALUES ('1', 'a')";
+                "VALUES (?, ?)";
 
         assertEquals(expected, sql);
+        assertArrayEquals(new Object[] { "1", "a" }, params.toArray());
     }
 
     @Test
@@ -67,15 +73,17 @@ public class SQLBuilderInsertTest
     @Test
     public void testInsertSkipExisting()
     {
-        String sql = SQLBuilder.insert().into(tableA)
+        QueryBuilder query = SQLBuilder.insert().into(tableA)
                 .column(columnId_A, "1")
-                .skipExisting()
-                .toString();
+                .skipExisting();
+        String sql = query.toString();
+        List<Object> params = query.getParameters();
 
         String expected = "INSERT INTO \"test_table\" (\"id\")\n" +
-                "VALUES ('1')\n" +
+                "VALUES (?)\n" +
                 "ON CONFLICT DO NOTHING";
 
         assertEquals(expected, sql);
+        assertArrayEquals(new Object[] { "1" }, params.toArray());
     }
 }

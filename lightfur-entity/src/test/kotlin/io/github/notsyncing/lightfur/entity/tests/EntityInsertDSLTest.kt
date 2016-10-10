@@ -20,13 +20,15 @@ class EntityInsertDSLTest {
         m.flag = 3
         m.name = "test"
 
-        val s = EntityInsertDSL(m).values()
-                .toSQL()
+        val q = EntityInsertDSL(m).values()
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
 
         val expected = """INSERT INTO "test_table" ("flag", "name")
-VALUES ('3', 'test')
+VALUES (?, ?)
 RETURNING "id""""
 
         Assert.assertEquals(expected, s)
+        Assert.assertArrayEquals(arrayOf(3, "test"), p.toTypedArray())
     }
 }

@@ -34,8 +34,8 @@ public class ValuesGenerator extends CodeGenerator
                 return;
             }
 
-            b.column(c, new ExpressionBuilder().namedParameterReference(dataParamName + "_" + c.getFieldName() + "@" +
-                    c.getModelType()));
+            b.column(c, new ExpressionBuilder().namedParameter(dataParamName + "_" + c.getFieldName() + "@" +
+                    c.getModelType(), null));
         });
     }
 }

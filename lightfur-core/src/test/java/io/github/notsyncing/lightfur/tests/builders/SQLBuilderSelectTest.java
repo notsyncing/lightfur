@@ -2,12 +2,15 @@ package io.github.notsyncing.lightfur.tests.builders;
 
 import io.github.notsyncing.lightfur.sql.SQLBuilder;
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
+import io.github.notsyncing.lightfur.sql.builders.QueryBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
-import io.vertx.core.impl.verticle.PackageHelper;
 import org.junit.Test;
 
+import java.util.List;
+
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class SQLBuilderSelectTest
@@ -79,19 +82,21 @@ public class SQLBuilderSelectTest
     @Test
     public void testSimpleQueryWithOffsetAndOrder()
     {
-        String sql = SQLBuilder.select(columnId_A, columnName_A)
+        QueryBuilder b = SQLBuilder.select(columnId_A, columnName_A)
                 .from(tableA)
                 .orderBy(new OrderByColumnInfo(columnId_A, true))
-                .limit(10).offset(20)
-                .toString();
+                .limit(10).offset(20);
+        String sql = b.toString();
+        List<Object> params = b.getParameters();
 
         String expected = "SELECT \"test_table\".\"id\", \"test_table\".\"name\"\n" +
                 "FROM \"test_table\"\n" +
                 "ORDER BY \"test_table\".\"id\" DESC\n" +
-                "LIMIT 10\n" +
-                "OFFSET 20";
+                "LIMIT ?\n" +
+                "OFFSET ?";
 
         assertEquals(expected, sql);
+        assertArrayEquals(new Object[] { 10, 20 }, params.toArray());
     }
 
     @Test

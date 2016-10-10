@@ -1,8 +1,18 @@
 package io.github.notsyncing.lightfur.sql.base;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ExpressionBuilder implements SQLPart
 {
     private StringBuilder buf = new StringBuilder();
+    private List<Object> parameters = new ArrayList<>();
+
+    @Override
+    public List<Object> getParameters()
+    {
+        return parameters;
+    }
 
     public boolean isEmpty()
     {
@@ -41,6 +51,10 @@ public class ExpressionBuilder implements SQLPart
 
     public ExpressionBuilder expr(SQLPart e)
     {
+        if (e instanceof ExpressionBuilder) {
+            parameters.addAll(((ExpressionBuilder) e).getParameters());
+        }
+
         buf.append(e);
         return this;
     }
@@ -188,15 +202,17 @@ public class ExpressionBuilder implements SQLPart
         return operator("IS");
     }
 
-    public ExpressionBuilder namedParameterReference(String name)
+    public ExpressionBuilder namedParameter(String name, Object parameter)
     {
         buf.append(":").append(name);
+        parameters.add(parameter);
         return this;
     }
 
-    public ExpressionBuilder parameterReference()
+    public ExpressionBuilder parameter(Object parameter)
     {
         buf.append("?");
+        parameters.add(parameter);
         return this;
     }
 

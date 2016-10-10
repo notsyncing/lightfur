@@ -19,9 +19,10 @@ class EntitySelectDSLTest {
     @Test
     fun testSimpleSelect() {
         val m = TestModel()
-        val s = EntitySelectDSL(m)
+        val q = EntitySelectDSL(m)
                 .from()
-                .toSQL()
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
 
         val h = m.hashCode()
         val expected = """SELECT "TestModel_$h"."flag", "TestModel_$h"."id", "TestModel_$h"."name"
@@ -34,34 +35,38 @@ FROM "test_table" AS "TestModel_$h""""
     fun testSelectWithMap() {
         val ms = TestModel()
         val mt = TestModel()
-        val s = EntitySelectDSL(mt)
+        val q = EntitySelectDSL(mt)
                 .from(ms)
                 .map(ms.F(ms::name) + "_test", mt::name)
                 .map(ms.F(ms::id) - 2, mt::id)
                 .map(ms.F(ms::flag), mt::flag)
-                .toSQL()
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
 
         val hs = ms.hashCode()
         val ht = mt.hashCode()
-        val expected = """SELECT (("TestModel_$hs"."name" + '_test')) AS "name", (("TestModel_$hs"."id" - 2)) AS "id", ("TestModel_$hs"."flag") AS "flag"
+        val expected = """SELECT (("TestModel_$hs"."name" + ?)) AS "name", (("TestModel_$hs"."id" - ?)) AS "id", ("TestModel_$hs"."flag") AS "flag"
 FROM "test_table" AS "TestModel_$hs""""
 
         Assert.assertEquals(expected, s)
+        Assert.assertArrayEquals(arrayOf("_test", 2), p.toTypedArray())
     }
 
     @Test
     fun testSelectWithSimpleConditions() {
         val m = TestModel()
-        val s = EntitySelectDSL(m)
+        val q = EntitySelectDSL(m)
                 .from()
                 .where { m.F(m::id) gt 4 }
-                .toSQL()
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
 
         val h = m.hashCode()
         val expected = """SELECT "TestModel_$h"."flag", "TestModel_$h"."id", "TestModel_$h"."name"
 FROM "test_table" AS "TestModel_$h"
-WHERE (("TestModel_$h"."id" > 4))"""
+WHERE (("TestModel_$h"."id" > ?))"""
 
         Assert.assertEquals(expected, s)
+        Assert.assertArrayEquals(arrayOf(4), p.toTypedArray())
     }
 }

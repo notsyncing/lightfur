@@ -3,10 +3,8 @@ package io.github.notsyncing.lightfur.codegen.generators;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import io.github.notsyncing.lightfur.codegen.utils.CodeToSqlBuilder;
-import io.github.notsyncing.lightfur.models.ModelColumnResult;
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
 import io.github.notsyncing.lightfur.sql.base.SQLPart;
-import io.github.notsyncing.lightfur.sql.builders.InsertQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 
@@ -55,7 +53,7 @@ public class SetGenerator extends CodeGenerator
             setValue = new ExpressionBuilder().literal(v);
         } else if (value instanceof NameExpr) {
             String n = ((NameExpr) value).getName();
-            setValue = new ExpressionBuilder().namedParameterReference(n);
+            setValue = new ExpressionBuilder().namedParameter(n, null);
         } else {
             throw new RuntimeException("Unsupported set target value: " + value + ", to column " + setColumn);
         }

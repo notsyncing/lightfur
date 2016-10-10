@@ -54,13 +54,14 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
 
     fun execute(session: DataSession? = null) = async<Pair<List<F>, Int>> {
         val sql = toSQL()
+        val params = toSQLParameters().toTypedArray()
         val db = session ?: DataSession()
 
         if (isQuery) {
-            val r = await(db.queryList(finalModel.javaClass, sql))
+            val r = await(db.queryList(finalModel.javaClass, sql, *params))
             return@async Pair(r, r.size)
         } else if (isInsert) {
-            val r = await(db.executeWithReturning(sql))
+            val r = await(db.executeWithReturning(sql, *params))
 
             if (r.numRows == 1) {
                 val pkf = finalModel.primaryKeyField as KMutableProperty0<Any>
@@ -69,7 +70,7 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
 
             return@async Pair(listOf(finalModel), r.numRows)
         } else {
-            val u = await(db.execute(sql))
+            val u = await(db.execute(sql, *params))
 
             return@async Pair(listOf(finalModel), u.updated)
         }
@@ -78,4 +79,6 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
     open fun toSQLPart() = builder
 
     open fun toSQL() = builder.toString()
+
+    open fun toSQLParameters() = builder.parameters
 }

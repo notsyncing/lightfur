@@ -34,8 +34,7 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
             return set(c, (SQLPart)v);
         }
 
-        setColumns.put(c, new ExpressionBuilder().literal(v));
-
+        setColumns.put(c, new ExpressionBuilder().parameter(v));
         return this;
     }
 
@@ -58,6 +57,7 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
         }
 
         whereConditions.beginGroup().expr(cond).endGroup();
+        getParameters().addAll(cond.getParameters());
 
         return this;
     }
@@ -91,16 +91,28 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
             .map(e -> e.getKey().toColumnString() + " = (" + e.getValue().toUpdateColumnString() + ")")
             .collect(Collectors.joining(", ")));
 
+        for (SQLPart p : setColumns.values()) {
+            getParameters().addAll(p.getParameters());
+        }
+
+
         if (fromTables.size() > 0) {
             buf.append("\nFROM ");
 
             buf.append(fromTables.stream()
                 .map(TableModel::toString)
                 .collect(Collectors.joining(", ")));
+
+            for (TableModel t : fromTables) {
+                if (t.isSubQuery()) {
+                    getParameters().add(t.getSubQuery().getParameters());
+                }
+            }
         }
 
         if (!whereConditions.isEmpty()) {
             buf.append("\nWHERE ").append(whereConditions);
+            getParameters().add(whereConditions.getParameters());
         }
 
         appendReturningClause(buf);

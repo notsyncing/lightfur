@@ -23,14 +23,16 @@ class EntityUpdateDSLTest {
 
         m.flag = 4
 
-        val s = EntityUpdateDSL(m)
-                .toSQL()
+        val q = EntityUpdateDSL(m)
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
 
         val h = m.hashCode()
         val expected = """UPDATE "test_table" AS "TestModel_$h"
-SET "flag" = (4)"""
+SET "flag" = (?)"""
 
         Assert.assertEquals(expected, s)
+        Assert.assertArrayEquals(arrayOf(4), p.toTypedArray())
     }
 
     @Test
@@ -41,13 +43,15 @@ SET "flag" = (4)"""
         m.name = "test"
         m.assumeAllChanged()
 
-        val s = EntityUpdateDSL(m)
-                .toSQL()
+        val q = EntityUpdateDSL(m)
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
 
         val h = m.hashCode()
         val expected = """UPDATE "test_table" AS "TestModel_$h"
-SET "flag" = (3), "name" = ('test')"""
+SET "flag" = (?), "name" = (?)"""
 
         Assert.assertEquals(expected, s)
+        Assert.assertArrayEquals(arrayOf(3, "test"), p.toTypedArray())
     }
 }

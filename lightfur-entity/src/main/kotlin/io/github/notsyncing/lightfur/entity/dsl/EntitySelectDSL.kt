@@ -12,7 +12,9 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityBaseDSL<F>(re
     override val builder = SelectQueryBuilder()
 
     init {
-        resultModel.fieldInfo.forEach { builder.select(getColumnModelFromEntityFieldInfo(it.value)) }
+        resultModel.fieldInfo.map { it.value }
+                .sortedBy { it.name }
+                .forEach { builder.select(getColumnModelFromEntityFieldInfo(it)) }
     }
 
     fun from(tableModel: EntityModel? = null): EntitySelectDSL<F> {

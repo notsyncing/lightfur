@@ -11,8 +11,8 @@ class EntityInsertDSL<F: EntityModel>(val insertModel: F) : EntityBaseDSL<F>(ins
         val tableModel = getTableModelFromEntityModel(insertModel)
         builder.into(tableModel)
 
-        if (insertModel.primaryKeyFieldInfo != null) {
-            builder.returning(getColumnModelFromEntityFieldInfo(insertModel.primaryKeyFieldInfo!!))
+        for (info in insertModel.primaryKeyFieldInfos) {
+            builder.returning(getColumnModelFromEntityFieldInfo(info))
         }
     }
 

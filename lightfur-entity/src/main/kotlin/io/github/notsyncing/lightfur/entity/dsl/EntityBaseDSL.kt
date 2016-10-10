@@ -64,8 +64,10 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
             val r = await(db.executeWithReturning(sql, *params))
 
             if (r.numRows == 1) {
-                val pkf = finalModel.primaryKeyField as KMutableProperty0<Any>
-                pkf.set(r.results[0].getValue(0))
+                for ((i, pkf) in finalModel.primaryKeyFields.withIndex()) {
+                    val p = pkf as KMutableProperty0<Any>
+                    p.set(r.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].dbColumn))
+                }
             }
 
             return@async Pair(listOf(finalModel), r.numRows)

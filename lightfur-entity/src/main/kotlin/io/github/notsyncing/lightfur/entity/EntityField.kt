@@ -17,4 +17,8 @@ class EntityField<T> {
         thisRef.changedDataMap[property] = value
         data = value
     }
+
+    fun setData(data: T?) {
+        this.data = data
+    }
 }

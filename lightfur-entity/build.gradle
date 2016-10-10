@@ -49,6 +49,7 @@ dependencies {
     testCompile 'io.vertx:vertx-unit:3.3.3'
     testCompile 'org.slf4j:slf4j-api:1.7.21'
     testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
+    testCompile project(":lightfur-core").sourceSets.test.output
 }
 
 compileJava {

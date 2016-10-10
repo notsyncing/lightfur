@@ -1,6 +1,7 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
 import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.entity.EntityDataMapper
 import io.github.notsyncing.lightfur.entity.EntityFieldInfo
 import io.github.notsyncing.lightfur.entity.EntityGlobal
 import io.github.notsyncing.lightfur.entity.EntityModel
@@ -55,7 +56,7 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
     fun execute(session: DataSession? = null) = async<Pair<List<F>, Int>> {
         val sql = toSQL()
         val params = toSQLParameters().toTypedArray()
-        val db = session ?: DataSession()
+        val db = session ?: DataSession(EntityDataMapper())
 
         if (isQuery) {
             val r = await(db.queryList(finalModel.javaClass, sql, *params))

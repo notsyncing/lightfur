@@ -57,8 +57,13 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
         }
 
         whereConditions.beginGroup().expr(cond).endGroup();
-        getParameters().addAll(cond.getParameters());
 
+        return this;
+    }
+
+    public UpdateQueryBuilder clearWhere()
+    {
+        whereConditions = new ExpressionBuilder();
         return this;
     }
 
@@ -105,14 +110,14 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
 
             for (TableModel t : fromTables) {
                 if (t.isSubQuery()) {
-                    getParameters().add(t.getSubQuery().getParameters());
+                    getParameters().addAll(t.getSubQuery().getParameters());
                 }
             }
         }
 
         if (!whereConditions.isEmpty()) {
             buf.append("\nWHERE ").append(whereConditions);
-            getParameters().add(whereConditions.getParameters());
+            getParameters().addAll(whereConditions.getParameters());
         }
 
         appendReturningClause(buf);

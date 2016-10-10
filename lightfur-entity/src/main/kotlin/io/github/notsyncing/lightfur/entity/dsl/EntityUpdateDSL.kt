@@ -9,6 +9,8 @@ import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(updateModel) {
     override val builder = UpdateQueryBuilder()
 
+    private var firstWhere = true
+
     init {
         builder.on(getTableModelFromEntityModel(updateModel))
 
@@ -24,6 +26,13 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
                     val c = getColumnModelFromEntityFieldInfo(f)
                     builder.set(c, it.value)
                 }
+
+        for ((i, v) in updateModel.primaryKeyFieldInfos.withIndex()) {
+            val c = getColumnModelFromEntityFieldInfo(v)
+            val value = updateModel.primaryKeyFields[i].get()
+
+            builder.where(ExpressionBuilder().column(c).eq().parameter(value))
+        }
     }
 
     fun set(f: EntityFieldInfo, source: EntityFieldInfo): EntityUpdateDSL<F> {
@@ -42,6 +51,11 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
     }
 
     fun where(conditions: () -> ExpressionBuilder): EntityUpdateDSL<F> {
+        if (firstWhere) {
+            builder.clearWhere()
+            firstWhere = false
+        }
+
         builder.where(conditions())
 
         return this

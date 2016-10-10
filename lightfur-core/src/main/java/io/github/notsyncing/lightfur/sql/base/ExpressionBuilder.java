@@ -51,11 +51,8 @@ public class ExpressionBuilder implements SQLPart
 
     public ExpressionBuilder expr(SQLPart e)
     {
-        if (e instanceof ExpressionBuilder) {
-            parameters.addAll(((ExpressionBuilder) e).getParameters());
-        }
-
         buf.append(e);
+        parameters.addAll(e.getParameters());
         return this;
     }
 

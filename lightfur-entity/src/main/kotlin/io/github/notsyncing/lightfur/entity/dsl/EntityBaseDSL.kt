@@ -90,7 +90,15 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
 
     open fun toSQLPart() = builder
 
-    open fun toSQL() = cachedSQL ?: builder.toString()
+    open fun toSQL(): String {
+        // FIXME: Implement parameter-only generation
+        if (cachedSQL != null) {
+            // This call is for parameter generation
+            builder.toString()
+        }
+
+        return cachedSQL ?: builder.toString()
+    }
 
     open fun toSQLParameters() = builder.parameters
 }

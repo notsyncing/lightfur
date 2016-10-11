@@ -13,7 +13,7 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityBaseDSL<F>(re
 
     init {
         resultModel.fieldInfo.map { it.value }
-                .sortedBy { it.name }
+                .sortedBy { it.inner.name }
                 .forEach { builder.select(getColumnModelFromEntityFieldInfo(it)) }
     }
 

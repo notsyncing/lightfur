@@ -1,21 +1,24 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
 import io.github.notsyncing.lightfur.DataSession
-import io.github.notsyncing.lightfur.entity.EntityDataMapper
-import io.github.notsyncing.lightfur.entity.EntityFieldInfo
-import io.github.notsyncing.lightfur.entity.EntityGlobal
-import io.github.notsyncing.lightfur.entity.EntityModel
+import io.github.notsyncing.lightfur.entity.*
 import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
 import kotlinx.coroutines.async
+import javax.swing.text.html.parser.Entity
 import kotlin.reflect.KMutableProperty0
 
 abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
                                              private val isQuery: Boolean = false,
-                                             private val isInsert: Boolean = false) {
+                                             private val isInsert: Boolean = false,
+                                             private val cacheTag: String? = null) {
     abstract protected val builder: SQLPart
+    private var cachedSQL: String? = null
+
+    protected var cached: Boolean = false
+        get() = cachedSQL != null
 
     companion object {
         @JvmStatic
@@ -53,6 +56,12 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
         }
     }
 
+    init {
+        if (cacheTag != null) {
+            cachedSQL = EntityGlobal.sqlCache[cacheTag]
+        }
+    }
+
     fun execute(session: DataSession? = null) = async<Pair<List<F>, Int>> {
         val sql = toSQL()
         val params = toSQLParameters().toTypedArray()
@@ -81,7 +90,7 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
 
     open fun toSQLPart() = builder
 
-    open fun toSQL() = builder.toString()
+    open fun toSQL() = cachedSQL ?: builder.toString()
 
     open fun toSQLParameters() = builder.parameters
 }

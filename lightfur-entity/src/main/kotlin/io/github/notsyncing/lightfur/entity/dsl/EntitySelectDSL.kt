@@ -12,7 +12,7 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityBaseDSL<F>(re
     override val builder = SelectQueryBuilder()
 
     init {
-        resultModel.fieldInfo.map { it.value }
+        resultModel.fieldMap.map { it.value.info }
                 .sortedBy { it.inner.name }
                 .forEach { builder.select(getColumnModelFromEntityFieldInfo(it)) }
     }
@@ -121,7 +121,7 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityBaseDSL<F>(re
     }
 
     fun map(sourceColumn: EntityFieldInfo, asColumn: KProperty0<*>): EntitySelectDSL<F> {
-        return map(sourceColumn, resultModel.fieldInfo[asColumn.name]!!)
+        return map(sourceColumn, resultModel.fieldMap[asColumn.name]!!.info)
     }
 
     fun map(sourceExpr: SQLPart, asColumn: EntityFieldInfo): EntitySelectDSL<F> {
@@ -132,6 +132,6 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityBaseDSL<F>(re
     }
 
     fun map(sourceExpr: SQLPart, asColumn: KProperty0<*>): EntitySelectDSL<F> {
-        return map(sourceExpr, resultModel.fieldInfo[asColumn.name]!!)
+        return map(sourceExpr, resultModel.fieldMap[asColumn.name]!!.info)
     }
 }

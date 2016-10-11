@@ -1,7 +1,6 @@
 package io.github.notsyncing.lightfur.entity
 
 import io.vertx.core.json.JsonObject
-import kotlin.reflect.jvm.javaGetter
 
 class EntityDataMapper : DataMapper() {
     override fun <T : Any> mapSingleRow(clazz: Class<T>?, row: JsonObject?): T? {
@@ -12,7 +11,7 @@ class EntityDataMapper : DataMapper() {
         val o = clazz.newInstance() as EntityModel
 
         o.fieldMap.forEach {
-            val v = valueToType(it.key.javaGetter?.returnType, row?.getValue(o.fieldInfo[it.key]?.dbColumn))
+            val v = valueToType(it.value.fieldType.java, row?.getValue(o.fieldInfo[it.key]?.dbColumn))
             (it.value as EntityField<Any?>).setData(v)
         }
 

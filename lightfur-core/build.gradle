@@ -36,6 +36,7 @@ javadoc {
 
 jmh {
     jmhVersion = '1.15'
+    profilers = ["gc", "hs_rt"]
     duplicateClassesStrategy = 'warn'
 }
 

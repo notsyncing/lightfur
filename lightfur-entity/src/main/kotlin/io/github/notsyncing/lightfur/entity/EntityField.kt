@@ -1,8 +1,11 @@
 package io.github.notsyncing.lightfur.entity
 
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty0
 
-class EntityField<T> {
+class EntityField<T>(val fieldType: KClass<*>,
+                     val propertyRef: KProperty0<T>) {
     private var data: T? = null
 
     operator fun getValue(thisRef: EntityModel?, property: KProperty<*>): T {
@@ -14,7 +17,7 @@ class EntityField<T> {
             return
         }
 
-        thisRef.changedDataMap[property] = value
+        thisRef.changedDataMap[property.name] = value
         data = value
     }
 

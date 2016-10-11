@@ -10,8 +10,8 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
@@ -36,7 +36,7 @@ public abstract class DataMapperTest
         public String name;
 
         @Column("date")
-        public Instant date;
+        public LocalDateTime date;
 
         @Column("type")
         public TestEnum type;
@@ -105,8 +105,10 @@ public abstract class DataMapperTest
         assertNotNull(o);
         assertEquals(1, o.id);
         assertEquals("test", o.name);
-        assertEquals(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S").parse("2015-04-03T11:35:29.384").toInstant().getEpochSecond(),
-                o.date.getEpochSecond());
+
+        DateTimeFormatter t = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+
+        assertEquals("2015-04-03T11:35:29.384", t.format(o.date));
         assertEquals(TestEnum.TypeB, o.type);
         assertArrayEquals(new int[] { 1, 2, 3 }, o.list);
         assertArrayEquals(new int[] { 4, 5, 6 }, o.list2);

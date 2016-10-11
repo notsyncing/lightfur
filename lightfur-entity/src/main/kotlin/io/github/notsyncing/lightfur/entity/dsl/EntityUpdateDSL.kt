@@ -15,7 +15,7 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
         builder.on(getTableModelFromEntityModel(updateModel))
 
         updateModel.changedDataMap.map { it }
-                .sortedBy { it.key.name }
+                .sortedBy { it.key }
                 .forEach {
                     val f = updateModel.fieldInfo[it.key]!!
 

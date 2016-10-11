@@ -51,6 +51,8 @@ dependencies {
     testCompile 'org.slf4j:slf4j-api:1.7.21'
     testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
     testCompile project(":lightfur-core").sourceSets.test.output
+
+    jmh group: 'org.spf4j', name: 'spf4j-jmh', version: '8.1.6'
 }
 
 compileJava {
@@ -63,6 +65,9 @@ javadoc {
 
 jmh {
     jmhVersion = '1.15'
+    jvmArgsAppend = "-XX:+UnlockCommercialFeatures"
+    verbosity = "EXTRA"
+    profilers = ["org.spf4j.stackmonitor.JmhFlightRecorderProfiler"]
     duplicateClassesStrategy = 'warn'
 }
 

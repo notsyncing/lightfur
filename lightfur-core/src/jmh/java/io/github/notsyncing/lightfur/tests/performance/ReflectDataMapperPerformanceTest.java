@@ -73,9 +73,6 @@ public class ReflectDataMapperPerformanceTest
     public static void main(String[] args) throws RunnerException
     {
         Options opts = new OptionsBuilder().include(".*" + ReflectDataMapper.class.getSimpleName() + ".*")
-                    .forks(1)
-                    .warmupIterations(10)
-                    .measurementIterations(10)
                     .build();
 
         new Runner(opts).run();
@@ -83,6 +80,9 @@ public class ReflectDataMapperPerformanceTest
 
     @Benchmark
     @BenchmarkMode(Mode.All)
+    @Warmup(iterations = 10)
+    @Measurement(iterations = 10)
+    @Fork(1)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     public void reflectDataMapperBenchmark(BenchmarkStates states) throws InstantiationException, IllegalAccessException
     {

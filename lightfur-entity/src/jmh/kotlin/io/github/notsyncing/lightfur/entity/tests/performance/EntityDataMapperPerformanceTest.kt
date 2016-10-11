@@ -7,8 +7,9 @@ import io.vertx.ext.sql.ResultSet
 import org.openjdk.jmh.annotations.*
 import org.openjdk.jmh.runner.Runner
 import org.openjdk.jmh.runner.options.OptionsBuilder
+import org.spf4j.stackmonitor.JmhFlightRecorderProfiler
 import java.math.BigDecimal
-import java.time.Instant
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -23,7 +24,7 @@ open class EntityDataMapperPerformanceTest {
 
         var name: String? by field(this::name, column = "username")
 
-        var date: Instant? by field(this::date, column = "date")
+        var date: LocalDateTime? by field(this::date, column = "date")
 
         var type: TestEnum? by field(this::type, column = "type")
 
@@ -58,9 +59,7 @@ open class EntityDataMapperPerformanceTest {
         @JvmStatic
         fun main(args: Array<String>) {
             val opts = OptionsBuilder().include(".*" + EntityDataMapperPerformanceTest::class.java.simpleName + ".*")
-                    .forks(1)
-                    .warmupIterations(10)
-                    .measurementIterations(10)
+                    .addProfiler(JmhFlightRecorderProfiler::class.java)
                     .build()
 
             Runner(opts).run()
@@ -69,6 +68,9 @@ open class EntityDataMapperPerformanceTest {
 
     @Benchmark
     @BenchmarkMode(Mode.All)
+    @Warmup(iterations = 10)
+    @Measurement(iterations = 10)
+    @Fork(1)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     fun entityDataMapperTest(states: BenchmarkStates) {
         val o = states.dataMapper.map(TestObject::class.java, states.r)

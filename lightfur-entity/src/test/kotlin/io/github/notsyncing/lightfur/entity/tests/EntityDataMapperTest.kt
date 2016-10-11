@@ -9,8 +9,8 @@ import io.vertx.ext.sql.ResultSet
 import org.junit.Assert
 import org.junit.Test
 import java.math.BigDecimal
-import java.text.SimpleDateFormat
-import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class EntityDataMapperTest : DataMapperTest(EntityDataMapper::class.java) {
@@ -19,7 +19,7 @@ class EntityDataMapperTest : DataMapperTest(EntityDataMapper::class.java) {
 
         var name: String? by field(this::name, column = "username")
 
-        var date: Instant? by field(this::date, column = "date")
+        var date: LocalDateTime? by field(this::date, column = "date")
 
         var type: TestEnum? by field(this::type, column = "type")
 
@@ -61,8 +61,10 @@ class EntityDataMapperTest : DataMapperTest(EntityDataMapper::class.java) {
         Assert.assertNotNull(o)
         Assert.assertEquals(1, o.id.toLong())
         Assert.assertEquals("test", o.name)
-        Assert.assertEquals(SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S").parse("2015-04-03T11:35:29.384").toInstant().epochSecond,
-                o.date?.epochSecond)
+
+        val t = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+
+        Assert.assertEquals("2015-04-03T11:35:29.384", t.format(o.date))
         Assert.assertEquals(TestEnum.TypeB, o.type)
         Assert.assertArrayEquals(intArrayOf(1, 2, 3), o.list)
         Assert.assertArrayEquals(intArrayOf(4, 5, 6), o.list2)

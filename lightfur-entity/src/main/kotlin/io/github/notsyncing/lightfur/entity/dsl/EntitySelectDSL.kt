@@ -121,7 +121,7 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityBaseDSL<F>(re
     }
 
     fun map(sourceColumn: EntityFieldInfo, asColumn: KProperty0<*>): EntitySelectDSL<F> {
-        return map(sourceColumn, resultModel.fieldInfo[asColumn]!!)
+        return map(sourceColumn, resultModel.fieldInfo[asColumn.name]!!)
     }
 
     fun map(sourceExpr: SQLPart, asColumn: EntityFieldInfo): EntitySelectDSL<F> {
@@ -132,6 +132,6 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityBaseDSL<F>(re
     }
 
     fun map(sourceExpr: SQLPart, asColumn: KProperty0<*>): EntitySelectDSL<F> {
-        return map(sourceExpr, resultModel.fieldInfo[asColumn]!!)
+        return map(sourceExpr, resultModel.fieldInfo[asColumn.name]!!)
     }
 }

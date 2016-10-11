@@ -12,7 +12,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +33,7 @@ public class ReflectDataMapperPerformanceTest
         public String name;
 
         @Column("date")
-        public Instant date;
+        public LocalDateTime date;
 
         @Column("type")
         public DataMapperTest.TestEnum type;

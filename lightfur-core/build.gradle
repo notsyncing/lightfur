@@ -2,6 +2,7 @@ plugins {
     id "java"
     id "maven-publish"
     id "com.jfrog.bintray" version "1.6"
+    id "me.champeau.gradle.jmh" version "0.3.1"
 }
 
 sourceCompatibility = 1.8
@@ -18,7 +19,7 @@ dependencies {
     compile 'com.alibaba:fastjson:1.2.14'
     compile group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: '2.0.1'
 
-    testCompile project(":lightfur-codegen")
+    //testCompile project(":lightfur-codegen")
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile 'io.vertx:vertx-unit:3.3.3'
     testCompile 'org.slf4j:slf4j-api:1.7.21'
@@ -31,6 +32,11 @@ compileJava {
 
 javadoc {
     options.encoding = "UTF-8"
+}
+
+jmh {
+    jmhVersion = '1.15'
+    duplicateClassesStrategy = 'warn'
 }
 
 task sourceJar(type: Jar) {

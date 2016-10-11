@@ -18,6 +18,7 @@ plugins {
     id "java"
     id "maven-publish"
     id "com.jfrog.bintray" version "1.6"
+    id "me.champeau.gradle.jmh" version "0.3.1"
 }
 
 apply plugin: "kotlin"
@@ -58,6 +59,11 @@ compileJava {
 
 javadoc {
     options.encoding = "UTF-8"
+}
+
+jmh {
+    jmhVersion = '1.15'
+    duplicateClassesStrategy = 'warn'
 }
 
 task sourceJar(type: Jar) {

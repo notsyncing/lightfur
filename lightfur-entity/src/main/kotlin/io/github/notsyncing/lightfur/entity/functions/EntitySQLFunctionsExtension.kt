@@ -1,18 +1,26 @@
-package io.github.notsyncing.lightfur.entity
+package io.github.notsyncing.lightfur.entity.functions
 
+import io.github.notsyncing.lightfur.entity.EntityFieldInfo
+import io.github.notsyncing.lightfur.entity.field
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import io.github.notsyncing.lightfur.sql.base.SQLPart
 
-private fun function(func: String, field: EntityFieldInfo): ExpressionBuilder {
-    return ExpressionBuilder().beginFunction(func)
-            .field(field)
-            .endFunction()
-}
+fun function(func: String, vararg param: Any?): ExpressionBuilder {
+    val b = ExpressionBuilder().beginFunction(func)
 
-private fun function(func: String, expr: SQLPart): ExpressionBuilder {
-    return ExpressionBuilder().beginFunction(func)
-            .expr(expr)
-            .endFunction()
+    for (p in param) {
+        if (p is EntityFieldInfo) {
+            b.field(p).separator()
+        } else if (p is SQLPart) {
+            b.expr(p).separator()
+        } else {
+            b.literal(param).separator()
+        }
+    }
+
+    b.endFunction()
+
+    return b
 }
 
 fun sum(field: EntityFieldInfo): ExpressionBuilder {

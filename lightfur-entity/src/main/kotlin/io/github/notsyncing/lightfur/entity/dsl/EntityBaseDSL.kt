@@ -10,7 +10,7 @@ import kotlinx.coroutines.async
 import javax.swing.text.html.parser.Entity
 import kotlin.reflect.KMutableProperty0
 
-abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
+abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
                                              private val isQuery: Boolean = false,
                                              private val isInsert: Boolean = false,
                                              private val cacheTag: String? = null) {
@@ -68,23 +68,23 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F,
         val db = session ?: DataSession(EntityDataMapper())
 
         if (isQuery) {
-            val r = await(db.queryList(finalModel.javaClass, sql, *params))
+            val r = await(db.queryList(finalModel!!.javaClass, sql, *params))
             return@async Pair(r, r.size)
         } else if (isInsert) {
             val r = await(db.executeWithReturning(sql, *params))
 
             if (r.numRows == 1) {
-                for ((i, pkf) in finalModel.primaryKeyFields.withIndex()) {
+                for ((i, pkf) in finalModel!!.primaryKeyFields.withIndex()) {
                     val p = pkf as KMutableProperty0<Any>
                     p.set(r.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].inner.dbColumn))
                 }
             }
 
-            return@async Pair(listOf(finalModel), r.numRows)
+            return@async Pair(listOf(finalModel!!), r.numRows)
         } else {
             val u = await(db.execute(sql, *params))
 
-            return@async Pair(listOf(finalModel), u.updated)
+            return@async Pair(if (finalModel == null) emptyList() else listOf(finalModel), u.updated)
         }
     }
 

@@ -40,7 +40,7 @@ fun test() {
     r.F(r::flag) + r.F(r::id) gt r.F(r::flag)
     r.F(r::flag) gt r.F(r::id)
     r.F(r::flag) eq (case().on(r.F(r::id) gt 3).then(5).on(r.F(r::id) gt 5).then(8).otherwise(7))
-    coalesce(r.F(r::flag), 0)
+    coalesce(r.F(r::flag), 0) + 2
 
     EntityDSL.select(r)
             .from()

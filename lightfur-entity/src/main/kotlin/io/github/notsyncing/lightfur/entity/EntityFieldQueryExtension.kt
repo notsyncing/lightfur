@@ -271,6 +271,35 @@ operator fun EntityFieldInfo.plus(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
+operator fun ExpressionBuilder.plus(value: EntityFieldInfo): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
+            .operator("+")
+            .column(column)
+            .endGroup()
+}
+
+operator fun ExpressionBuilder.plus(value: SQLPart): ExpressionBuilder {
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
+            .operator("+")
+            .expr(value)
+            .endGroup()
+}
+
+operator fun ExpressionBuilder.plus(value: Any): ExpressionBuilder {
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
+            .operator("+")
+            .parameter(value)
+            .endGroup()
+}
+
 operator fun EntityFieldInfo.minus(value: EntityFieldInfo): ExpressionBuilder {
     val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
     val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
@@ -289,6 +318,35 @@ operator fun EntityFieldInfo.minus(value: SQLPart): ExpressionBuilder {
     return ExpressionBuilder()
             .beginGroup()
             .column(column)
+            .operator("-")
+            .expr(value)
+            .endGroup()
+}
+
+operator fun ExpressionBuilder.minus(value: Any): ExpressionBuilder {
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
+            .operator("-")
+            .parameter(value)
+            .endGroup()
+}
+
+operator fun ExpressionBuilder.minus(value: EntityFieldInfo): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
+            .operator("-")
+            .column(column)
+            .endGroup()
+}
+
+operator fun ExpressionBuilder.minus(value: SQLPart): ExpressionBuilder {
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
             .operator("-")
             .expr(value)
             .endGroup()
@@ -339,6 +397,35 @@ operator fun EntityFieldInfo.times(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
+operator fun ExpressionBuilder.times(value: EntityFieldInfo): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
+            .operator("*")
+            .column(column)
+            .endGroup()
+}
+
+operator fun ExpressionBuilder.times(value: SQLPart): ExpressionBuilder {
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
+            .operator("*")
+            .expr(value)
+            .endGroup()
+}
+
+operator fun ExpressionBuilder.times(value: Any): ExpressionBuilder {
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
+            .operator("*")
+            .parameter(value)
+            .endGroup()
+}
+
 operator fun EntityFieldInfo.div(value: EntityFieldInfo): ExpressionBuilder {
     val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
     val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
@@ -368,6 +455,35 @@ operator fun EntityFieldInfo.div(value: Any): ExpressionBuilder {
     return ExpressionBuilder()
             .beginGroup()
             .column(column)
+            .operator("/")
+            .parameter(value)
+            .endGroup()
+}
+
+operator fun ExpressionBuilder.div(value: EntityFieldInfo): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
+            .operator("/")
+            .column(column)
+            .endGroup()
+}
+
+operator fun ExpressionBuilder.div(value: SQLPart): ExpressionBuilder {
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
+            .operator("/")
+            .expr(value)
+            .endGroup()
+}
+
+operator fun ExpressionBuilder.div(value: Any): ExpressionBuilder {
+    return ExpressionBuilder()
+            .beginGroup()
+            .expr(this)
             .operator("/")
             .parameter(value)
             .endGroup()

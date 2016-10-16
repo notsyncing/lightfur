@@ -12,3 +12,7 @@ fun coalesce(field: EntityFieldInfo, defValue: Any?): ExpressionBuilder {
 fun coalesce(expr: ExpressionBuilder, defValue: Any?): ExpressionBuilder {
     return function("COALESCE", expr, defValue)
 }
+
+fun coalesce(value: Any?, defValue: Any?): ExpressionBuilder {
+    return function("COALESCE", value, defValue)
+}

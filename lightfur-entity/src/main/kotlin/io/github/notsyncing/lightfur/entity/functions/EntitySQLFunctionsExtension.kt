@@ -8,13 +8,15 @@ import io.github.notsyncing.lightfur.sql.base.SQLPart
 fun function(func: String, vararg param: Any?): ExpressionBuilder {
     val b = ExpressionBuilder().beginFunction(func)
 
-    for (p in param) {
-        if (p is EntityFieldInfo) {
-            b.field(p).separator()
-        } else if (p is SQLPart) {
-            b.expr(p).separator()
-        } else {
-            b.literal(param).separator()
+    if (param.size > 0) {
+        for (p in param) {
+            if (p is EntityFieldInfo) {
+                b.field(p).separator()
+            } else if (p is SQLPart) {
+                b.expr(p).separator()
+            } else {
+                b.literal(param).separator()
+            }
         }
     }
 

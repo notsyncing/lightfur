@@ -4,6 +4,7 @@ import io.github.notsyncing.lightfur.entity.*
 import io.github.notsyncing.lightfur.entity.dsl.EntityDSL
 import io.github.notsyncing.lightfur.entity.functions.coalesce
 import io.github.notsyncing.lightfur.entity.functions.count
+import io.github.notsyncing.lightfur.entity.functions.now
 import io.github.notsyncing.lightfur.entity.functions.sum
 
 class TestModel : EntityModel(table = "test_table") {
@@ -41,6 +42,7 @@ fun test() {
     r.F(r::flag) gt r.F(r::id)
     r.F(r::flag) eq (case().on(r.F(r::id) gt 3).then(5).on(r.F(r::id) gt 5).then(8).otherwise(7))
     coalesce(r.F(r::flag), 0) + 2
+    coalesce(r.F(r::flag), now())
 
     EntityDSL.select(r)
             .from()

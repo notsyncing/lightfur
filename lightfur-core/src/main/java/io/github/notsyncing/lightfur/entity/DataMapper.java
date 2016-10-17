@@ -8,6 +8,8 @@ import scala.Char;
 import scala.math.BigDecimal;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Executable;
+import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -21,6 +23,8 @@ public abstract class DataMapper
 {
     private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
             .withResolverStyle(ResolverStyle.SMART);
+
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     protected Instant valueToInstant(Object value)
     {
@@ -42,6 +46,12 @@ public abstract class DataMapper
                     time = Instant.parse((String) value);
                 } catch (Exception e) {
                     e.printStackTrace();
+
+                    try {
+                        time = sdf.parse((String)value).toInstant();
+                    } catch (Exception e2) {
+                        e2.printStackTrace();
+                    }
                 }
             }
         }

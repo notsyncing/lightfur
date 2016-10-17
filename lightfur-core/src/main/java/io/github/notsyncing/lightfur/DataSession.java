@@ -112,13 +112,11 @@ public class DataSession
      */
     public CompletableFuture<Void> commit(boolean endTransaction)
     {
-        return commitCore().thenCompose(o -> {
-            if (endTransaction) {
-                return setAutoCommit(true);
-            } else {
-                return CompletableFuture.completedFuture(o);
-            }
-        });
+        if (endTransaction) {
+            return setAutoCommit(true);
+        } else {
+            return commitCore();
+        }
     }
 
     /**
@@ -310,12 +308,19 @@ public class DataSession
     {
         CompletableFuture<Void> f = new CompletableFuture<>();
 
-        conn.close(r -> {
+        conn.setAutoCommit(false, r -> {
             if (r.failed()) {
                 f.completeExceptionally(r.cause());
-            } else {
-                f.complete(r.result());
+                return;
             }
+
+            conn.close(r2 -> {
+                if (r2.failed()) {
+                    f.completeExceptionally(r2.cause());
+                } else {
+                    f.complete(r2.result());
+                }
+            });
         });
 
         return f;

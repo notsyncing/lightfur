@@ -160,29 +160,46 @@ public class DatabaseVersionManager
 
         CompletableFuture<Void> f = new CompletableFuture<>();
 
-        conn.query("CREATE SCHEMA IF NOT EXISTS lightfur", r -> {
-            if (r.failed()) {
-                f.completeExceptionally(r.cause());
+        conn.setAutoCommit(false, r4 -> {
+            if (r4.failed()) {
+                f.completeExceptionally(r4.cause());
                 return;
             }
 
-            conn.query("CREATE TABLE IF NOT EXISTS lightfur.version_data (data JSONB)", r2 -> {
-                if (r2.failed()) {
-                    f.completeExceptionally(r2.cause());
+            conn.query("CREATE SCHEMA IF NOT EXISTS lightfur", r -> {
+                if (r.failed()) {
+                    conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
+                    f.completeExceptionally(r.cause());
                     return;
                 }
 
-                String sql = "INSERT INTO lightfur.version_data (data)\n" +
-                        "SELECT ?::jsonb\n" +
-                        "WHERE NOT EXISTS (SELECT 1 FROM lightfur.version_data)";
-
-                conn.queryWithParams(sql, new JsonArray().add(initData.toString()), r3 -> {
-                    if (r3.failed()) {
-                        f.completeExceptionally(r3.cause());
+                conn.query("CREATE TABLE IF NOT EXISTS lightfur.version_data (data JSONB)", r2 -> {
+                    if (r2.failed()) {
+                        conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
+                        f.completeExceptionally(r2.cause());
                         return;
                     }
 
-                    f.complete(null);
+                    String sql = "INSERT INTO lightfur.version_data (data)\n" +
+                            "SELECT ?::jsonb\n" +
+                            "WHERE NOT EXISTS (SELECT 1 FROM lightfur.version_data)";
+
+                    conn.queryWithParams(sql, new JsonArray().add(initData.toString()), r3 -> {
+                        if (r3.failed()) {
+                            conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
+                            f.completeExceptionally(r3.cause());
+                            return;
+                        }
+
+                        conn.setAutoCommit(true, r5 -> {
+                            if (r5.failed()) {
+                                f.completeExceptionally(r5.cause());
+                                return;
+                            }
+
+                            f.complete(null);
+                        });
+                    });
                 });
             });
         });
@@ -254,10 +271,24 @@ public class DatabaseVersionManager
     private CompletableFuture<Void> doUpdate(DbVersionUpdateInfo info)
     {
         CompletableFuture<Void> f = new CompletableFuture<>();
+        String data;
 
         try {
-            conn.query(info.getUpdateContent(), r -> {
+            data = info.getUpdateContent();
+        } catch (IOException e) {
+            f.completeExceptionally(e);
+            return f;
+        }
+
+        conn.setAutoCommit(false, r3 -> {
+            if (r3.failed()) {
+                f.completeExceptionally(r3.cause());
+                return;
+            }
+
+            conn.query(data, r -> {
                 if (r.failed()) {
+                    conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
                     f.completeExceptionally(r.cause());
                     return;
                 }
@@ -270,16 +301,22 @@ public class DatabaseVersionManager
 
                 conn.updateWithParams("UPDATE lightfur.version_data SET data = ?::jsonb", new JsonArray().add(versionData.toString()), r2 -> {
                     if (r2.failed()) {
+                        conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
                         f.completeExceptionally(r2.cause());
                         return;
                     }
 
-                    f.complete(null);
+                    conn.setAutoCommit(true, r4 -> {
+                        if (r4.failed()) {
+                            f.completeExceptionally(r4.cause());
+                            return;
+                        }
+
+                        f.complete(null);
+                    });
                 });
             });
-        } catch (IOException e) {
-            f.completeExceptionally(e);
-        }
+        });
 
         return f;
     }

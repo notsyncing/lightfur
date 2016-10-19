@@ -4,6 +4,11 @@ import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class ReflectDataMapper extends DataMapper
 {
@@ -12,7 +17,19 @@ public class ReflectDataMapper extends DataMapper
     {
         T instance = clazz.newInstance();
 
-        for (Field f : clazz.getFields()) {
+        List<Field> fields = new ArrayList<>();
+        fields.addAll(Arrays.asList(clazz.getFields()));
+
+        if (clazz.getDeclaredFields().length > 0) {
+            Stream.of(clazz.getDeclaredFields())
+                    .filter(f -> Modifier.isPrivate(f.getModifiers()))
+                    .forEach(f -> {
+                        f.setAccessible(true);
+                        fields.add(f);
+                    });
+        }
+
+        for (Field f : fields) {
             if (!f.isAnnotationPresent(Column.class)) {
                 continue;
             }

@@ -64,7 +64,17 @@ public class ExpressionBuilder implements SQLPart
 
     public ExpressionBuilder endFunction()
     {
+        if ((buf.charAt(buf.length() - 2) == ',') && (buf.charAt(buf.length() - 1) == ' ')) {
+            buf.delete(buf.length() - 2, buf.length());
+        }
+
         buf.append(")");
+        return this;
+    }
+
+    public ExpressionBuilder separator()
+    {
+        buf.append(", ");
         return this;
     }
 

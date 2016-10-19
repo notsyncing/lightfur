@@ -27,6 +27,7 @@ public class DataSession
     private CompletableFuture<Void> connFuture;
     private boolean inTransaction = false;
     private DataMapper dataMapper;
+    private boolean ended = false;
 
     /**
      * 实例化一个数据操作会话
@@ -112,13 +113,11 @@ public class DataSession
      */
     public CompletableFuture<Void> commit(boolean endTransaction)
     {
-        return commitCore().thenCompose(o -> {
-            if (endTransaction) {
-                return setAutoCommit(true);
-            } else {
-                return CompletableFuture.completedFuture(o);
-            }
-        });
+        if (endTransaction) {
+            return setAutoCommit(true);
+        } else {
+            return commitCore();
+        }
     }
 
     /**
@@ -274,16 +273,22 @@ public class DataSession
         return ensureConnection().thenCompose(c -> {
             CompletableFuture<ResultSet> f = new CompletableFuture<>();
 
-            c.queryWithParams(sql, params, r -> {
-                if (r.succeeded()) {
-                    f.complete(r.result());
-                } else {
-                    System.out.println("Error occured when querying SQL: " + sql + " (" + params + ")");
+            try {
+                c.queryWithParams(sql, params, r -> {
+                    if (r.succeeded()) {
+                        f.complete(r.result());
+                    } else {
+                        System.out.println("Error occured when querying SQL: " + sql + " (" + params + ")");
 
-                    r.cause().printStackTrace();
-                    f.completeExceptionally(r.cause());
-                }
-            });
+                        r.cause().printStackTrace();
+                        f.completeExceptionally(r.cause());
+                    }
+                });
+            } catch (Exception e) {
+                System.out.println("Error occured when querying SQL: " + sql + " (" + params + ")");
+                e.printStackTrace();
+                f.completeExceptionally(e);
+            }
 
             return f;
         });
@@ -308,14 +313,26 @@ public class DataSession
      */
     public CompletableFuture<Void> end()
     {
+        if (ended) {
+            return CompletableFuture.completedFuture(null);
+        }
+
         CompletableFuture<Void> f = new CompletableFuture<>();
 
-        conn.close(r -> {
+        conn.setAutoCommit(false, r -> {
             if (r.failed()) {
                 f.completeExceptionally(r.cause());
-            } else {
-                f.complete(r.result());
+                return;
             }
+
+            conn.close(r2 -> {
+                if (r2.failed()) {
+                    f.completeExceptionally(r2.cause());
+                } else {
+                    ended = true;
+                    f.complete(r2.result());
+                }
+            });
         });
 
         return f;

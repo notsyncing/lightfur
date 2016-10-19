@@ -45,6 +45,11 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
         return this
     }
 
+    fun set(f: EntityFieldInfo, value: Any?): EntityUpdateDSL<F> {
+        builder.set(getColumnModelFromEntityFieldInfo(f), value)
+        return this
+    }
+
     fun from(model: EntityModel): EntityUpdateDSL<F> {
         builder.from(getTableModelFromEntityModel(model))
         return this

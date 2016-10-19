@@ -312,6 +312,8 @@ public class DatabaseVersionManager
                             return;
                         }
 
+                        System.out.println(info.getId() + ": Updated database " + info.getDatabase() + " to version " +
+                                info.getVersion() + " with script " + info.getPath());
                         f.complete(null);
                     });
                 });

@@ -1,10 +1,16 @@
 package io.github.notsyncing.lightfur.versioning;
 
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 public class DbVersionUpdateInfo
 {
@@ -82,6 +88,10 @@ public class DbVersionUpdateInfo
 
     public String getUpdateContent() throws IOException
     {
-        return new String(Files.readAllBytes(path), "utf-8");
+        try (InputStream stream = new BOMInputStream(Files.newInputStream(path, StandardOpenOption.READ),
+                ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32BE,
+                ByteOrderMark.UTF_32LE)) {
+            return IOUtils.toString(stream, StandardCharsets.UTF_8);
+        }
     }
 }

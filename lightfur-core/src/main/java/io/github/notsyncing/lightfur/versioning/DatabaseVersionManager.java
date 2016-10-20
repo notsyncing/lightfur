@@ -6,6 +6,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -234,7 +236,9 @@ public class DatabaseVersionManager
         scanner.matchFilenameExtension("sql", (absolutePath, relativePathStr, inputStream, lengthBytes) -> {
             char[] header = new char[1024];
 
-            try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(inputStream,
+                    ByteOrderMark.UTF_8, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_32BE,
+                    ByteOrderMark.UTF_32LE))) {
                 reader.read(header, 0, 1024);
             }
 

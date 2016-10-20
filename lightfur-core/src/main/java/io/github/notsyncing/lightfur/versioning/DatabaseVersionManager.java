@@ -262,6 +262,10 @@ public class DatabaseVersionManager
                 return;
             }
 
+            if (info.getDatabase().equals("$")) {
+                info.setDatabase(databaseName);
+            }
+
             files.add(info);
         }).scan();
 
@@ -280,13 +284,16 @@ public class DatabaseVersionManager
             return f;
         }
 
+        System.out.println(info.getId() + ": Updating database " + info.getDatabase() + " to version " +
+                info.getVersion() + "...");
+
         conn.setAutoCommit(false, r3 -> {
             if (r3.failed()) {
                 f.completeExceptionally(r3.cause());
                 return;
             }
 
-            conn.query(data, r -> {
+            conn.execute(data, r -> {
                 if (r.failed()) {
                     conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
                     f.completeExceptionally(r.cause());

@@ -7,11 +7,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -236,11 +238,11 @@ public class DatabaseVersionManager
         scanner.matchFilenameExtension("sql", (absolutePath, relativePathStr, inputStream, lengthBytes) -> {
             char[] header = new char[1024];
 
-            try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(inputStream,
+            InputStream stream = new BOMInputStream(inputStream,
                     ByteOrderMark.UTF_8, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_32BE,
-                    ByteOrderMark.UTF_32LE))) {
-                reader.read(header, 0, 1024);
-            }
+                    ByteOrderMark.UTF_32LE);
+            InputStreamReader reader = new InputStreamReader(stream);
+            int headerReadLength = reader.read(header, 0, 1024);
 
             String s = new String(header);
             int start = s.indexOf(startMagic);
@@ -270,6 +272,12 @@ public class DatabaseVersionManager
                 info.setDatabase(databaseName);
             }
 
+            if (headerReadLength >= 1024) {
+                info.setUpdateContent(new String(header) + IOUtils.toString(reader));
+            } else {
+                info.setUpdateContent(new String(Arrays.copyOfRange(header, 0, headerReadLength)));
+            }
+
             files.add(info);
         }).scan();
 
@@ -279,14 +287,7 @@ public class DatabaseVersionManager
     private CompletableFuture<Void> doUpdate(DbVersionUpdateInfo info)
     {
         CompletableFuture<Void> f = new CompletableFuture<>();
-        String data;
-
-        try {
-            data = info.getUpdateContent();
-        } catch (IOException e) {
-            f.completeExceptionally(e);
-            return f;
-        }
+        String data = info.getUpdateContent();
 
         System.out.println(info.getId() + ": Updating database " + info.getDatabase() + " to version " +
                 info.getVersion() + "...");

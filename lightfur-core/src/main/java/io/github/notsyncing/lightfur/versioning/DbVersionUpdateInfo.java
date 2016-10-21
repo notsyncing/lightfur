@@ -1,16 +1,8 @@
 package io.github.notsyncing.lightfur.versioning;
 
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BOMInputStream;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 public class DbVersionUpdateInfo
 {
@@ -20,6 +12,7 @@ public class DbVersionUpdateInfo
     private int version;
     private boolean fullVersion;
     private JsonObject data;
+    private String updateContent;
 
     public String getDatabase()
     {
@@ -86,12 +79,13 @@ public class DbVersionUpdateInfo
         this.fullVersion = data.getBoolean("full_version", false);
     }
 
-    public String getUpdateContent() throws IOException
+    public String getUpdateContent()
     {
-        try (InputStream stream = new BOMInputStream(Files.newInputStream(path, StandardOpenOption.READ),
-                ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32BE,
-                ByteOrderMark.UTF_32LE)) {
-            return IOUtils.toString(stream, StandardCharsets.UTF_8);
-        }
+        return updateContent;
+    }
+
+    public void setUpdateContent(String updateContent)
+    {
+        this.updateContent = updateContent;
     }
 }

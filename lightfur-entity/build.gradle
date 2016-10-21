@@ -59,6 +59,12 @@ compileJava {
     options.encoding = "utf-8"
 }
 
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
 javadoc {
     options.encoding = "UTF-8"
 }

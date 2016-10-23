@@ -1,5 +1,6 @@
 package io.github.notsyncing.lightfur.entity
 
+import com.alibaba.fastjson.annotation.JSONField
 import io.github.notsyncing.lightfur.entity.dsl.EntityDSL
 import io.github.notsyncing.lightfur.entity.dsl.EntityInsertDSL
 import io.github.notsyncing.lightfur.sql.models.TableModel
@@ -7,11 +8,16 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KProperty0
 
-abstract class EntityModel(val database: String? = null,
-                           val schema: String? = null,
-                           val table: String) {
+abstract class EntityModel(@JSONField(serialize = false, deserialize = false) val database: String? = null,
+                           @JSONField(serialize = false, deserialize = false) val schema: String? = null,
+                           @JSONField(serialize = false, deserialize = false) val table: String) {
+    @JSONField(serialize = false, deserialize = false)
     val fieldMap = ConcurrentHashMap<String, EntityField<*>>()
+
+    @JSONField(serialize = false, deserialize = false)
     val primaryKeyFields = ArrayList<KProperty0<*>>()
+
+    @JSONField(serialize = false, deserialize = false)
     val primaryKeyFieldInfos = ArrayList<EntityFieldInfo>()
 
     init {

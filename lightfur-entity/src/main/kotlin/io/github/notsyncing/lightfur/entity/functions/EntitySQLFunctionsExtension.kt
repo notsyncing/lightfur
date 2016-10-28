@@ -15,7 +15,7 @@ fun function(func: String, vararg param: Any?): ExpressionBuilder {
             } else if (p is SQLPart) {
                 b.expr(p).separator()
             } else {
-                b.literal(param).separator()
+                b.literal(p).separator()
             }
         }
     }

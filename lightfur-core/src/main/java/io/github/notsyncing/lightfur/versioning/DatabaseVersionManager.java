@@ -35,10 +35,8 @@ public class DatabaseVersionManager
         this.scanner = scanner;
     }
 
-    public CompletableFuture<Void> upgradeToLatest()
+    public CompletableFuture<Void> upgradeToLatest(String dbName)
     {
-        String dbName = db.getConfigs().getDatabase();
-
         return db.setDatabase("postgres")
                 .thenCompose(r -> db.getConnection())
                 .thenAccept(r -> conn = r)

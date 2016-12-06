@@ -37,7 +37,7 @@ public class DatabaseManager
 
     private DatabaseManager()
     {
-        cpScanner = new FastClasspathScanner("-com.github.mauricio", "-scala");
+        cpScanner = new FastClasspathScanner("-com.github.mauricio", "-scala", "-kotlin");
         cpScanner.matchClassesWithAnnotation(GeneratedDataContext.class,
                 c -> Query.addDataContextImplementation((Class<? extends DataContext>)c))
         .scan();
@@ -71,9 +71,9 @@ public class DatabaseManager
         configs = config;
         client = PostgreSQLClient.createNonShared(vertx, configs.toVertxConfig());
 
-        if (config.isEnableDatabaseVersioning()) {
+        if ((config.isEnableDatabaseVersioning()) && (!config.getDatabase().equals("postgres"))) {
             DatabaseVersionManager versionManager = new DatabaseVersionManager(this, cpScanner);
-            return versionManager.upgradeToLatest();
+            return versionManager.upgradeToLatest(config.getDatabase());
         }
 
         return CompletableFuture.completedFuture(null);
@@ -281,5 +281,16 @@ public class DatabaseManager
             configs.setDatabase(databaseName);
             client = PostgreSQLClient.createNonShared(vertx, configs.toVertxConfig());
         });
+    }
+
+    /**
+     * 异步升级数据库到最新版本
+     * @param databaseName 要升级到数据库名称
+     * @return 指示是否完成升级的 CompletableFuture 对象
+     */
+    public CompletableFuture<Void> upgradeDatabase(String databaseName)
+    {
+        DatabaseVersionManager versionManager = new DatabaseVersionManager(this, cpScanner);
+        return versionManager.upgradeToLatest(databaseName);
     }
 }

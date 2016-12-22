@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.1-M03'
+    ext.kotlin_version = '1.1-M04'
 
     repositories {
         mavenCentral()
@@ -33,16 +33,12 @@ repositories {
     maven {
         url "http://dl.bintray.com/kotlin/kotlin-eap-1.1"
     }
-
-    maven {
-        url "http://dl.bintray.com/kotlin/kotlinx.coroutines"
-    }
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-async:0.1-alpha-2"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-async:0.2-beta"
     compile project(":lightfur-core")
     compile 'com.alibaba:fastjson:1.2.14'
 

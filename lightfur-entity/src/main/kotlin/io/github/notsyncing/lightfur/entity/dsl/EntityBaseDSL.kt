@@ -7,6 +7,7 @@ import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.await
 import javax.swing.text.html.parser.Entity
 import kotlin.reflect.KMutableProperty0
 
@@ -68,10 +69,10 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
         val db = session ?: DataSession(EntityDataMapper())
 
         if (isQuery) {
-            val r = await(db.queryList(finalModel!!.javaClass, sql, *params))
+            val r = db.queryList(finalModel!!.javaClass, sql, *params).await()
             return@async Pair(r, r.size)
         } else if (isInsert) {
-            val r = await(db.executeWithReturning(sql, *params))
+            val r = db.executeWithReturning(sql, *params).await()
 
             if (r.numRows == 1) {
                 for ((i, pkf) in finalModel!!.primaryKeyFields.withIndex()) {
@@ -82,7 +83,7 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
 
             return@async Pair(listOf(finalModel!!), r.numRows)
         } else {
-            val u = await(db.execute(sql, *params))
+            val u = db.execute(sql, *params).await()
 
             return@async Pair(if (finalModel == null) emptyList() else listOf(finalModel), u.updated)
         }

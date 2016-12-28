@@ -51,4 +51,24 @@ RETURNING "id", "name""""
         Assert.assertEquals(expected, s)
         Assert.assertArrayEquals(arrayOf(3), p.toTypedArray())
     }
+
+    @Test
+    fun testInsertWithSkippedColumns() {
+        val m = TestModel()
+        m.id = 3
+        m.flag = 4
+        m.name = "skip"
+
+        val q = EntityInsertDSL(m)
+                .values(skips = listOf(m::flag))
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
+
+        val expected = """INSERT INTO "test_table" ("name")
+VALUES (?)
+RETURNING "id""""
+
+        Assert.assertEquals(expected, s)
+        Assert.assertArrayEquals(arrayOf("skip"), p.toTypedArray())
+    }
 }

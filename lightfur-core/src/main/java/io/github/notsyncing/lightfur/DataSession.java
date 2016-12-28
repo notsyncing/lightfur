@@ -317,6 +317,10 @@ public class DataSession
             return CompletableFuture.completedFuture(null);
         }
 
+        if (conn == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+
         CompletableFuture<Void> f = new CompletableFuture<>();
 
         conn.setAutoCommit(false, r -> {

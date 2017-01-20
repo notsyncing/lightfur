@@ -6,8 +6,8 @@ import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.await
+import kotlinx.coroutines.experimental.future.await
+import kotlinx.coroutines.experimental.future.future
 import javax.swing.text.html.parser.Entity
 import kotlin.reflect.KMutableProperty0
 
@@ -63,14 +63,14 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
         }
     }
 
-    fun execute(session: DataSession? = null) = async<Pair<List<F>, Int>> {
+    fun execute(session: DataSession? = null) = future<Pair<List<F>, Int>> {
         val sql = toSQL()
         val params = toSQLParameters().toTypedArray()
         val db = session ?: DataSession(EntityDataMapper())
 
         if (isQuery) {
             val r = db.queryList(finalModel!!.javaClass, sql, *params).await()
-            return@async Pair(r, r.size)
+            return@future Pair(r, r.size)
         } else if (isInsert) {
             val r = db.executeWithReturning(sql, *params).await()
 
@@ -81,11 +81,11 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
                 }
             }
 
-            return@async Pair(listOf(finalModel!!), r.numRows)
+            return@future Pair(listOf(finalModel!!), r.numRows)
         } else {
             val u = db.execute(sql, *params).await()
 
-            return@async Pair(if (finalModel == null) emptyList() else listOf(finalModel), u.updated)
+            return@future Pair(if (finalModel == null) emptyList() else listOf(finalModel), u.updated)
         }
     }
 

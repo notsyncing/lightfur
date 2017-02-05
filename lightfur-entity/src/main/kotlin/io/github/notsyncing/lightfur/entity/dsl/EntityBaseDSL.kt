@@ -81,9 +81,17 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
                 }
             }
 
+            if (session == null) {
+                db.end().await()
+            }
+
             return@future Pair(listOf(finalModel!!), r.numRows)
         } else {
             val u = db.execute(sql, *params).await()
+
+            if (session == null) {
+                db.end().await()
+            }
 
             return@future Pair(if (finalModel == null) emptyList() else listOf(finalModel), u.updated)
         }

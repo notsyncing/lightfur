@@ -17,7 +17,7 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
     private List<ColumnModel> columns = new ArrayList<>();
     private List<Object> values = new ArrayList<>();
     private boolean needOnConflict = false;
-    private SQLPart onConflictColumn = null;
+    private ColumnModel onConflictColumn = null;
     private SQLPart onConflictDo = null;
 
     public InsertQueryBuilder into(TableModel t)
@@ -122,7 +122,7 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
     {
         StringBuilder buf = new StringBuilder();
 
-        buf.append("INSERT INTO ").append(table.toStringWithoutAlias());
+        buf.append("INSERT INTO ").append(table.toString());
 
         buf.append(" (");
 
@@ -160,7 +160,7 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
             buf.append("\nON CONFLICT ");
 
             if (onConflictColumn != null) {
-                buf.append("(").append(onConflictColumn).append(") ");
+                buf.append("(").append(onConflictColumn.toColumnString()).append(") ");
             }
 
             buf.append("DO ");

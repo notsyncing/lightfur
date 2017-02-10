@@ -1,5 +1,6 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
+import io.github.notsyncing.lightfur.entity.EntityFieldInfo
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.builders.InsertQueryBuilder
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
@@ -54,8 +55,17 @@ class EntityInsertDSL<F: EntityModel>(val insertModel: F) : EntityBaseDSL<F>(ins
         return this
     }
 
-    fun whenExists(alterOp: EntityUpdateDSL<*>): EntityInsertDSL<F> {
-        builder.whenExists(alterOp.toSQLPart())
+    fun updateWhenExists(column: EntityFieldInfo, alterOp: (EntityUpdateDSL<*>) -> Unit): EntityInsertDSL<F> {
+        insertModel.skipTableAlias = true
+        insertModel.skipTableName = true
+
+        val updateDsl = EntityUpdateDSL(insertModel)
+        updateDsl.skipTableName = true
+
+        alterOp(updateDsl)
+
+        builder.whenExists(getColumnModelFromEntityFieldInfo(column), updateDsl.toSQLPart())
+        insertModel.skipTableAlias = false
         return this
     }
 }

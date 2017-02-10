@@ -45,8 +45,17 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
         @JvmStatic
         fun getColumnModelFromEntityFieldInfo(info: EntityFieldInfo): ColumnModel {
             val c = ColumnModel()
+
             c.table = EntityGlobal.tableModels[info.entity.javaClass]!!.clone()
-            c.table.alias = "${info.entity.javaClass.simpleName}_${info.entity.hashCode()}"
+
+            if (info.entity.skipTableName) {
+                c.table.name = null
+            }
+
+            if (!info.entity.skipTableAlias) {
+                c.table.alias = "${info.entity.javaClass.simpleName}_${info.entity.hashCode()}"
+            }
+
             c.modelType = info.entity.javaClass.canonicalName
             c.column = info.inner.dbColumn
             c.fieldName = info.inner.name

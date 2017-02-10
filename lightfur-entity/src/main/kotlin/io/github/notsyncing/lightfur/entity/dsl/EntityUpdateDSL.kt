@@ -11,6 +11,12 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
 
     private var firstWhere = true
 
+    var skipTableName
+        get() = builder.skipTableName
+        set(value) {
+            builder.skipTableName = value
+        }
+
     init {
         builder.on(getTableModelFromEntityModel(updateModel))
 

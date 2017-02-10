@@ -16,6 +16,8 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
     private List<TableModel> fromTables = new ArrayList<>();
     private ExpressionBuilder whereConditions = new ExpressionBuilder();
 
+    public boolean skipTableName = false;
+
     public UpdateQueryBuilder on(TableModel t)
     {
         table = t;
@@ -90,7 +92,13 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
     {
         StringBuilder buf = new StringBuilder();
 
-        buf.append("UPDATE ").append(table).append("\nSET ");
+        buf.append("UPDATE");
+
+        if (!skipTableName) {
+            buf.append(" ").append(table);
+        }
+
+        buf.append("\nSET ");
 
         buf.append(setColumns.entrySet().stream()
             .map(e -> e.getKey().toColumnString() + " = (" + e.getValue().toUpdateColumnString() + ")")
@@ -99,7 +107,6 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
         for (SQLPart p : setColumns.values()) {
             getParameters().addAll(p.getParameters());
         }
-
 
         if (fromTables.size() > 0) {
             buf.append("\nFROM ");

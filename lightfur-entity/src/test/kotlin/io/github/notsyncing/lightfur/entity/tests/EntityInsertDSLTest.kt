@@ -2,6 +2,8 @@ package io.github.notsyncing.lightfur.entity.tests
 
 import io.github.notsyncing.lightfur.entity.EntityGlobal
 import io.github.notsyncing.lightfur.entity.dsl.EntityInsertDSL
+import io.github.notsyncing.lightfur.entity.dsl.EntityUpdateDSL
+import io.github.notsyncing.lightfur.entity.eq
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModel
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModelMultiPK
 import org.junit.Assert
@@ -70,5 +72,33 @@ RETURNING "id""""
 
         Assert.assertEquals(expected, s)
         Assert.assertArrayEquals(arrayOf("skip"), p.toTypedArray())
+    }
+
+    @Test
+    fun testUpsert() {
+        val m = TestModel()
+        m.id = 3
+        m.flag = 4
+        m.name = "skip"
+
+        val q = EntityInsertDSL(m)
+                .values()
+                .updateWhenExists(m.F(m::id)) {
+                    it.set(m.F(m::flag), 5)
+                            .where { m.F(m::id) eq 3 }
+                }
+
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
+
+        val expected = """INSERT INTO "test_table" ("flag", "name")
+VALUES (?, ?)
+ON CONFLICT ("id") DO UPDATE
+SET "flag" = (?), "name" = (?), "flag" = (?)
+WHERE (("id" = ?))
+RETURNING "id""""
+
+        Assert.assertEquals(expected, s)
+        Assert.assertArrayEquals(arrayOf(4, "skip", 4, "skip", 5, 3), p.toTypedArray())
     }
 }

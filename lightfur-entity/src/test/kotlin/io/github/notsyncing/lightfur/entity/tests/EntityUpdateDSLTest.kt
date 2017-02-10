@@ -26,6 +26,7 @@ class EntityUpdateDSLTest {
         m.flag = 4
 
         val q = EntityUpdateDSL(m)
+                .set()
         val s = q.toSQL()
         val p = q.toSQLParameters()
 
@@ -47,6 +48,7 @@ WHERE ("TestModel_$h"."id" = ?)"""
         m.assumeAllChanged()
 
         val q = EntityUpdateDSL(m)
+                .set()
         val s = q.toSQL()
         val p = q.toSQLParameters()
 
@@ -69,7 +71,9 @@ WHERE ("TestModel_$h"."id" = ?)"""
 
         m.flag = 4
 
-        val q = EntityUpdateDSL(m).where { m.F(m::flag) gt 6 }
+        val q = EntityUpdateDSL(m)
+                .set()
+                .where { m.F(m::flag) gt 6 }
         val s = q.toSQL()
         val p = q.toSQLParameters()
 
@@ -93,6 +97,7 @@ WHERE (("TestModel_$h"."flag" > ?))"""
         m.flag = 4
 
         val q = EntityUpdateDSL(m)
+                .set()
         val s = q.toSQL()
         val p = q.toSQLParameters()
 

@@ -94,11 +94,11 @@ RETURNING "id""""
         val expected = """INSERT INTO "test_table" ("flag", "name")
 VALUES (?, ?)
 ON CONFLICT ("id") DO UPDATE
-SET "flag" = (?), "name" = (?), "flag" = (?)
+SET "flag" = (?)
 WHERE (("id" = ?))
 RETURNING "id""""
 
         Assert.assertEquals(expected, s)
-        Assert.assertArrayEquals(arrayOf(4, "skip", 4, "skip", 5, 3), p.toTypedArray())
+        Assert.assertArrayEquals(arrayOf(4, "skip", 5, 3), p.toTypedArray())
     }
 }

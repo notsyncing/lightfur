@@ -19,7 +19,9 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
 
     init {
         builder.on(getTableModelFromEntityModel(updateModel))
+    }
 
+    fun set(): EntityUpdateDSL<F> {
         updateModel.fieldMap.map { it }
                 .filter { it.value.changed }
                 .sortedBy { it.key }
@@ -39,6 +41,8 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
 
             builder.where(ExpressionBuilder().column(c).eq().parameter(value))
         }
+
+        return this
     }
 
     fun set(f: EntityFieldInfo, source: EntityFieldInfo): EntityUpdateDSL<F> {

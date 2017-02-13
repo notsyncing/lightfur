@@ -37,7 +37,7 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
 
         for ((i, v) in updateModel.primaryKeyFieldInfos.withIndex()) {
             val c = getColumnModelFromEntityFieldInfo(v)
-            val value = updateModel.primaryKeyFields[i].get()
+            val value = updateModel.primaryKeyFields[i].getter.call(updateModel)
 
             builder.where(ExpressionBuilder().column(c).eq().parameter(value))
         }

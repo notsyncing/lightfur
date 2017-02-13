@@ -15,7 +15,7 @@ class EntityDeleteDSL<F: EntityModel>(val deleteModel: F) : EntityBaseDSL<F>(del
 
         for ((i, v) in deleteModel.primaryKeyFieldInfos.withIndex()) {
             val c = getColumnModelFromEntityFieldInfo(v)
-            val value = deleteModel.primaryKeyFields[i].get()
+            val value = deleteModel.primaryKeyFields[i].getter.call(deleteModel)
 
             builder.where(ExpressionBuilder().column(c).eq().parameter(value))
         }

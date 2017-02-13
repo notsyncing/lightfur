@@ -11,7 +11,7 @@ class EntityDataMapper : DataMapper() {
         val o = clazz.newInstance() as EntityModel
 
         o.fieldMap.forEach {
-            val v = valueToType(it.value.fieldType.java, row?.getValue(o.fieldMap[it.key]?.info?.inner?.dbColumn))
+            val v = valueToType(it.value.fieldType, row?.getValue(o.fieldMap[it.key]?.info?.inner?.dbColumn))
             (it.value as EntityField<Any?>).data = v
         }
 

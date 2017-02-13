@@ -26,8 +26,9 @@ class EntityInsertDSLTest {
         val q = EntityInsertDSL(m).values()
         val s = q.toSQL()
         val p = q.toSQLParameters()
+        val h = m.hashCode()
 
-        val expected = """INSERT INTO "test_table" ("flag", "name")
+        val expected = """INSERT INTO "test_table" AS "TestModel_$h" ("flag", "name")
 VALUES (?, ?)
 RETURNING "id""""
 
@@ -45,8 +46,9 @@ RETURNING "id""""
         val q = EntityInsertDSL(m).values()
         val s = q.toSQL()
         val p = q.toSQLParameters()
+        val h = m.hashCode()
 
-        val expected = """INSERT INTO "test_table" ("flag")
+        val expected = """INSERT INTO "test_table" AS "TestModelMultiPK_$h" ("flag")
 VALUES (?)
 RETURNING "id", "name""""
 
@@ -65,8 +67,9 @@ RETURNING "id", "name""""
                 .values(skips = listOf(m::flag))
         val s = q.toSQL()
         val p = q.toSQLParameters()
+        val h = m.hashCode()
 
-        val expected = """INSERT INTO "test_table" ("name")
+        val expected = """INSERT INTO "test_table" AS "TestModel_$h" ("name")
 VALUES (?)
 RETURNING "id""""
 
@@ -90,12 +93,13 @@ RETURNING "id""""
 
         val s = q.toSQL()
         val p = q.toSQLParameters()
+        val h = m.hashCode()
 
-        val expected = """INSERT INTO "test_table" ("flag", "name")
+        val expected = """INSERT INTO "test_table" AS "TestModel_$h" ("flag", "name")
 VALUES (?, ?)
 ON CONFLICT ("id") DO UPDATE
 SET "flag" = (?)
-WHERE (("id" = ?))
+WHERE (("TestModel_$h"."id" = ?))
 RETURNING "id""""
 
         Assert.assertEquals(expected, s)

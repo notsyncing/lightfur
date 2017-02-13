@@ -15,29 +15,29 @@ import java.util.*
 
 class EntityDataMapperTest : DataMapperTest(EntityDataMapper::class.java) {
     class TestObject : EntityModel(table = "") {
-        var id: Int by field(this::id, column = "id")
+        var id: Int by field(column = "id")
 
-        var name: String? by field(this::name, column = "username")
+        var name: String? by field(column = "username")
 
-        var date: LocalDateTime? by field(this::date, column = "date")
+        var date: LocalDateTime? by field(column = "date")
 
-        var type: TestEnum? by field(this::type, column = "type")
+        var type: TestEnum? by field(column = "type")
 
-        var list: IntArray? by field(this::list, column = "list")
+        var list: IntArray? by field(column = "list")
 
-        var list2: IntArray? by field(this::list2, column = "list2")
+        var list2: IntArray? by field(column = "list2")
 
-        var complex: TestInnerObject? by field(this::complex, column = "complex")
+        var complex: TestInnerObject? by field(column = "complex")
 
-        var complexArray: Array<TestInnerObject>? by field(this::complexArray, column = "complex2")
+        var complexArray: Array<TestInnerObject>? by field(column = "complex2")
 
-        var longNumber: BigDecimal? by field(this::longNumber, column = "long_number")
+        var longNumber: BigDecimal? by field(column = "long_number")
     }
 
     class TestLongObject : EntityModel(table = "") {
-        var id: Long by field(this::id, column = "id")
+        var id: Long by field(column = "id")
 
-        var list: LongArray? by field(this::list, column = "list")
+        var list: LongArray? by field(column = "list")
     }
 
     @Test

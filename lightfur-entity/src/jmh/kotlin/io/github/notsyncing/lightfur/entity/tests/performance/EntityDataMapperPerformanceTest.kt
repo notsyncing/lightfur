@@ -20,19 +20,19 @@ open class EntityDataMapperPerformanceTest {
     }
 
     class TestObject : EntityModel(table = "") {
-        var id: Int by field(this::id, column = "id")
+        var id: Int by field(column = "id")
 
-        var name: String? by field(this::name, column = "username")
+        var name: String? by field(column = "username")
 
-        var date: LocalDateTime? by field(this::date, column = "date")
+        var date: LocalDateTime? by field(column = "date")
 
-        var type: TestEnum? by field(this::type, column = "type")
+        var type: TestEnum? by field(column = "type")
 
-        var list: IntArray? by field(this::list, column = "list")
+        var list: IntArray? by field(column = "list")
 
-        var list2: IntArray? by field(this::list2, column = "list2")
+        var list2: IntArray? by field(column = "list2")
 
-        var longNumber: BigDecimal? by field(this::longNumber, column = "long_number")
+        var longNumber: BigDecimal? by field(column = "long_number")
     }
 
     @State(Scope.Benchmark)

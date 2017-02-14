@@ -5,6 +5,7 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
 import kotlin.reflect.KProperty1
+import kotlin.reflect.jvm.isAccessible
 
 class EntityField<T>(val fieldType: Class<T>,
                      val column: String? = null,
@@ -23,8 +24,6 @@ class EntityField<T>(val fieldType: Class<T>,
 
     var changed = false
 
-    private lateinit var propertyRef: KProperty<*>
-
     lateinit var info: EntityFieldInfo
 
     override fun getValue(thisRef: EntityModel, property: KProperty<*>): T {
@@ -37,8 +36,6 @@ class EntityField<T>(val fieldType: Class<T>,
     }
 
     operator fun provideDelegate(thisRef: EntityModel, property: KProperty<*>): ReadWriteProperty<EntityModel, T> {
-        propertyRef = property
-
         val propertyName = property.name
         var inner = EntityGlobal.fieldInfoInners[thisRef.javaClass]!![propertyName]
 
@@ -51,8 +48,10 @@ class EntityField<T>(val fieldType: Class<T>,
         info = EntityFieldInfo(thisRef, inner)
 
         if (primaryKey) {
-            thisRef.primaryKeyFields.add(property)
+            val l = EntityModel.getPrimaryKeyFields(thisRef.javaClass)
+            l.add(property)
             thisRef.primaryKeyFieldInfos.add(info)
+            thisRef.primaryKeyFields = l
         }
 
         thisRef.fieldMap[propertyName] = this

@@ -6,17 +6,33 @@ import io.github.notsyncing.lightfur.entity.dsl.EntityInsertDSL
 import io.github.notsyncing.lightfur.sql.models.TableModel
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.ArrayList
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
 
 abstract class EntityModel(@JSONField(serialize = false, deserialize = false) val database: String? = null,
                            @JSONField(serialize = false, deserialize = false) val schema: String? = null,
                            @JSONField(serialize = false, deserialize = false) val table: String) {
-    @JSONField(serialize = false, deserialize = false)
-    val fieldMap = ConcurrentHashMap<String, EntityField<*>>()
+    companion object {
+        val primaryKeyFields = ConcurrentHashMap<Class<EntityModel>, MutableList<KProperty<*>>>()
+
+        fun getPrimaryKeyFields(modelClass: Class<EntityModel>): MutableList<KProperty<*>> {
+            var l = primaryKeyFields[modelClass]
+
+            if (l == null) {
+                l = mutableListOf()
+                primaryKeyFields[modelClass] = l
+            }
+
+            return l
+        }
+    }
 
     @JSONField(serialize = false, deserialize = false)
-    val primaryKeyFields = ArrayList<KProperty<*>>()
+    lateinit var primaryKeyFields: List<KProperty<*>>
+
+    @JSONField(serialize = false, deserialize = false)
+    val fieldMap = ConcurrentHashMap<String, EntityField<*>>()
 
     @JSONField(serialize = false, deserialize = false)
     val primaryKeyFieldInfos = ArrayList<EntityFieldInfo>()

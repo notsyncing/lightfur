@@ -11,7 +11,7 @@ import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
-import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KMutableProperty
 
 abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
                                              private val isQuery: Boolean = false,
@@ -89,8 +89,8 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
 
             if (r.numRows == 1) {
                 for ((i, pkf) in finalModel!!.primaryKeyFields.withIndex()) {
-                    val p = pkf as KMutableProperty0<Any>
-                    p.set(r.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].inner.dbColumn))
+                    val p = pkf as KMutableProperty<Any>
+                    p.setter.call(finalModel, r.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].inner.dbColumn))
                 }
             }
 

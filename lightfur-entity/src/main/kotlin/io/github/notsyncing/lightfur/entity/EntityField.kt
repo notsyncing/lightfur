@@ -1,11 +1,7 @@
 package io.github.notsyncing.lightfur.entity
 
-import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty0
-import kotlin.reflect.KProperty1
-import kotlin.reflect.jvm.isAccessible
 
 class EntityField<T>(val fieldType: Class<T>,
                      val column: String? = null,
@@ -48,7 +44,7 @@ class EntityField<T>(val fieldType: Class<T>,
         info = EntityFieldInfo(thisRef, inner)
 
         if (primaryKey) {
-            val l = EntityModel.getPrimaryKeyFields(thisRef.javaClass)
+            val l = EntityModel.getPrimaryKeyFieldsFromCache(thisRef.javaClass)
             l.add(property)
             thisRef.primaryKeyFieldInfos.add(info)
             thisRef.primaryKeyFields = l

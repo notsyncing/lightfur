@@ -40,9 +40,9 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
                     builder.set(getColumnModelFromEntityFieldInfo(info), it.value.data)
                 }
 
-        for ((i, v) in updateModel.primaryKeyFieldInfos.withIndex()) {
+        for (v in updateModel.primaryKeyFieldInfos) {
             val c = getColumnModelFromEntityFieldInfo(v)
-            val value = updateModel.primaryKeyFields[i].getter.call(updateModel)
+            val value = updateModel.primaryKeyFields.first { it.name == v.inner.name }.getter.call(updateModel)
 
             builder.where(ExpressionBuilder().column(c).eq().parameter(value))
         }

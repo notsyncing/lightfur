@@ -13,14 +13,14 @@ abstract class EntityModel(@JSONField(serialize = false, deserialize = false) va
                            @JSONField(serialize = false, deserialize = false) val table: String) {
     companion object {
         @JSONField(serialize = false, deserialize = false)
-        val primaryKeyFields = ConcurrentHashMap<Class<EntityModel>, MutableList<KProperty<*>>>()
+        val primaryKeyFieldCache = ConcurrentHashMap<Class<EntityModel>, MutableSet<KProperty<*>>>()
 
-        fun getPrimaryKeyFields(modelClass: Class<EntityModel>): MutableList<KProperty<*>> {
-            var l = primaryKeyFields[modelClass]
+        fun getPrimaryKeyFieldsFromCache(modelClass: Class<EntityModel>): MutableSet<KProperty<*>> {
+            var l = primaryKeyFieldCache[modelClass]
 
             if (l == null) {
-                l = mutableListOf()
-                primaryKeyFields[modelClass] = l
+                l = mutableSetOf()
+                primaryKeyFieldCache[modelClass] = l
             }
 
             return l
@@ -28,7 +28,7 @@ abstract class EntityModel(@JSONField(serialize = false, deserialize = false) va
     }
 
     @JSONField(serialize = false, deserialize = false)
-    lateinit var primaryKeyFields: List<KProperty<*>>
+    lateinit var primaryKeyFields: Set<KProperty<*>>
 
     @JSONField(serialize = false, deserialize = false)
     val fieldMap = ConcurrentHashMap<String, EntityField<*>>()

@@ -4,9 +4,7 @@ import com.alibaba.fastjson.annotation.JSONField
 import io.github.notsyncing.lightfur.entity.dsl.EntityDSL
 import io.github.notsyncing.lightfur.entity.dsl.EntityInsertDSL
 import io.github.notsyncing.lightfur.sql.models.TableModel
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.ArrayList
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
 
@@ -14,6 +12,7 @@ abstract class EntityModel(@JSONField(serialize = false, deserialize = false) va
                            @JSONField(serialize = false, deserialize = false) val schema: String? = null,
                            @JSONField(serialize = false, deserialize = false) val table: String) {
     companion object {
+        @JSONField(serialize = false, deserialize = false)
         val primaryKeyFields = ConcurrentHashMap<Class<EntityModel>, MutableList<KProperty<*>>>()
 
         fun getPrimaryKeyFields(modelClass: Class<EntityModel>): MutableList<KProperty<*>> {

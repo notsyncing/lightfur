@@ -56,10 +56,14 @@ class EntityInsertDSL<F: EntityModel>(val insertModel: F) : EntityBaseDSL<F>(ins
     }
 
     fun updateWhenExists(column: EntityFieldInfo, alterOp: (EntityUpdateDSL<*>) -> Unit): EntityInsertDSL<F> {
-        val updateDsl = EntityUpdateDSL(insertModel)
+        val updateDsl = EntityUpdateDSL(this, insertModel)
         updateDsl.skipTableName = true
 
         alterOp(updateDsl)
+
+        if (requireTableAlias) {
+            builder.withAlias()
+        }
 
         builder.whenExists(getColumnModelFromEntityFieldInfo(column), updateDsl.toSQLPart())
         return this

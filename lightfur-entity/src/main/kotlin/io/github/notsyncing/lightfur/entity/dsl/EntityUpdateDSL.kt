@@ -10,12 +10,17 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
     override val builder = UpdateQueryBuilder()
 
     private var firstWhere = true
+    private var parentDsl: EntityBaseDSL<F>? = null
 
     var skipTableName
         get() = builder.skipTableName
         set(value) {
             builder.skipTableName = value
         }
+
+    constructor(parentDsl: EntityBaseDSL<F>, updateModel: F) : this(updateModel) {
+        this.parentDsl = parentDsl
+    }
 
     init {
         builder.on(getTableModelFromEntityModel(updateModel))
@@ -72,6 +77,8 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
         }
 
         builder.where(conditions())
+
+        parentDsl?.requireTableAlias = true
 
         return this
     }

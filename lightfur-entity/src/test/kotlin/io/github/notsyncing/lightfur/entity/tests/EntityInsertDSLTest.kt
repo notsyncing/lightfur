@@ -2,7 +2,6 @@ package io.github.notsyncing.lightfur.entity.tests
 
 import io.github.notsyncing.lightfur.entity.EntityGlobal
 import io.github.notsyncing.lightfur.entity.dsl.EntityInsertDSL
-import io.github.notsyncing.lightfur.entity.dsl.EntityUpdateDSL
 import io.github.notsyncing.lightfur.entity.eq
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModel
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModelMultiPK
@@ -28,7 +27,7 @@ class EntityInsertDSLTest {
         val p = q.toSQLParameters()
         val h = m.hashCode()
 
-        val expected = """INSERT INTO "test_table" AS "TestModel_$h" ("flag", "name")
+        val expected = """INSERT INTO "test_table" ("flag", "name")
 VALUES (?, ?)
 RETURNING "id""""
 
@@ -48,7 +47,7 @@ RETURNING "id""""
         val p = q.toSQLParameters()
         val h = m.hashCode()
 
-        val expected = """INSERT INTO "test_table" AS "TestModelMultiPK_$h" ("flag")
+        val expected = """INSERT INTO "test_table" ("flag")
 VALUES (?)
 RETURNING "id", "name""""
 
@@ -69,7 +68,7 @@ RETURNING "id", "name""""
         val p = q.toSQLParameters()
         val h = m.hashCode()
 
-        val expected = """INSERT INTO "test_table" AS "TestModel_$h" ("name")
+        val expected = """INSERT INTO "test_table" ("name")
 VALUES (?)
 RETURNING "id""""
 

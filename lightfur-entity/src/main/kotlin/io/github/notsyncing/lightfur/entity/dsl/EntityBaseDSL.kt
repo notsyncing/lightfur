@@ -1,14 +1,16 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
 import io.github.notsyncing.lightfur.DataSession
-import io.github.notsyncing.lightfur.entity.*
+import io.github.notsyncing.lightfur.entity.EntityDataMapper
+import io.github.notsyncing.lightfur.entity.EntityFieldInfo
+import io.github.notsyncing.lightfur.entity.EntityGlobal
+import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
-import javax.swing.text.html.parser.Entity
 import kotlin.reflect.KMutableProperty0
 
 abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
@@ -20,6 +22,8 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
 
     protected var cached: Boolean = false
         get() = cachedSQL != null
+
+    var requireTableAlias = false
 
     companion object {
         @JvmStatic

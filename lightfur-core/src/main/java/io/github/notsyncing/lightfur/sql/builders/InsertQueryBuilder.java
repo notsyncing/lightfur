@@ -19,6 +19,7 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
     private boolean needOnConflict = false;
     private ColumnModel onConflictColumn = null;
     private SQLPart onConflictDo = null;
+    private boolean needTableAlias = false;
 
     public InsertQueryBuilder into(TableModel t)
     {
@@ -117,12 +118,18 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
         return (InsertQueryBuilder) super.returning(expr, name);
     }
 
+    public InsertQueryBuilder withAlias()
+    {
+        needTableAlias = true;
+        return this;
+    }
+
     @Override
     public String toString()
     {
         StringBuilder buf = new StringBuilder();
 
-        buf.append("INSERT INTO ").append(table.toString());
+        buf.append("INSERT INTO ").append(needTableAlias ? table.toString() : table.toStringWithoutAlias());
 
         buf.append(" (");
 

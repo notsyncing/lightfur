@@ -1,10 +1,7 @@
 package io.github.notsyncing.lightfur.entity.tests
 
-import io.github.notsyncing.lightfur.entity.EntityGlobal
+import io.github.notsyncing.lightfur.entity.*
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
-import io.github.notsyncing.lightfur.entity.gt
-import io.github.notsyncing.lightfur.entity.minus
-import io.github.notsyncing.lightfur.entity.plus
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModel
 import org.junit.Assert
 import org.junit.Before
@@ -68,5 +65,21 @@ WHERE (("TestModel_$h"."id" > ?))"""
 
         Assert.assertEquals(expected, s)
         Assert.assertArrayEquals(arrayOf(4), p.toTypedArray())
+    }
+
+    @Test
+    fun testSelectWithNull() {
+        val m = TestModel()
+        val q = EntitySelectDSL(m)
+                .from()
+                .where { m.F(m::id) eq null }
+        val s = q.toSQL()
+
+        val h = m.hashCode()
+        val expected = """SELECT "TestModel_$h"."flag", "TestModel_$h"."id", "TestModel_$h"."name"
+FROM "test_table" AS "TestModel_$h"
+WHERE (("TestModel_$h"."id" IS NULL))"""
+
+        Assert.assertEquals(expected, s)
     }
 }

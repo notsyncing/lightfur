@@ -156,7 +156,7 @@ public class ExpressionBuilder implements SQLPart
 
     public ExpressionBuilder eqNull()
     {
-        return is().literal("NULL");
+        return is().raw("NULL");
     }
 
     public ExpressionBuilder gt()
@@ -186,7 +186,7 @@ public class ExpressionBuilder implements SQLPart
 
     public ExpressionBuilder neNull()
     {
-        return is().not().literal("NULL");
+        return is().not().raw("NULL");
     }
 
     public ExpressionBuilder in()

@@ -87,7 +87,7 @@ abstract class EntityModel(@JSONField(serialize = false, deserialize = false) va
         return EntityDSL.insert(this).values()
     }
 
-    fun update() = EntityDSL.update(this)
+    fun update() = EntityDSL.update(this).set()
 
     fun delete() = EntityDSL.delete(this)
 }

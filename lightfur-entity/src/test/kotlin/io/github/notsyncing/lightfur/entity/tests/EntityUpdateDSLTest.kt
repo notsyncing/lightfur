@@ -40,6 +40,29 @@ WHERE ("TestModel_$h"."id" = ?)"""
     }
 
     @Test
+    fun testSimpleUpdateFromModel() {
+        val m = TestModel()
+        m.id = 2
+        m.flag = 3
+        m.name = "test"
+        m.assumeNoChange()
+
+        m.flag = 4
+
+        val q = m.update()
+        val s = q.toSQL()
+        val p = q.toSQLParameters()
+
+        val h = m.hashCode()
+        val expected = """UPDATE "test_table" AS "TestModel_$h"
+SET "flag" = (?)
+WHERE ("TestModel_$h"."id" = ?)"""
+
+        Assert.assertEquals(expected, s)
+        Assert.assertArrayEquals(arrayOf(4, 2), p.toTypedArray())
+    }
+
+    @Test
     fun testSimpleFullUpdate() {
         val m = TestModel()
         m.id = 2

@@ -43,17 +43,17 @@ abstract class EntityModel(@JSONField(serialize = false, deserialize = false) va
     var skipTableAlias = false
 
     init {
-        if (!EntityGlobal.tableModels.containsKey(this.javaClass)) {
+        if (!EntityGlobal.tableModels.containsKey(this::class.java)) {
             val t = TableModel()
             t.name = table
             t.database = database
             t.schema = schema
 
-            EntityGlobal.tableModels[this.javaClass] = t
+            EntityGlobal.tableModels[this::class.java as Class<EntityModel>] = t
         }
 
-        if (!EntityGlobal.fieldInfoInners.containsKey(this.javaClass)) {
-            EntityGlobal.fieldInfoInners[this.javaClass] = ConcurrentHashMap()
+        if (!EntityGlobal.fieldInfoInners.containsKey(this::class.java)) {
+            EntityGlobal.fieldInfoInners[this::class.java as Class<EntityModel>] = ConcurrentHashMap()
         }
     }
 

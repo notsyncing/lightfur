@@ -81,33 +81,36 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
         val params = toSQLParameters().toTypedArray()
         val db = session ?: DataSession(EntityDataMapper())
 
-        if (isQuery) {
-            val r = db.queryList(finalModel!!::class.java, sql, *params).await()
-            return@future Pair(r, r.size)
-        } else if (isInsert) {
-            val r = db.executeWithReturning(sql, *params).await()
+        val r: List<F>
+        val c: Int
 
-            if (r.numRows == 1) {
+        if (isQuery) {
+            r = db.queryList(finalModel!!::class.java, sql, *params).await()
+            c = r.size
+        } else if (isInsert) {
+            val rs = db.executeWithReturning(sql, *params).await()
+
+            if (rs.numRows == 1) {
                 for ((i, pkf) in finalModel!!.primaryKeyFields.withIndex()) {
                     val p = pkf as KMutableProperty<Any>
-                    p.setter.call(finalModel, r.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].inner.dbColumn))
+                    p.setter.call(finalModel, rs.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].inner.dbColumn))
                 }
             }
 
-            if (session == null) {
-                db.end().await()
-            }
-
-            return@future Pair(listOf(finalModel!!), r.numRows)
+            r = listOf(finalModel!!)
+            c = rs.numRows
         } else {
             val u = db.execute(sql, *params).await()
 
-            if (session == null) {
-                db.end().await()
-            }
-
-            return@future Pair(if (finalModel == null) emptyList() else listOf(finalModel), u.updated)
+            r = if (finalModel == null) emptyList() else listOf(finalModel)
+            c = u.updated
         }
+
+        if (session == null) {
+            db.end().await()
+        }
+
+        return@future Pair(r, c)
     }
 
     open fun toSQLPart() = builder

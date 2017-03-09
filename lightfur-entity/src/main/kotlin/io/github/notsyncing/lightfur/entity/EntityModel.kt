@@ -8,9 +8,9 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
 
-abstract class EntityModel(@JSONField(serialize = false, deserialize = false) val database: String? = null,
-                           @JSONField(serialize = false, deserialize = false) val schema: String? = null,
-                           @JSONField(serialize = false, deserialize = false) val table: String) {
+abstract class EntityModel(@field:JSONField(serialize = false, deserialize = false) val database: String? = null,
+                           @field:JSONField(serialize = false, deserialize = false) val schema: String? = null,
+                           @field:JSONField(serialize = false, deserialize = false) val table: String) {
     companion object {
         @JSONField(serialize = false, deserialize = false)
         val primaryKeyFieldCache = ConcurrentHashMap<Class<EntityModel>, MutableSet<KProperty<*>>>()

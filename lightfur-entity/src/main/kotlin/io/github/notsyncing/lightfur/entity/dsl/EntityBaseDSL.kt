@@ -11,6 +11,7 @@ import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
+import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KMutableProperty
 
 abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
@@ -111,6 +112,17 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
         }
 
         return@future Pair(r, c)
+    }
+
+    fun executeFirst(session: DataSession? = null): CompletableFuture<F?> {
+        return execute(session)
+                .thenApply { (l, c) ->
+                    if (c > 0) {
+                        l[0]
+                    } else {
+                        null
+                    }
+                }
     }
 
     open fun toSQLPart() = builder

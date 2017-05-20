@@ -1,5 +1,4 @@
 rootProject.name = 'lightfur'
-include 'lightfur-codegen'
 include 'lightfur-core'
 include 'lightfur-entity'
 

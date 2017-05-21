@@ -14,8 +14,8 @@ class EntityField<T>(val fieldType: Class<T>,
     var data: Any? = null
         get() = field
         set(value) {
+            changed = field != value
             field = value
-            changed = true
         }
 
     var changed = false
@@ -27,8 +27,8 @@ class EntityField<T>(val fieldType: Class<T>,
     }
 
     override fun setValue(thisRef: EntityModel, property: KProperty<*>, value: T) {
+        changed = data != value
         data = value
-        changed = true
     }
 
     operator fun provideDelegate(thisRef: EntityModel, property: KProperty<*>): ReadWriteProperty<EntityModel, T> {

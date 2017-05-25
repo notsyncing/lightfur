@@ -26,6 +26,15 @@ public class PageResult<T>
         this.totalCount = totalCount;
     }
 
+    public PageResult(List<T> list, int pageNum, int pageSize, int totalCount)
+    {
+        this.list = list;
+        this.pageNum = pageNum;
+        this.pageSize = pageSize;
+        this.pageCount = PageUtils.calculatePageCount(pageSize, totalCount);
+        this.totalCount = totalCount;
+    }
+
     public List<T> getList()
     {
         return list;

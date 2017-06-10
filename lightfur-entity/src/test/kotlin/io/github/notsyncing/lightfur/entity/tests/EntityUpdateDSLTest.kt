@@ -5,6 +5,7 @@ import io.github.notsyncing.lightfur.entity.dsl.EntityUpdateDSL
 import io.github.notsyncing.lightfur.entity.gt
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModel
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModelMultiPK
+import io.github.notsyncing.lightfur.entity.update
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test

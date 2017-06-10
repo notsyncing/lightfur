@@ -4,6 +4,7 @@ import io.github.notsyncing.lightfur.entity.EntityFieldInfo
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.builders.InsertQueryBuilder
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
+import java.security.InvalidParameterException
 import kotlin.reflect.KProperty
 
 class EntityInsertDSL<F: EntityModel>(val insertModel: F) : EntityBaseDSL<F>(insertModel, isInsert = true) {
@@ -44,7 +45,22 @@ class EntityInsertDSL<F: EntityModel>(val insertModel: F) : EntityBaseDSL<F>(ins
                         return@forEach
                     }
 
-                    builder.column(getColumnModelFromEntityFieldInfo(info), it.value.data)
+                    var fieldValue = it.value.data
+
+                    if ((!it.value.nullable) && (it.value.data == null)) {
+                        if (it.value.defaultValue != null) {
+                            fieldValue = it.value.defaultValue
+                        } else if (it.value.defaultValueDefinedInDatabase) {
+                            return@forEach
+                        } else {
+                            throw InvalidParameterException("Column ${it.key} " +
+                                    "of entity ${d.javaClass} is non-nullable, " +
+                                    "but neither a default value had been " +
+                                    "defined in entity model, nor in database!")
+                        }
+                    }
+
+                    builder.column(getColumnModelFromEntityFieldInfo(info), fieldValue)
                 }
 
         return this

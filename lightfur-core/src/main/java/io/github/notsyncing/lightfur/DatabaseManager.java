@@ -1,26 +1,15 @@
 package io.github.notsyncing.lightfur;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import io.github.lukehutch.fastclasspathscanner.matchprocessor.FileMatchContentsProcessor;
-import io.github.lukehutch.fastclasspathscanner.matchprocessor.FileMatchProcessor;
-import io.github.lukehutch.fastclasspathscanner.matchprocessor.FileMatchProcessorWithContext;
-import io.github.notsyncing.lightfur.annotations.GeneratedDataContext;
 import io.github.notsyncing.lightfur.common.LightfurConfig;
 import io.github.notsyncing.lightfur.common.LightfurConfigBuilder;
-import io.github.notsyncing.lightfur.dsl.DataContext;
-import io.github.notsyncing.lightfur.dsl.IQueryContext;
-import io.github.notsyncing.lightfur.dsl.Query;
 import io.github.notsyncing.lightfur.versioning.DatabaseVersionManager;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
 import io.vertx.ext.asyncsql.PostgreSQLClient;
 import io.vertx.ext.sql.SQLConnection;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -38,9 +27,6 @@ public class DatabaseManager
     private DatabaseManager()
     {
         cpScanner = new FastClasspathScanner("-com.github.mauricio", "-scala", "-kotlin");
-        cpScanner.matchClassesWithAnnotation(GeneratedDataContext.class,
-                c -> Query.addDataContextImplementation((Class<? extends DataContext>)c))
-        .scan();
     }
 
     /**

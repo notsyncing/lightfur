@@ -9,6 +9,7 @@ import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
+import io.vertx.ext.sql.ResultSet
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.util.concurrent.CompletableFuture
@@ -82,36 +83,38 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
         val params = toSQLParameters().toTypedArray()
         val db = session ?: DataSession(EntityDataMapper())
 
-        val r: List<F>
-        val c: Int
+        try {
+            val r: List<F>
+            val c: Int
 
-        if (isQuery) {
-            r = db.queryList(finalModel!!::class.java, sql, *params).await()
-            c = r.size
-        } else if (isInsert) {
-            val rs = db.executeWithReturning(sql, *params).await()
+            if (isQuery) {
+                r = db.queryList(finalModel!!::class.java, sql, *params).await()
+                c = r.size
+            } else if (isInsert) {
+                val rs = db.executeWithReturning(sql, *params).await()
 
-            if (rs.numRows == 1) {
-                for ((i, pkf) in finalModel!!.primaryKeyFields.withIndex()) {
-                    val p = pkf as KMutableProperty<Any>
-                    p.setter.call(finalModel, rs.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].inner.dbColumn))
+                if (rs.numRows == 1) {
+                    for ((i, pkf) in finalModel!!.primaryKeyFields.withIndex()) {
+                        val p = pkf as KMutableProperty<Any>
+                        p.setter.call(finalModel, rs.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].inner.dbColumn))
+                    }
                 }
+
+                r = listOf(finalModel!!)
+                c = rs.numRows
+            } else {
+                val u = db.execute(sql, *params).await()
+
+                r = if (finalModel == null) emptyList() else listOf(finalModel)
+                c = u.updated
             }
 
-            r = listOf(finalModel!!)
-            c = rs.numRows
-        } else {
-            val u = db.execute(sql, *params).await()
-
-            r = if (finalModel == null) emptyList() else listOf(finalModel)
-            c = u.updated
+            return@future Pair(r, c)
+        } finally {
+            if (session == null) {
+                db.end().await()
+            }
         }
-
-        if (session == null) {
-            db.end().await()
-        }
-
-        return@future Pair(r, c)
     }
 
     fun executeFirst(session: DataSession? = null): CompletableFuture<F?> {
@@ -123,6 +126,42 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
                         null
                     }
                 }
+    }
+
+    fun queryRaw(session: DataSession? = null) = future {
+        val sql = toSQL()
+        val params = toSQLParameters().toTypedArray()
+        val db = session ?: DataSession(EntityDataMapper())
+
+        try {
+            val r: ResultSet
+
+            if (isQuery) {
+                r = db.query(sql, *params).await()
+            } else {
+                r = db.executeWithReturning(sql, *params).await()
+            }
+
+            r
+        } finally {
+            if (session == null) {
+                db.end().await()
+            }
+        }
+    }
+
+    fun executeRaw(session: DataSession? = null) = future {
+        val sql = toSQL()
+        val params = toSQLParameters().toTypedArray()
+        val db = session ?: DataSession(EntityDataMapper())
+
+        try {
+            db.execute(sql, *params).await()
+        } finally {
+            if (session == null) {
+                db.end().await()
+            }
+        }
     }
 
     open fun toSQLPart() = builder

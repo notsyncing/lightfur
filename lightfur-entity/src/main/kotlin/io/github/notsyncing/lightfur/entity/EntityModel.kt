@@ -41,6 +41,9 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
     @JSONField(serialize = false, deserialize = false)
     var skipTableAlias = false
 
+    @JSONField(serialize = false, deserialize = false)
+    var modelAliasBeforeColumnName = false
+
     init {
         if (!EntityGlobal.tableModels.containsKey(this::class.java)) {
             val t = TableModel()

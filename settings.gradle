@@ -1,4 +1,5 @@
 rootProject.name = 'lightfur'
 include 'lightfur-core'
 include 'lightfur-entity'
+include 'lightfur-ql'
 

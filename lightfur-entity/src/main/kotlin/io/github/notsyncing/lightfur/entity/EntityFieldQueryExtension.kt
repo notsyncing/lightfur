@@ -12,9 +12,9 @@ infix fun EntityFieldInfo.eq(value: EntityFieldInfo): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column1)
+            .column(column1, true)
             .eq()
-            .column(column2)
+            .column(column2, true)
             .endGroup()
 }
 
@@ -23,7 +23,7 @@ infix fun EntityFieldInfo.eq(value: SQLPart): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .eq()
             .expr(value)
             .endGroup()
@@ -34,7 +34,7 @@ infix fun EntityFieldInfo.eq(value: Any?): ExpressionBuilder {
 
     val b = ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
 
     if (value == null) {
         b.eqNull()
@@ -51,9 +51,9 @@ infix fun EntityFieldInfo.neq(value: EntityFieldInfo): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column1)
+            .column(column1, true)
             .ne()
-            .column(column2)
+            .column(column2, true)
             .endGroup()
 }
 
@@ -62,7 +62,7 @@ infix fun EntityFieldInfo.neq(value: SQLPart): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .ne()
             .expr(value)
             .endGroup()
@@ -73,7 +73,7 @@ infix fun EntityFieldInfo.neq(value: Any?): ExpressionBuilder {
 
     val b = ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
 
     if (value == null) {
         b.neNull()
@@ -90,9 +90,9 @@ infix fun EntityFieldInfo.gt(value: EntityFieldInfo): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column1)
+            .column(column1, true)
             .gt()
-            .column(column2)
+            .column(column2, true)
             .endGroup()
 }
 
@@ -101,7 +101,7 @@ infix fun EntityFieldInfo.gt(value: SQLPart): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .gt()
             .expr(value)
             .endGroup()
@@ -112,7 +112,7 @@ infix fun EntityFieldInfo.gt(value: Any): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .gt()
             .parameter(value)
             .endGroup()
@@ -124,9 +124,9 @@ infix fun EntityFieldInfo.lt(value: EntityFieldInfo): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column1)
+            .column(column1, true)
             .lt()
-            .column(column2)
+            .column(column2, true)
             .endGroup()
 }
 
@@ -135,7 +135,7 @@ infix fun EntityFieldInfo.lt(value: SQLPart): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .lt()
             .expr(value)
             .endGroup()
@@ -147,7 +147,7 @@ infix fun EntityFieldInfo.lt(value: Any): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .lt()
             .parameter(value)
             .endGroup()
@@ -159,7 +159,7 @@ infix fun EntityFieldInfo.gte(value: EntityFieldInfo): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column1)
+            .column(column1, true)
             .gte()
             .column(column2)
             .endGroup()
@@ -170,7 +170,7 @@ infix fun EntityFieldInfo.gte(value: SQLPart): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .gte()
             .expr(value)
             .endGroup()
@@ -181,7 +181,7 @@ infix fun EntityFieldInfo.gte(value: Any): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .gte()
             .parameter(value)
             .endGroup()
@@ -193,9 +193,9 @@ infix fun EntityFieldInfo.lte(value: EntityFieldInfo): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column1)
+            .column(column1, true)
             .lte()
-            .column(column2)
+            .column(column2, true)
             .endGroup()
 }
 
@@ -204,7 +204,7 @@ infix fun EntityFieldInfo.lte(value: SQLPart): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .lte()
             .expr(value)
             .endGroup()
@@ -215,7 +215,7 @@ infix fun EntityFieldInfo.lte(value: Any): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .lte()
             .parameter(value)
             .endGroup()
@@ -243,9 +243,9 @@ operator fun EntityFieldInfo.plus(value: EntityFieldInfo): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column1)
+            .column(column1, true)
             .operator("+")
-            .column(column2)
+            .column(column2, true)
             .endGroup()
 }
 
@@ -254,7 +254,7 @@ operator fun EntityFieldInfo.plus(value: SQLPart): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .operator("+")
             .expr(value)
             .endGroup()
@@ -265,7 +265,7 @@ operator fun EntityFieldInfo.plus(value: Any): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .operator("+")
             .parameter(value)
             .endGroup()
@@ -278,7 +278,7 @@ operator fun ExpressionBuilder.plus(value: EntityFieldInfo): ExpressionBuilder {
             .beginGroup()
             .expr(this)
             .operator("+")
-            .column(column)
+            .column(column, true)
             .endGroup()
 }
 
@@ -306,9 +306,9 @@ operator fun EntityFieldInfo.minus(value: EntityFieldInfo): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column1)
+            .column(column1, true)
             .operator("-")
-            .column(column2)
+            .column(column2, true)
             .endGroup()
 }
 
@@ -317,7 +317,7 @@ operator fun EntityFieldInfo.minus(value: SQLPart): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .operator("-")
             .expr(value)
             .endGroup()
@@ -339,7 +339,7 @@ operator fun ExpressionBuilder.minus(value: EntityFieldInfo): ExpressionBuilder 
             .beginGroup()
             .expr(this)
             .operator("-")
-            .column(column)
+            .column(column, true)
             .endGroup()
 }
 
@@ -357,7 +357,7 @@ operator fun EntityFieldInfo.minus(value: Any): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .operator("-")
             .parameter(value)
             .endGroup()
@@ -369,9 +369,9 @@ operator fun EntityFieldInfo.times(value: EntityFieldInfo): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column1)
+            .column(column1, true)
             .operator("*")
-            .column(column2)
+            .column(column2, true)
             .endGroup()
 }
 
@@ -380,7 +380,7 @@ operator fun EntityFieldInfo.times(value: SQLPart): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .operator("*")
             .expr(value)
             .endGroup()
@@ -391,7 +391,7 @@ operator fun EntityFieldInfo.times(value: Any): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .operator("*")
             .parameter(value)
             .endGroup()
@@ -404,7 +404,7 @@ operator fun ExpressionBuilder.times(value: EntityFieldInfo): ExpressionBuilder 
             .beginGroup()
             .expr(this)
             .operator("*")
-            .column(column)
+            .column(column, true)
             .endGroup()
 }
 
@@ -432,9 +432,9 @@ operator fun EntityFieldInfo.div(value: EntityFieldInfo): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column1)
+            .column(column1, true)
             .operator("/")
-            .column(column2)
+            .column(column2, true)
             .endGroup()
 }
 
@@ -443,7 +443,7 @@ operator fun EntityFieldInfo.div(value: SQLPart): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .operator("/")
             .expr(value)
             .endGroup()
@@ -454,7 +454,7 @@ operator fun EntityFieldInfo.div(value: Any): ExpressionBuilder {
 
     return ExpressionBuilder()
             .beginGroup()
-            .column(column)
+            .column(column, true)
             .operator("/")
             .parameter(value)
             .endGroup()
@@ -467,7 +467,7 @@ operator fun ExpressionBuilder.div(value: EntityFieldInfo): ExpressionBuilder {
             .beginGroup()
             .expr(this)
             .operator("/")
-            .column(column)
+            .column(column, true)
             .endGroup()
 }
 
@@ -496,7 +496,7 @@ infix fun ExpressionBuilder.gt(next: SQLPart): ExpressionBuilder {
 infix fun ExpressionBuilder.gt(next: EntityFieldInfo): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(next)
 
-    return this.gt().column(column)
+    return this.gt().column(column, true)
 }
 
 infix fun ExpressionBuilder.gt(next: Any): ExpressionBuilder {
@@ -510,7 +510,7 @@ infix fun ExpressionBuilder.gte(next: SQLPart): ExpressionBuilder {
 infix fun ExpressionBuilder.gte(next: EntityFieldInfo): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(next)
 
-    return this.gte().column(column)
+    return this.gte().column(column, true)
 }
 
 infix fun ExpressionBuilder.gte(next: Any): ExpressionBuilder {
@@ -524,7 +524,7 @@ infix fun ExpressionBuilder.lt(next: SQLPart): ExpressionBuilder {
 infix fun ExpressionBuilder.lt(next: EntityFieldInfo): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(next)
 
-    return this.lt().column(column)
+    return this.lt().column(column, true)
 }
 
 infix fun ExpressionBuilder.lt(next: Any): ExpressionBuilder {
@@ -538,7 +538,7 @@ infix fun ExpressionBuilder.lte(next: SQLPart): ExpressionBuilder {
 infix fun ExpressionBuilder.lte(next: EntityFieldInfo): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(next)
 
-    return this.lte().column(column)
+    return this.lte().column(column, true)
 }
 
 infix fun ExpressionBuilder.lte(next: Any): ExpressionBuilder {
@@ -552,7 +552,7 @@ infix fun ExpressionBuilder.eq(next: SQLPart): ExpressionBuilder {
 infix fun ExpressionBuilder.eq(next: EntityFieldInfo): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(next)
 
-    return this.eq().column(column)
+    return this.eq().column(column, true)
 }
 
 infix fun ExpressionBuilder.eq(next: Any): ExpressionBuilder {
@@ -561,7 +561,7 @@ infix fun ExpressionBuilder.eq(next: Any): ExpressionBuilder {
 
 fun ExpressionBuilder.field(f: EntityFieldInfo): ExpressionBuilder {
     val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(f)
-    return this.column(column)
+    return this.column(column, true)
 }
 
 class case {

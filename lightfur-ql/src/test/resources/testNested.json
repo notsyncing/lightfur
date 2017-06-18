@@ -1,0 +1,38 @@
+{
+  "user": {
+    "_from": "io.github.notsyncing.lightfur.ql.tests.toys.UserModel",
+    "_conditions": [
+      { "_and": [
+        { "id": { "_gt": 2 } },
+        { "username": { "_like": "133" } },
+        { "status": { "_ne": 4 } },
+        { "contacts.default": { "_eq": true } }
+      ] },
+      { "_or": [
+        { "status": { "_in": [2, 3, 5] } },
+        { "status": { "_eq": 10 } }
+      ] }
+    ],
+    "_skip": 0,
+    "_take": 10,
+    "_orderBy": [ "id", { "username": "desc" } ],
+
+    "id": null,
+    "username": null,
+    "mobile": null,
+    "lastLogin": { "_aliasOf": "lastLoginTime" },
+    "status": null,
+
+    "contacts": {
+      "_from": "io.github.notsyncing.lightfur.ql.tests.toys.UserContactInfoModel",
+      "_joinType": "inner",
+      "_joinOuter": "id",
+      "_joinInner": "userId",
+
+      "userId": null,
+      "id": null,
+      "mobile": null,
+      "default": null
+    }
+  }
+}

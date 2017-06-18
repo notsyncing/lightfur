@@ -1,5 +1,7 @@
 package io.github.notsyncing.lightfur.sql.base;
 
+import io.github.notsyncing.lightfur.sql.models.ColumnModel;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,14 +47,41 @@ public class ExpressionBuilder implements SQLPart
 
     public ExpressionBuilder column(SQLPart c)
     {
-        buf.append(c);
+        return column(c, false);
+    }
+
+    public ExpressionBuilder column(SQLPart c, boolean noAlias)
+    {
+        if ((c instanceof ColumnModel) && (noAlias)) {
+            ColumnModel column = (ColumnModel)c;
+            String alias = column.getAlias();
+            column.setAlias(null);
+
+            buf.append(c);
+
+            column.setAlias(alias);
+        } else {
+            buf.append(c);
+        }
+
         return this;
     }
 
     public ExpressionBuilder expr(SQLPart e)
     {
-        buf.append(e);
-        parameters.addAll(e.getParameters());
+        if (e instanceof ColumnModel) {
+            ColumnModel column = (ColumnModel)e;
+            String alias = column.getAlias();
+            column.setAlias(null);
+
+            buf.append(e);
+
+            column.setAlias(alias);
+        } else {
+            buf.append(e);
+            parameters.addAll(e.getParameters());
+        }
+
         return this;
     }
 

@@ -17,6 +17,25 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityBaseDSL<F>(re
                 .forEach { builder.select(getColumnModelFromEntityFieldInfo(it)) }
     }
 
+    fun customColumns(): EntitySelectDSL<F> {
+        builder.selectColumns.clear()
+
+        return this
+    }
+
+    fun columns(columnList: List<EntityFieldInfo>): EntitySelectDSL<F> {
+        builder.selectColumns.clear()
+        columnList.forEach { builder.select(getColumnModelFromEntityFieldInfo(it)) }
+
+        return this
+    }
+
+    fun column(col: EntityFieldInfo): EntitySelectDSL<F> {
+        builder.select(getColumnModelFromEntityFieldInfo(col))
+
+        return this
+    }
+
     fun from(tableModel: EntityModel? = null): EntitySelectDSL<F> {
         var m = tableModel
 
@@ -90,6 +109,12 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityBaseDSL<F>(re
 
     fun orderBy(vararg columns: OrderByColumnInfo): EntitySelectDSL<F> {
         builder.orderBy(*columns)
+
+        return this
+    }
+
+    fun orderBy(column: EntityFieldInfo, isDesc: Boolean = false): EntitySelectDSL<F> {
+        builder.orderBy(OrderByColumnInfo(getColumnModelFromEntityFieldInfo(column), isDesc))
 
         return this
     }

@@ -48,7 +48,17 @@ public class OrderByColumnInfo
     {
         StringBuilder buf = new StringBuilder();
 
-        buf.append(column);
+        if (column instanceof ColumnModel) {
+            ColumnModel cm = (ColumnModel)column;
+            String alias = cm.getAlias();
+            cm.setAlias(null);
+
+            buf.append(column);
+
+            cm.setAlias(alias);
+        } else {
+            buf.append(column);
+        }
 
         if (desc) {
             buf.append(" DESC");

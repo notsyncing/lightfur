@@ -7,7 +7,7 @@ class EntityField<T>(val fieldType: Class<T>,
                      val column: String? = null,
                      val type: String = "",
                      val length: Int = 0,
-                     val nullable: Boolean = false,
+                     var nullable: Boolean = false,
                      val defaultValue: T? = null,
                      val defaultValueDefinedInDatabase: Boolean = false,
                      val primaryKey: Boolean = false,
@@ -35,6 +35,8 @@ class EntityField<T>(val fieldType: Class<T>,
     operator fun provideDelegate(thisRef: EntityModel, property: KProperty<*>): ReadWriteProperty<EntityModel, T> {
         val propertyName = property.name
         var inner = EntityGlobal.fieldInfoInners[thisRef::class.java]!![propertyName]
+
+        nullable = property.returnType.isMarkedNullable
 
         if (inner == null) {
             inner = EntityFieldInfo.Inner(property.name, column ?: property.name, type, length, nullable, defaultValue,

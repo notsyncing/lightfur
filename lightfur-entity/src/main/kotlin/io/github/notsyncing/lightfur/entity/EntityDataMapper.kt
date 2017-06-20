@@ -12,7 +12,10 @@ class EntityDataMapper : DataMapper() {
 
         o.fieldMap.forEach {
             val v = valueToType(it.value.fieldType, row?.getValue(o.fieldMap[it.key]?.info?.inner?.dbColumn))
-            (it.value as EntityField<Any?>).data = v
+            val field = it.value as EntityField<Any?>
+
+            field.data = v
+            field.changed = false
         }
 
         return o as T

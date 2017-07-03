@@ -7,6 +7,7 @@ import io.github.notsyncing.lightfur.entity.EntityGlobal
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
+import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
 import io.vertx.ext.sql.ResultSet
@@ -84,6 +85,11 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
 
     fun execute(session: DataSession? = null) = future<Pair<List<F>, Int>> {
         val sql = toSQL()
+
+        if (sql == UpdateQueryBuilder.NOTHING_TO_UPDATE) {
+            return@future Pair(emptyList(), 0)
+        }
+
         val params = toSQLParameters().toTypedArray()
         val db = session ?: DataSession(EntityDataMapper())
 
@@ -156,6 +162,11 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
 
     fun executeRaw(session: DataSession? = null) = future {
         val sql = toSQL()
+
+        if (sql == UpdateQueryBuilder.NOTHING_TO_UPDATE) {
+            return@future
+        }
+
         val params = toSQLParameters().toTypedArray()
         val db = session ?: DataSession(EntityDataMapper())
 

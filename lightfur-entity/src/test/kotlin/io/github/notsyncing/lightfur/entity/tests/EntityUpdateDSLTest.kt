@@ -6,6 +6,7 @@ import io.github.notsyncing.lightfur.entity.gt
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModel
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModelMultiPK
 import io.github.notsyncing.lightfur.entity.update
+import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -132,5 +133,20 @@ WHERE ("TestModelMultiPK_$h"."id" = ?) AND ("TestModelMultiPK_$h"."name" = ?)"""
 
         Assert.assertEquals(expected, s)
         Assert.assertArrayEquals(arrayOf(4, 2, "test"), p.toTypedArray())
+    }
+
+    @Test
+    fun testNothingUpdated() {
+        val m = TestModel()
+        m.flag = 1
+        m.id = 2
+        m.name = "3"
+        m.assumeNoChange()
+
+        val q = EntityUpdateDSL(m)
+                .set()
+        val s = q.toSQL()
+
+        Assert.assertEquals(UpdateQueryBuilder.NOTHING_TO_UPDATE, s)
     }
 }

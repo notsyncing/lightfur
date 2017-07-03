@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
 {
+    public static final String NOTHING_TO_UPDATE = "NOTHING_TO_UPDATE";
+
     private TableModel table;
     private Map<ColumnModel, SQLPart> setColumns = new LinkedHashMap<>();
     private List<TableModel> fromTables = new ArrayList<>();
@@ -90,6 +92,10 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
     @Override
     public String toString()
     {
+        if (setColumns.isEmpty()) {
+            return NOTHING_TO_UPDATE;
+        }
+
         StringBuilder buf = new StringBuilder();
 
         buf.append("UPDATE");

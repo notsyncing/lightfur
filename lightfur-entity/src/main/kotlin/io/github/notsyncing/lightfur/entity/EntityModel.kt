@@ -76,6 +76,34 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
     fun assumeAllChanged() {
         fieldMap.forEach { it.value.changed = true }
     }
+
+    fun copyFieldsTo(obj: Any) {
+        if (obj is EntityModel) {
+            fieldMap.forEach {
+                obj.fieldMap[it.key]?.data = it.value.data
+            }
+        } else {
+            fieldMap.forEach {
+                obj.javaClass.getField(it.key)?.set(obj, it.value.data)
+            }
+        }
+    }
+
+    fun copyFieldsFrom(obj: Any) {
+        if (obj is EntityModel) {
+            fieldMap.forEach {
+                it.value.data = obj.fieldMap[it.key]?.data
+            }
+        } else {
+            fieldMap.forEach {
+                val field = obj.javaClass.getField(it.key)
+
+                if (field != null) {
+                    it.value.data = field.get(obj)
+                }
+            }
+        }
+    }
 }
 
 fun <T: EntityModel> T.select(): EntitySelectDSL<T> {

@@ -9,20 +9,23 @@ import io.github.notsyncing.lightfur.entity.dsl.EntityDSL
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
 import io.github.notsyncing.lightfur.entity.eq
 import io.github.notsyncing.lightfur.entity.field
+import io.github.notsyncing.lightfur.ql.permission.EntityPermission
+import io.github.notsyncing.lightfur.ql.permission.QueryPermissions
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import java.security.InvalidParameterException
+import javax.naming.NoPermissionException
 
 class QueryParser {
     val modelMap = mutableMapOf<String, EntityModel>()
 
     val neededModels get() = modelMap.values
 
-    fun parse(query: JSONObject): Map<String, EntitySelectDSL<*>> {
+    fun parse(query: JSONObject, permissions: QueryPermissions = QueryPermissions.ALL): Map<String, EntitySelectDSL<*>> {
         val map = mutableMapOf<String, EntitySelectDSL<*>>()
 
         for (key in query.keys) {
             val queryTarget = query.getJSONObject(key)
-            val parsedQuery = recursiveParse(key, queryTarget, null, null)
+            val parsedQuery = recursiveParse(key, queryTarget, permissions, null, null)
 
             map[key] = parsedQuery
         }
@@ -30,10 +33,22 @@ class QueryParser {
         return map
     }
 
-    fun parse(query: String) = parse(JSON.parseObject(query))
+    fun parse(query: String, permissions: QueryPermissions = QueryPermissions.ALL) = parse(JSON.parseObject(query), permissions)
 
-    private fun recursiveParse(path: String, query: JSONObject, parentQuery: JSONObject?, currDsl: EntitySelectDSL<*>? = null): EntitySelectDSL<*> {
+    private fun recursiveParse(path: String, query: JSONObject, permissions: QueryPermissions, parentQuery: JSONObject?,
+                               currDsl: EntitySelectDSL<*>? = null): EntitySelectDSL<*> {
         val fromClassName = query.getString("_from")
+
+        var allowEntity: EntityPermission<*>? = null
+
+        if (permissions != QueryPermissions.ALL) {
+            allowEntity = permissions.allowEntities.firstOrNull { it.entityModel.javaClass.name == fromClassName }
+
+            if (allowEntity == null) {
+                throw NoPermissionException("Current permissions does not contain entity model $fromClassName")
+            }
+        }
+
         val fromClass = Class.forName(fromClassName)
         val fromModel = modelMap["${fromClassName}_$path"] ?: fromClass.newInstance() as EntityModel
         val dsl = currDsl ?: EntityDSL.select(fromModel).customColumns()
@@ -45,6 +60,7 @@ class QueryParser {
         }
 
         var conditionList: Pair<String, JSONArray> = Pair("", JSONArray())
+        val permissionConditionList: MutableList<Pair<String, JSONArray>> = mutableListOf()
         var orderByList: JSONArray = JSONArray()
         var joinType: String? = null
         var joinOuter: String? = null
@@ -70,13 +86,12 @@ class QueryParser {
                 joinInner = query.getString(key)
             } else {
                 val p = query.get(key)
+                var realKey = key
 
                 if (p is JSONObject) {
                     if (p.containsKey("_from")) {
                         innerList.add(Pair(key, p))
                     } else {
-                        var realKey = key
-
                         for (fieldKey in p.keys) {
                             if (fieldKey == "_aliasOf") {
                                 realKey = p.getString(fieldKey)
@@ -95,6 +110,18 @@ class QueryParser {
                     }
 
                     dsl.column(fromModel.fieldMap[key]!!.info)
+                }
+
+                if (permissions != QueryPermissions.ALL) {
+                    val fieldPermissions = allowEntity!!.allowFields.firstOrNull { it.field.name == realKey }
+
+                    if (fieldPermissions == null) {
+                        throw NoPermissionException("Current permissions does not contain field $key of entity model $fromClassName")
+                    } else {
+                        if (fieldPermissions.allowRules.size > 0) {
+                            permissionConditionList.add(Pair(path, fieldPermissions.allowRules))
+                        }
+                    }
                 }
             }
         }
@@ -125,7 +152,7 @@ class QueryParser {
         }
 
         for ((key, inner) in innerList) {
-            recursiveParse("$path.$key", inner, query, dsl)
+            recursiveParse("$path.$key", inner, permissions, query, dsl)
         }
 
         for (orderByKey in orderByList) {
@@ -140,17 +167,66 @@ class QueryParser {
 
         val conds = resolveConditions(conditionList, query)
 
+        var expBuilder: ExpressionBuilder? = null
+        var permExpBuilder: ExpressionBuilder? = null
+
         if (conds.isNotEmpty()) {
-            val expBuilder = ExpressionBuilder()
+            expBuilder = ExpressionBuilder()
 
             for (i in 0..conds.size - 2) {
                 expBuilder.expr(conds[i]).and()
             }
 
             expBuilder.expr(conds.last())
-
-            dsl.where { expBuilder }
         }
+
+        if (permissionConditionList.isNotEmpty()) {
+            if (permExpBuilder == null) {
+                permExpBuilder = ExpressionBuilder()
+            }
+
+            val list = mutableListOf<ExpressionBuilder>()
+
+            for (permCond in permissionConditionList) {
+                val resolvedPermConds = resolveConditions(permCond, query)
+
+                if (resolvedPermConds.isNotEmpty()) {
+                    val resolvedPermCondExpr = ExpressionBuilder()
+
+                    for (i in 0..resolvedPermConds.size - 2) {
+                        resolvedPermCondExpr.expr(resolvedPermConds[i]).and()
+                    }
+
+                    resolvedPermCondExpr.expr(resolvedPermConds.last())
+                    list.add(resolvedPermCondExpr)
+                }
+            }
+
+            for (i in 0..list.size - 2) {
+                permExpBuilder.expr(list[i]).and()
+            }
+
+            permExpBuilder.expr(list.last())
+        }
+
+        val finalExpBuilder = ExpressionBuilder()
+
+        if (expBuilder != null) {
+            finalExpBuilder.beginGroup()
+                    .expr(expBuilder)
+                    .endGroup()
+        } else {
+            return dsl
+        }
+
+        if (permExpBuilder != null) {
+            finalExpBuilder.and()
+                    .beginGroup()
+                    .expr(permExpBuilder)
+                    .endGroup()
+        }
+
+        dsl.where { finalExpBuilder }
 
         return dsl
     }
@@ -195,42 +271,11 @@ class QueryParser {
                 val fieldCondInfo = resolveFieldInfo(rootKey, fullQuery, key)
                 val fieldCondRelation = fieldCond.entries.first().key
                 val fieldCondTarget = fieldCond[fieldCondRelation]
-                val expBuilder = ExpressionBuilder()
 
-                when (fieldCondRelation) {
-                    "_gt", ">" -> expBuilder.field(fieldCondInfo)
-                            .gt()
-                            .parameter(fieldCondTarget)
+                val expBuilder = buildWhereClause(fieldCondRelation, fieldCondInfo, fieldCondTarget)
 
-                    "_gte", ">=" -> expBuilder.field(fieldCondInfo)
-                            .gte()
-                            .parameter(fieldCondTarget)
-
-                    "_lt", "<" -> expBuilder.field(fieldCondInfo)
-                            .lt()
-                            .parameter(fieldCondTarget)
-
-                    "_lte", "<=" -> expBuilder.field(fieldCondInfo)
-                            .lte()
-                            .parameter(fieldCondTarget)
-
-                    "_eq", "=" -> expBuilder.field(fieldCondInfo)
-                            .apply { if (fieldCondTarget == null) this.eqNull() else this.eq().parameter(fieldCondTarget) }
-
-                    "_ne", "!=" -> expBuilder.field(fieldCondInfo)
-                            .apply { if (fieldCondTarget == null) this.neNull() else this.ne().parameter(fieldCondTarget) }
-
-                    "_like" -> expBuilder.field(fieldCondInfo)
-                            .like()
-                            .parameter(fieldCondTarget)
-
-                    "_in" -> expBuilder.field(fieldCondInfo)
-                            .eq()
-                            .beginFunction("ANY")
-                            .parameter((fieldCondTarget as JSONArray).toArray())
-                            .endFunction()
-
-                    else -> throw InvalidParameterException("Unsupported conditional operator $fieldCondRelation in query condition $cond")
+                if (expBuilder == null) {
+                    throw InvalidParameterException("Unsupported conditional operator $fieldCondRelation in conditions $cond")
                 }
 
                 list.add(expBuilder)
@@ -238,6 +283,48 @@ class QueryParser {
         }
 
         return list
+    }
+
+    private fun buildWhereClause(fieldCondRelation: String?, fieldCondInfo: EntityFieldInfo, fieldCondTarget: Any?): ExpressionBuilder? {
+        val expBuilder = ExpressionBuilder()
+
+        when (fieldCondRelation) {
+            "_gt", ">" -> expBuilder.field(fieldCondInfo)
+                    .gt()
+                    .parameter(fieldCondTarget)
+
+            "_gte", ">=" -> expBuilder.field(fieldCondInfo)
+                    .gte()
+                    .parameter(fieldCondTarget)
+
+            "_lt", "<" -> expBuilder.field(fieldCondInfo)
+                    .lt()
+                    .parameter(fieldCondTarget)
+
+            "_lte", "<=" -> expBuilder.field(fieldCondInfo)
+                    .lte()
+                    .parameter(fieldCondTarget)
+
+            "_eq", "=" -> expBuilder.field(fieldCondInfo)
+                    .apply { if (fieldCondTarget == null) this.eqNull() else this.eq().parameter(fieldCondTarget) }
+
+            "_ne", "!=" -> expBuilder.field(fieldCondInfo)
+                    .apply { if (fieldCondTarget == null) this.neNull() else this.ne().parameter(fieldCondTarget) }
+
+            "_like" -> expBuilder.field(fieldCondInfo)
+                    .like()
+                    .parameter(fieldCondTarget)
+
+            "_in" -> expBuilder.field(fieldCondInfo)
+                    .eq()
+                    .beginFunction("ANY")
+                    .parameter((fieldCondTarget as JSONArray).toArray())
+                    .endFunction()
+
+            else -> return null
+        }
+
+        return expBuilder
     }
 
     private fun resolveFieldInfo(rootKey: String, fullQuery: JSONObject, path: String): EntityFieldInfo {

@@ -84,9 +84,8 @@ public class DatabaseVersionManagerTest
                 .thenCompose(r -> db.getConnection())
                 .thenAccept(c -> {
                     c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
-                        c.close();
-
                         if (result.failed()) {
+                            c.close();
                             context.fail(result.cause());
                             return;
                         }
@@ -97,6 +96,7 @@ public class DatabaseVersionManagerTest
 
                         c.query("SELECT column_name FROM information_schema.columns WHERE table_name = 'test' AND table_catalog = '" + TEST_DB + "'", r -> {
                             if (r.failed()) {
+                                c.close();
                                 context.fail(r.cause());
                                 return;
                             }
@@ -115,6 +115,7 @@ public class DatabaseVersionManagerTest
 
                             c.query("SELECT data::text FROM lightfur.version_data", r2 -> {
                                 if (r2.failed()) {
+                                    c.close();
                                     context.fail(r2.cause());
                                     return;
                                 }
@@ -185,9 +186,8 @@ public class DatabaseVersionManagerTest
                 .thenCompose(r -> db.getConnection())
                 .thenAccept(c -> {
                     c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
-                        c.close();
-
                         if (result.failed()) {
+                            c.close();
                             context.fail(result.cause());
                             return;
                         }
@@ -198,6 +198,7 @@ public class DatabaseVersionManagerTest
 
                         c.query("SELECT column_name FROM information_schema.columns WHERE table_name = 'test' AND table_catalog = '" + TEST_DB + "'", r -> {
                             if (r.failed()) {
+                                c.close();
                                 context.fail(r.cause());
                                 return;
                             }
@@ -213,6 +214,7 @@ public class DatabaseVersionManagerTest
 
                             c.query("SELECT data::text FROM lightfur.version_data", r2 -> {
                                 if (r2.failed()) {
+                                    c.close();
                                     context.fail(r2.cause());
                                     return;
                                 }
@@ -252,9 +254,8 @@ public class DatabaseVersionManagerTest
                 .thenCompose(r -> db.getConnection())
                 .thenAccept(c -> {
                     c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
-                        c.close();
-
                         if (result.failed()) {
+                            c.close();
                             context.fail(result.cause());
                             return;
                         }
@@ -265,6 +266,7 @@ public class DatabaseVersionManagerTest
 
                         c.query("SELECT column_name FROM information_schema.columns WHERE table_name = 'test_full' AND table_catalog = '" + TEST_DB + "'", r -> {
                             if (r.failed()) {
+                                c.close();
                                 context.fail(r.cause());
                                 return;
                             }
@@ -283,6 +285,7 @@ public class DatabaseVersionManagerTest
 
                             c.query("SELECT data::text FROM lightfur.version_data", r2 -> {
                                 if (r2.failed()) {
+                                    c.close();
                                     context.fail(r2.cause());
                                     return;
                                 }

@@ -180,15 +180,15 @@ public class DatabaseManager
                     return;
                 }
 
-                if (switchTo) {
-                    setDatabase(databaseName);
-                }
-
                 f.complete(r2.result());
             });
         });
 
-        return f;
+        if (!switchTo) {
+            return f;
+        } else {
+            return f.thenCompose(x -> setDatabase(databaseName));
+        }
     }
 
     /**
@@ -199,37 +199,38 @@ public class DatabaseManager
      */
     public CompletableFuture<Void> dropDatabase(String databaseName, boolean ifExists)
     {
-        setDatabase("postgres");
+        return setDatabase("postgres")
+                .thenCompose(x -> {
+                    CompletableFuture<Void> f = new CompletableFuture<>();
 
-        CompletableFuture<Void> f = new CompletableFuture<>();
+                    client.getConnection(r -> {
+                        if (!r.succeeded()) {
+                            f.completeExceptionally(r.cause());
+                            return;
+                        }
 
-        client.getConnection(r -> {
-            if (!r.succeeded()) {
-                f.completeExceptionally(r.cause());
-                return;
-            }
+                        SQLConnection c = r.result();
 
-            SQLConnection c = r.result();
+                        String sql = "DROP DATABASE";
 
-            String sql = "DROP DATABASE";
+                        if (ifExists) {
+                            sql += " IF EXISTS";
+                        }
 
-            if (ifExists) {
-                sql += " IF EXISTS";
-            }
+                        c.execute(sql + " \"" + databaseName + "\"", r2 -> {
+                            c.close();
 
-            c.execute(sql + " \"" + databaseName + "\"", r2 -> {
-                c.close();
+                            if (!r2.succeeded()) {
+                                f.completeExceptionally(r2.cause());
+                                return;
+                            }
 
-                if (!r2.succeeded()) {
-                    f.completeExceptionally(r2.cause());
-                    return;
-                }
+                            f.complete(r2.result());
+                        });
+                    });
 
-                f.complete(r2.result());
-            });
-        });
-
-        return f;
+                    return f;
+                });
     }
 
     /**

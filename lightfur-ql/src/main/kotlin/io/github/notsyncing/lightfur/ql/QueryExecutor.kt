@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
+import io.github.notsyncing.lightfur.ql.permission.QueryPermissions
 import io.vertx.ext.sql.ResultSet
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
@@ -14,8 +15,8 @@ class QueryExecutor {
 
     private var _queryFunction: (EntitySelectDSL<*>) -> CompletableFuture<ResultSet> = { it.queryRaw() }
 
-    fun execute(query: JSONObject) = future {
-        val resolvedQueries = parser.parse(query)
+    fun execute(query: JSONObject, permissions: QueryPermissions = QueryPermissions.ALL) = future {
+        val resolvedQueries = parser.parse(query, permissions)
         val result = JSONObject()
 
         for ((key, q) in resolvedQueries.entries) {
@@ -28,7 +29,7 @@ class QueryExecutor {
         result
     }
 
-    fun execute(query: String) = execute(JSON.parseObject(query))
+    fun execute(query: String, permissions: QueryPermissions = QueryPermissions.ALL) = execute(JSON.parseObject(query), permissions)
 
     private fun aggregateResultSet(rootKey: String, currQuery: JSONObject, r: ResultSet): JSONArray {
         val data = r.rows.map { it.map }

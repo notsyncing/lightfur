@@ -16,8 +16,8 @@ repositories {
 dependencies {
     compile 'io.vertx:vertx-core:3.4.2'
     compile 'io.vertx:vertx-mysql-postgresql-client:3.4.2'
-    compile 'com.alibaba:fastjson:1.2.29'
-    compile group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: '2.0.17'
+    compile 'com.alibaba:fastjson:1.2.35'
+    compile group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: '2.4.2'
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'

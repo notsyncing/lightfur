@@ -24,6 +24,7 @@ public class DatabaseManager
     private AsyncSQLClient client;
     private LightfurConfig configs;
     private FastClasspathScanner cpScanner;
+    private String currentDatabase;
 
     private DatabaseManager()
     {
@@ -44,6 +45,10 @@ public class DatabaseManager
         return configs;
     }
 
+    public String getCurrentDatabase() {
+        return currentDatabase;
+    }
+
     /**
      * 设置到数据库的连接参数
      * @param config 相关配置
@@ -62,6 +67,8 @@ public class DatabaseManager
             DatabaseVersionManager versionManager = new DatabaseVersionManager(this, cpScanner);
             return versionManager.upgradeToLatest(config.getDatabase());
         }
+
+        currentDatabase = config.getDatabase();
 
         return CompletableFuture.completedFuture(null);
     }
@@ -268,6 +275,8 @@ public class DatabaseManager
         return f.thenAccept(r -> {
             configs.setDatabase(databaseName);
             client = PostgreSQLClient.createNonShared(vertx, configs.toVertxConfig());
+
+            currentDatabase = databaseName;
         });
     }
 

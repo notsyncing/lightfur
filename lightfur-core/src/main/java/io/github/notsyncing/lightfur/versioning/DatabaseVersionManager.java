@@ -40,15 +40,22 @@ public class DatabaseVersionManager
 
     public CompletableFuture<Void> upgradeToLatest(String dbName, DbUpdateFileCollector collector)
     {
-        return db.setDatabase("postgres")
-                .thenCompose(r -> db.getConnection())
-                .thenAccept(r -> conn = r)
-                .thenCompose(r -> createDatabaseIfNotExists(dbName))
-                .thenCompose(r -> {
-                    conn.close();
-                    return db.setDatabase(dbName);
-                })
-                .thenCompose(r -> db.getConnection())
+        CompletableFuture<Void> ff;
+
+        if (dbName.equals(db.getCurrentDatabase())) {
+            ff = CompletableFuture.completedFuture(null);
+        } else {
+            ff = db.setDatabase("postgres")
+                    .thenCompose(r -> db.getConnection())
+                    .thenAccept(r -> conn = r)
+                    .thenCompose(r -> createDatabaseIfNotExists(dbName))
+                    .thenCompose(r -> {
+                        conn.close();
+                        return db.setDatabase(dbName);
+                    });
+        }
+
+        return ff.thenCompose(r -> db.getConnection())
                 .thenCompose(r -> {
                     conn = r;
 

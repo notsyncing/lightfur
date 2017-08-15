@@ -4,6 +4,7 @@ import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.notsyncing.lightfur.common.LightfurConfig;
 import io.github.notsyncing.lightfur.common.LightfurConfigBuilder;
 import io.github.notsyncing.lightfur.versioning.DatabaseVersionManager;
+import io.github.notsyncing.lightfur.versioning.DbUpdateFileCollector;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
@@ -272,12 +273,23 @@ public class DatabaseManager
 
     /**
      * 异步升级数据库到最新版本
-     * @param databaseName 要升级到数据库名称
+     * @param databaseName 要升级的数据库名称
      * @return 指示是否完成升级的 CompletableFuture 对象
      */
     public CompletableFuture<Void> upgradeDatabase(String databaseName)
     {
         DatabaseVersionManager versionManager = new DatabaseVersionManager(this, cpScanner);
         return versionManager.upgradeToLatest(databaseName);
+    }
+
+    /**
+     * 异步升级数据库到最新版本
+     * @param databaseName 要升级的数据库名称
+     * @param collector 升级文件收集器
+     * @return 指示是否完成升级的 CompletableFuture 对象
+     */
+    public CompletableFuture<Void> upgradeDatabase(String databaseName, DbUpdateFileCollector collector) {
+        DatabaseVersionManager versionManager = new DatabaseVersionManager(this, cpScanner);
+        return versionManager.upgradeToLatest(databaseName, collector);
     }
 }

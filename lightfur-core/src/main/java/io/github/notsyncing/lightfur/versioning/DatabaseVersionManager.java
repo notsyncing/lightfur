@@ -1,6 +1,7 @@
 package io.github.notsyncing.lightfur.versioning;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import io.github.lukehutch.fastclasspathscanner.matchprocessor.FileMatchProcessorWithContext;
 import io.github.notsyncing.lightfur.DatabaseManager;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -37,7 +38,7 @@ public class DatabaseVersionManager
         this.scanner = scanner;
     }
 
-    public CompletableFuture<Void> upgradeToLatest(String dbName)
+    public CompletableFuture<Void> upgradeToLatest(String dbName, DbUpdateFileCollector collector)
     {
         return db.setDatabase("postgres")
                 .thenCompose(r -> db.getConnection())
@@ -56,7 +57,7 @@ public class DatabaseVersionManager
                 .thenCompose(r -> getCurrentDatabaseVersionData())
                 .thenCompose(r -> {
                     versionData = r;
-                    List<DbVersionUpdateInfo> updates = collectUpdateFiles(dbName);
+                    List<DbVersionUpdateInfo> updates = collectUpdateFiles(dbName, collector);
                     Map<String, List<DbVersionUpdateInfo>> updateMap = updates.stream()
                             .collect(groupingBy(DbVersionUpdateInfo::getId, mapping(u -> u, toList())));
 
@@ -127,6 +128,10 @@ public class DatabaseVersionManager
 
                     return null;
                 });
+    }
+
+    public CompletableFuture<Void> upgradeToLatest(String dbName) {
+        return upgradeToLatest(dbName, null);
     }
 
     private CompletableFuture<Void> createDatabaseIfNotExists(String name)
@@ -229,13 +234,13 @@ public class DatabaseVersionManager
         return f;
     }
 
-    private List<DbVersionUpdateInfo> collectUpdateFiles(String databaseName)
+    private List<DbVersionUpdateInfo> collectUpdateFiles(String databaseName, DbUpdateFileCollector collector)
     {
         List<DbVersionUpdateInfo> files = new ArrayList<>();
         String startMagic = " LIGHTFUR {";
         String endMagic = "} END";
 
-        scanner.matchFilenameExtension("sql", (absolutePath, relativePathStr, inputStream, lengthBytes) -> {
+        FileMatchProcessorWithContext handler = (absolutePath, relativePathStr, inputStream, lengthBytes) -> {
             char[] header = new char[1024];
 
             try (InputStream stream = new BOMInputStream(inputStream,
@@ -280,7 +285,14 @@ public class DatabaseVersionManager
 
                 files.add(info);
             }
-        }).scan();
+        };
+
+        if (collector == null) {
+            scanner.matchFilenameExtension("sql", handler)
+                    .scan();
+        } else {
+            collector.collect("sql", handler);
+        }
 
         return files;
     }

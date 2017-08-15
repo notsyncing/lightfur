@@ -8,7 +8,6 @@ import scala.Char;
 import scala.math.BigDecimal;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Executable;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -200,8 +199,12 @@ public abstract class DataMapper
             if (value instanceof String) {
                 String s = (String)value;
 
-                if (((s.startsWith("{")) && (s.endsWith("}"))) && (!type.isPrimitive()) && (!type.equals(String.class))) {
-                    return JSON.parseObject(s, type);
+                if ((!type.isPrimitive()) && (!type.equals(String.class))) {
+                    if ((s.startsWith("{")) && (s.endsWith("}"))) {
+                        return JSON.parseObject(s, type);
+                    } else if ((s.startsWith("[")) && (s.endsWith("]"))) {
+                        return JSON.parseArray(s, type);
+                    }
                 }
             } else if (value instanceof JsonObject) {
                 if (type.equals(JsonObject.class)) {

@@ -16,6 +16,7 @@ import java.security.InvalidParameterException;
 import java.time.temporal.Temporal;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
 /**
  * 数据操作会话类
@@ -28,6 +29,7 @@ public class DataSession
     private boolean inTransaction = false;
     private DataMapper dataMapper;
     private boolean ended = false;
+    private Logger log = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * 实例化一个数据操作会话
@@ -183,6 +185,8 @@ public class DataSession
      */
     public CompletableFuture<UpdateResult> execute(String sql, JsonArray params)
     {
+        Exception ex = new Exception();
+
         return ensureConnection().thenCompose(c -> {
             CompletableFuture<UpdateResult> f = new CompletableFuture<>();
 
@@ -190,10 +194,12 @@ public class DataSession
                 if (r.succeeded()) {
                     f.complete(r.result());
                 } else {
-                    System.out.println("Error occured when executing SQL: " + sql + " (" + params + ")");
+                    log.warning("Error occured when executing SQL: " + sql + " (" + params + ")");
 
-                    r.cause().printStackTrace();
-                    f.completeExceptionally(r.cause());
+                    ex.initCause(r.cause());
+
+                    ex.printStackTrace();
+                    f.completeExceptionally(ex);
                 }
             });
 
@@ -270,6 +276,8 @@ public class DataSession
      */
     public CompletableFuture<ResultSet> query(String sql, JsonArray params)
     {
+        Exception ex = new Exception();
+
         return ensureConnection().thenCompose(c -> {
             CompletableFuture<ResultSet> f = new CompletableFuture<>();
 
@@ -278,16 +286,19 @@ public class DataSession
                     if (r.succeeded()) {
                         f.complete(r.result());
                     } else {
-                        System.out.println("Error occured when querying SQL: " + sql + " (" + params + ")");
+                        log.warning("Error occured when querying SQL: " + sql + " (" + params + ")");
 
-                        r.cause().printStackTrace();
-                        f.completeExceptionally(r.cause());
+                        ex.initCause(r.cause());
+
+                        ex.printStackTrace();
+                        f.completeExceptionally(ex);
                     }
                 });
             } catch (Exception e) {
-                System.out.println("Error occured when querying SQL: " + sql + " (" + params + ")");
-                e.printStackTrace();
-                f.completeExceptionally(e);
+                log.warning("Error occured when querying SQL: " + sql + " (" + params + ")");
+                ex.initCause(e);
+                ex.printStackTrace();
+                f.completeExceptionally(ex);
             }
 
             return f;

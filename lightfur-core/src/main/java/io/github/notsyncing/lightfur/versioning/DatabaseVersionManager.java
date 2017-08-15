@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.*;
 
@@ -28,6 +29,7 @@ public class DatabaseVersionManager
     private SQLConnection conn;
     private FastClasspathScanner scanner;
     private JsonObject versionData;
+    private Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     public DatabaseVersionManager(DatabaseManager db, FastClasspathScanner scanner)
     {
@@ -288,7 +290,7 @@ public class DatabaseVersionManager
         CompletableFuture<Void> f = new CompletableFuture<>();
         String data = info.getUpdateContent();
 
-        System.out.println(info.getId() + ": Updating database " + info.getDatabase() + " to version " +
+        log.info(info.getId() + ": Updating database " + info.getDatabase() + " to version " +
                 info.getVersion() + "...");
 
         conn.setAutoCommit(false, r3 -> {
@@ -323,7 +325,7 @@ public class DatabaseVersionManager
                             return;
                         }
 
-                        System.out.println(info.getId() + ": Updated database " + info.getDatabase() + " to version " +
+                        log.info(info.getId() + ": Updated database " + info.getDatabase() + " to version " +
                                 info.getVersion() + " with script " + info.getPath());
                         f.complete(null);
                     });

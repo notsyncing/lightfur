@@ -83,46 +83,53 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
         }
     }
 
-    fun execute(session: DataSession? = null) = future<Pair<List<F>, Int>> {
-        val sql = toSQL()
+    fun execute(session: DataSession? = null): CompletableFuture<Pair<List<F>, Int>> {
+        val ex = Exception()
 
-        if (sql == UpdateQueryBuilder.NOTHING_TO_UPDATE) {
-            return@future Pair(emptyList(), 0)
-        }
+        return future<Pair<List<F>, Int>> {
+            val sql = toSQL()
 
-        val params = toSQLParameters().toTypedArray()
-        val db = session ?: DataSession(EntityDataMapper())
-
-        try {
-            val r: List<F>
-            val c: Int
-
-            if (isQuery) {
-                r = db.queryList(finalModel!!::class.java, sql, *params).await()
-                c = r.size
-            } else if (isInsert) {
-                val rs = db.executeWithReturning(sql, *params).await()
-
-                if (rs.numRows == 1) {
-                    for ((i, pkf) in finalModel!!.primaryKeyFields.withIndex()) {
-                        val p = pkf as KMutableProperty<Any>
-                        p.setter.call(finalModel, rs.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].inner.dbColumn))
-                    }
-                }
-
-                r = listOf(finalModel!!)
-                c = rs.numRows
-            } else {
-                val u = db.execute(sql, *params).await()
-
-                r = if (finalModel == null) emptyList() else listOf(finalModel)
-                c = u.updated
+            if (sql == UpdateQueryBuilder.NOTHING_TO_UPDATE) {
+                return@future Pair(emptyList(), 0)
             }
 
-            return@future Pair(r, c)
-        } finally {
-            if (session == null) {
-                db.end().await()
+            val params = toSQLParameters().toTypedArray()
+            val db = session ?: DataSession(EntityDataMapper())
+
+            try {
+                val r: List<F>
+                val c: Int
+
+                if (isQuery) {
+                    r = db.queryList(finalModel!!::class.java, sql, *params).await()
+                    c = r.size
+                } else if (isInsert) {
+                    val rs = db.executeWithReturning(sql, *params).await()
+
+                    if (rs.numRows == 1) {
+                        for ((i, pkf) in finalModel!!.primaryKeyFields.withIndex()) {
+                            val p = pkf as KMutableProperty<Any>
+                            p.setter.call(finalModel, rs.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].inner.dbColumn))
+                        }
+                    }
+
+                    r = listOf(finalModel!!)
+                    c = rs.numRows
+                } else {
+                    val u = db.execute(sql, *params).await()
+
+                    r = if (finalModel == null) emptyList() else listOf(finalModel)
+                    c = u.updated
+                }
+
+                return@future Pair(r, c)
+            } catch (e: Exception) {
+                ex.initCause(e)
+                throw ex
+            } finally {
+                if (session == null) {
+                    db.end().await()
+                }
             }
         }
     }

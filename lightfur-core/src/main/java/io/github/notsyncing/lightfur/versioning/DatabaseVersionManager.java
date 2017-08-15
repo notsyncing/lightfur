@@ -236,47 +236,48 @@ public class DatabaseVersionManager
         scanner.matchFilenameExtension("sql", (absolutePath, relativePathStr, inputStream, lengthBytes) -> {
             char[] header = new char[1024];
 
-            InputStream stream = new BOMInputStream(inputStream,
+            try (InputStream stream = new BOMInputStream(inputStream,
                     ByteOrderMark.UTF_8, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_32BE,
                     ByteOrderMark.UTF_32LE);
-            InputStreamReader reader = new InputStreamReader(stream);
-            int headerReadLength = reader.read(header, 0, 1024);
+                 InputStreamReader reader = new InputStreamReader(stream)) {
+                int headerReadLength = reader.read(header, 0, 1024);
 
-            String s = new String(header);
-            int start = s.indexOf(startMagic);
+                String s = new String(header);
+                int start = s.indexOf(startMagic);
 
-            if (start < 0) {
-                return;
+                if (start < 0) {
+                    return;
+                }
+
+                start += startMagic.length() - 1;
+                int end = s.indexOf(endMagic);
+
+                if (end < 0) {
+                    return;
+                }
+
+                String json = s.substring(start, end + 1);
+                JsonObject data = new JsonObject(json);
+                DbVersionUpdateInfo info = new DbVersionUpdateInfo();
+                info.setData(data);
+                info.setPath(absolutePath.toPath().resolve(relativePathStr));
+
+                if ((!info.getDatabase().equals(databaseName)) && (!info.getDatabase().equals("$"))) {
+                    return;
+                }
+
+                if (info.getDatabase().equals("$")) {
+                    info.setDatabase(databaseName);
+                }
+
+                if (headerReadLength >= 1024) {
+                    info.setUpdateContent(new String(header) + IOUtils.toString(reader));
+                } else {
+                    info.setUpdateContent(new String(Arrays.copyOfRange(header, 0, headerReadLength)));
+                }
+
+                files.add(info);
             }
-
-            start += startMagic.length() - 1;
-            int end = s.indexOf(endMagic);
-
-            if (end < 0) {
-                return;
-            }
-
-            String json = s.substring(start, end + 1);
-            JsonObject data = new JsonObject(json);
-            DbVersionUpdateInfo info = new DbVersionUpdateInfo();
-            info.setData(data);
-            info.setPath(absolutePath.toPath().resolve(relativePathStr));
-
-            if ((!info.getDatabase().equals(databaseName)) && (!info.getDatabase().equals("$"))) {
-                return;
-            }
-
-            if (info.getDatabase().equals("$")) {
-                info.setDatabase(databaseName);
-            }
-
-            if (headerReadLength >= 1024) {
-                info.setUpdateContent(new String(header) + IOUtils.toString(reader));
-            } else {
-                info.setUpdateContent(new String(Arrays.copyOfRange(header, 0, headerReadLength)));
-            }
-
-            files.add(info);
         }).scan();
 
         return files;

@@ -5,7 +5,8 @@ import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
 import io.github.notsyncing.lightfur.ql.permission.QueryPermissions
-import io.vertx.ext.sql.ResultSet
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.util.concurrent.CompletableFuture
@@ -61,7 +62,15 @@ class QueryExecutor {
                     }
                 }
 
-                currLayerObject.put(it, row[modelAliasPrefix + currKey])
+                var value = row[modelAliasPrefix + currKey]
+
+                if (value is JsonArray) {
+                    value = JSON.parseArray(value.toString())
+                } else if (value is JsonObject) {
+                    value = JSON.parseObject(value.toString())
+                }
+
+                currLayerObject.put(it, value)
             }
 
             currLayerObject
@@ -76,7 +85,9 @@ class QueryExecutor {
         if (innerQuery != null) {
             val (innerKey, q) = innerQuery
 
-            currLayerData.forEach { parentObj, innerData -> parentObj.put(innerKey, recursiveAggregateResults("$key.$innerKey", q, innerData)) }
+            currLayerData.forEach { parentObj, innerData ->
+                parentObj.put(innerKey, recursiveAggregateResults("$key.$innerKey", q, innerData))
+            }
         }
 
         return JSON.toJSON(currLayerData.keys) as JSONArray

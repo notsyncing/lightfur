@@ -3,12 +3,8 @@ package io.github.notsyncing.lightfur.ql
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import io.github.notsyncing.lightfur.entity.EntityFieldInfo
-import io.github.notsyncing.lightfur.entity.EntityModel
-import io.github.notsyncing.lightfur.entity.dsl.EntityDSL
+import io.github.notsyncing.lightfur.entity.*
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
-import io.github.notsyncing.lightfur.entity.eq
-import io.github.notsyncing.lightfur.entity.field
 import io.github.notsyncing.lightfur.ql.permission.EntityPermission
 import io.github.notsyncing.lightfur.ql.permission.QueryPermissions
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
@@ -51,7 +47,7 @@ class QueryParser {
 
         val fromClass = Class.forName(fromClassName)
         val fromModel = modelMap["${fromClassName}_$path"] ?: fromClass.newInstance() as EntityModel
-        val dsl = currDsl ?: EntityDSL.select(fromModel).customColumns()
+        val dsl = currDsl ?: fromModel.select().customColumns()
 
         fromModel.modelAliasBeforeColumnName = true
 

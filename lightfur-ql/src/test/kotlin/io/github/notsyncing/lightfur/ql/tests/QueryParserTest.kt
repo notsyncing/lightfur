@@ -34,6 +34,7 @@ class QueryParserTest {
 
         val h = m.hashCode()
         val expected = """SELECT "UserModel_${h}"."last_login_time" AS "UserModel_${h}_lastLoginTime", "UserModel_${h}"."mobile" AS "UserModel_${h}_mobile", "UserModel_${h}"."id" AS "UserModel_${h}_id", "UserModel_${h}"."username" AS "UserModel_${h}_username", "UserModel_${h}"."status" AS "UserModel_${h}_status"
+FROM "users" AS "UserModel_${h}"
 WHERE (("UserModel_${h}"."id" > ? AND "UserModel_${h}"."username" LIKE ? AND "UserModel_${h}"."status" <> ? AND "UserModel_${h}"."status" = ANY(?) OR "UserModel_${h}"."status" = ?))
 ORDER BY "UserModel_${h}"."id", "UserModel_${h}"."username" DESC
 LIMIT ?
@@ -59,6 +60,7 @@ OFFSET ?"""
         val h2 = m2.hashCode()
 
         val expected = """SELECT "UserModel_${h1}"."last_login_time" AS "UserModel_${h1}_lastLoginTime", "UserModel_${h1}"."mobile" AS "UserModel_${h1}_mobile", "UserModel_${h1}"."id" AS "UserModel_${h1}_id", "UserModel_${h1}"."username" AS "UserModel_${h1}_username", "UserModel_${h1}"."status" AS "UserModel_${h1}_status", "UserContactInfoModel_${h2}"."default" AS "UserContactInfoModel_${h2}_default", "UserContactInfoModel_${h2}"."mobile" AS "UserContactInfoModel_${h2}_mobile", "UserContactInfoModel_${h2}"."id" AS "UserContactInfoModel_${h2}_id", "UserContactInfoModel_${h2}"."user_id" AS "UserContactInfoModel_${h2}_userId"
+FROM "users" AS "UserModel_${h1}"
 INNER JOIN ("user_contact_infos" AS "UserContactInfoModel_${h2}") ON ("UserModel_${h1}"."id" = "UserContactInfoModel_${h2}"."user_id")
 WHERE (("UserModel_${h1}"."id" > ? AND "UserModel_${h1}"."username" LIKE ? AND "UserModel_${h1}"."status" <> ? AND "UserContactInfoModel_${h2}"."default" = ? AND "UserModel_${h1}"."status" = ANY(?) OR "UserModel_${h1}"."status" = ?))
 ORDER BY "UserModel_${h1}"."id", "UserModel_${h1}"."username" DESC
@@ -87,6 +89,7 @@ OFFSET ?"""
         val h3 = m3.hashCode()
 
         val expected = """SELECT "UserModel_${h1}"."last_login_time" AS "UserModel_${h1}_lastLoginTime", "UserModel_${h1}"."mobile" AS "UserModel_${h1}_mobile", "UserModel_${h1}"."id" AS "UserModel_${h1}_id", "UserModel_${h1}"."username" AS "UserModel_${h1}_username", "UserModel_${h1}"."status" AS "UserModel_${h1}_status", "UserContactInfoModel_${h2}"."default" AS "UserContactInfoModel_${h2}_default", "UserContactInfoModel_${h2}"."mobile" AS "UserContactInfoModel_${h2}_mobile", "UserContactInfoModel_${h2}"."id" AS "UserContactInfoModel_${h2}_id", "UserContactInfoModel_${h2}"."user_id" AS "UserContactInfoModel_${h2}_userId", "UserContactDetailsModel_${h3}"."contact_info_id" AS "UserContactDetailsModel_${h3}_contactInfoId", "UserContactDetailsModel_${h3}"."comment" AS "UserContactDetailsModel_${h3}_comment", "UserContactDetailsModel_${h3}"."id" AS "UserContactDetailsModel_${h3}_id"
+FROM "users" AS "UserModel_${h1}"
 INNER JOIN ("user_contact_infos" AS "UserContactInfoModel_${h2}") ON ("UserModel_${h1}"."id" = "UserContactInfoModel_${h2}"."user_id")
 INNER JOIN ("user_contact_info_details" AS "UserContactDetailsModel_${h3}") ON ("UserContactInfoModel_${h2}"."id" = "UserContactDetailsModel_${h3}"."contact_info_id")
 WHERE (("UserModel_${h1}"."id" > ? AND "UserModel_${h1}"."username" LIKE ? AND "UserModel_${h1}"."status" <> ? AND "UserContactInfoModel_${h2}"."default" = ? AND "UserModel_${h1}"."status" = ANY(?) OR "UserModel_${h1}"."status" = ? OR "UserContactDetailsModel_${h3}"."comment" IS  NOT NULL))
@@ -138,6 +141,7 @@ OFFSET ?"""
 
         val h = m.hashCode()
         val expected = """SELECT "UserModel_${h}"."last_login_time" AS "UserModel_${h}_lastLoginTime", "UserModel_${h}"."mobile" AS "UserModel_${h}_mobile", "UserModel_${h}"."id" AS "UserModel_${h}_id", "UserModel_${h}"."username" AS "UserModel_${h}_username", "UserModel_${h}"."status" AS "UserModel_${h}_status"
+FROM "users" AS "UserModel_${h}"
 WHERE (("UserModel_${h}"."id" > ? AND "UserModel_${h}"."username" LIKE ? AND "UserModel_${h}"."status" <> ? AND "UserModel_${h}"."status" = ANY(?) OR "UserModel_${h}"."status" = ?) AND ("UserModel_${h}"."id" > ?))
 ORDER BY "UserModel_${h}"."id", "UserModel_${h}"."username" DESC
 LIMIT ?

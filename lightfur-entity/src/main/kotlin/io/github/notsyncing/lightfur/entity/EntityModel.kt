@@ -77,6 +77,8 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
         fieldMap.forEach { it.value.changed = true }
     }
 
+    fun hasChanged() = fieldMap.any { it.value.changed }
+
     fun copyFieldsTo(obj: Any) {
         if (obj is EntityModel) {
             fieldMap.forEach {

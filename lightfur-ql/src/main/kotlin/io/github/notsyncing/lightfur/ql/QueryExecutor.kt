@@ -7,6 +7,7 @@ import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
 import io.github.notsyncing.lightfur.ql.permission.QueryPermissions
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.sql.ResultSet
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.util.concurrent.CompletableFuture

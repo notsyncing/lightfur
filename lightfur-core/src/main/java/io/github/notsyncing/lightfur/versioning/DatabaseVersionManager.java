@@ -2,21 +2,16 @@ package io.github.notsyncing.lightfur.versioning;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.matchprocessor.FileMatchProcessorWithContext;
+import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.DatabaseManager;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.sql.SQLConnection;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
@@ -27,7 +22,7 @@ import static java.util.stream.Collectors.*;
 public class DatabaseVersionManager
 {
     private DatabaseManager db;
-    private SQLConnection conn;
+    private DataSession conn;
     private FastClasspathScanner scanner;
     private JsonObject versionData;
     private Logger log = Logger.getLogger(this.getClass().getSimpleName());
@@ -46,18 +41,16 @@ public class DatabaseVersionManager
             ff = CompletableFuture.completedFuture(null);
         } else {
             ff = db.setDatabase("postgres")
-                    .thenCompose(r -> db.getConnection())
-                    .thenAccept(r -> conn = r)
+                    .thenAccept(r -> conn = new DataSession())
                     .thenCompose(r -> createDatabaseIfNotExists(dbName))
-                    .thenCompose(r -> {
-                        conn.close();
-                        return db.setDatabase(dbName);
-                    });
+                    .thenCompose(r -> conn.end())
+                    .thenCompose(r -> db.setDatabase(dbName));
         }
 
-        return ff.thenCompose(r -> db.getConnection())
-                .thenCompose(r -> {
-                    conn = r;
+        CompletableFuture<Void> fff = new CompletableFuture<>();
+
+        ff.thenCompose(r -> {
+                    conn = new DataSession();
 
                     return initLightfurTables();
                 })
@@ -74,7 +67,7 @@ public class DatabaseVersionManager
                         co[0] = co[0].thenCompose(r2 -> {
                             DbVersionUpdateInfo maxFullVersion = list.stream()
                                     .filter(DbVersionUpdateInfo::isFullVersion)
-                                    .max((u1, u2) -> u1.getVersion() - u2.getVersion())
+                                    .max(Comparator.comparingInt(DbVersionUpdateInfo::getVersion))
                                     .orElse(null);
 
                             final int[] currVersion = {-1};
@@ -96,7 +89,7 @@ public class DatabaseVersionManager
 
                                 list.stream()
                                         .filter(u -> !u.isFullVersion())
-                                        .sorted((u1, u2) -> u1.getVersion() - u2.getVersion())
+                                        .sorted(Comparator.comparingInt(DbVersionUpdateInfo::getVersion))
                                         .forEach(u -> {
                                             if (u.getVersion() <= currVersion[0]) {
                                                 return;
@@ -114,27 +107,15 @@ public class DatabaseVersionManager
 
                     return co[0];
                 })
-                .thenCompose(r -> {
-                    CompletableFuture<Void> f = new CompletableFuture<>();
-
-                    conn.close(r2 -> {
-                        if (r2.failed()) {
-                            f.completeExceptionally(r2.cause());
-                            return;
-                        }
-
-                        f.complete(null);
-                    });
-
-                    return f;
-                })
+                .thenCompose(r -> conn.end())
+                .thenAccept(r -> fff.complete(null))
                 .exceptionally(ex -> {
-                    conn.close();
-
-                    ex.printStackTrace();
+                    conn.end().thenAccept(r -> fff.completeExceptionally(ex));
 
                     return null;
                 });
+
+        return fff;
     }
 
     public CompletableFuture<Void> upgradeToLatest(String dbName) {
@@ -143,31 +124,15 @@ public class DatabaseVersionManager
 
     private CompletableFuture<Void> createDatabaseIfNotExists(String name)
     {
-        CompletableFuture<Void> f = new CompletableFuture<>();
-
-        conn.queryWithParams("SELECT 1 FROM pg_database WHERE datname = ?", new JsonArray().add(name), r -> {
-            if (r.failed()) {
-                f.completeExceptionally(r.cause());
-                return;
-            }
-
-            ResultSet result = r.result();
-
-            if (result.getNumRows() <= 0) {
-                conn.query("CREATE DATABASE \"" + name + "\"", r2 -> {
-                   if (r2.failed()) {
-                       f.completeExceptionally(r2.cause());
-                       return;
-                   }
-
-                   f.complete(null);
-                });
-            } else {
-                f.complete(null);
-            }
-        });
-
-        return f;
+        return conn.query("SELECT 1 FROM pg_database WHERE datname = ?", name)
+                .thenCompose(result -> {
+                    if (result.getNumRows() <= 0) {
+                        return conn.execute("CREATE DATABASE \"" + name + "\"");
+                    } else {
+                        return CompletableFuture.completedFuture(null);
+                    }
+                })
+                .thenApply(r -> null);
     }
 
     private CompletableFuture<Void> initLightfurTables()
@@ -176,69 +141,35 @@ public class DatabaseVersionManager
 
         CompletableFuture<Void> f = new CompletableFuture<>();
 
-        conn.setAutoCommit(false, r4 -> {
-            if (r4.failed()) {
-                f.completeExceptionally(r4.cause());
-                return;
-            }
-
-            conn.query("CREATE SCHEMA IF NOT EXISTS lightfur", r -> {
-                if (r.failed()) {
-                    conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
-                    f.completeExceptionally(r.cause());
-                    return;
-                }
-
-                conn.query("CREATE TABLE IF NOT EXISTS lightfur.version_data (data JSONB)", r2 -> {
-                    if (r2.failed()) {
-                        conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
-                        f.completeExceptionally(r2.cause());
-                        return;
-                    }
-
+        conn.beginTransaction()
+                .thenCompose(r -> conn.execute("CREATE SCHEMA IF NOT EXISTS lightfur"))
+                .thenCompose(r -> conn.execute("CREATE TABLE IF NOT EXISTS lightfur.version_data (data JSONB)"))
+                .thenCompose(r -> {
                     String sql = "INSERT INTO lightfur.version_data (data)\n" +
                             "SELECT ?::jsonb\n" +
                             "WHERE NOT EXISTS (SELECT 1 FROM lightfur.version_data)";
 
-                    conn.queryWithParams(sql, new JsonArray().add(initData.toString()), r3 -> {
-                        if (r3.failed()) {
-                            conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
-                            f.completeExceptionally(r3.cause());
-                            return;
-                        }
+                    return conn.query(sql, initData.toString());
+                })
+                .thenCompose(r -> conn.commit(true))
+                .thenAccept(r -> f.complete(null))
+                .exceptionally(ex -> {
+                    conn.rollback(true)
+                            .thenAccept(r -> f.completeExceptionally(ex));
 
-                        conn.setAutoCommit(true, r5 -> {
-                            if (r5.failed()) {
-                                f.completeExceptionally(r5.cause());
-                                return;
-                            }
-
-                            f.complete(null);
-                        });
-                    });
+                    return null;
                 });
-            });
-        });
 
         return f;
     }
 
     private CompletableFuture<JsonObject> getCurrentDatabaseVersionData()
     {
-        CompletableFuture<JsonObject> f = new CompletableFuture<>();
-
-        conn.query("SELECT COALESCE(data::text, '{}') FROM lightfur.version_data LIMIT 1", r -> {
-            if (r.failed()) {
-                f.completeExceptionally(r.cause());
-                return;
-            }
-
-            String s = r.result().getResults().get(0).getString(0);
-
-            f.complete(new JsonObject(s));
-        });
-
-        return f;
+        return conn.query("SELECT COALESCE(data::text, '{}') FROM lightfur.version_data LIMIT 1")
+                .thenApply(r -> {
+                    String s = r.getResults().get(0).getString(0);
+                    return new JsonObject(s);
+                });
     }
 
     private List<DbVersionUpdateInfo> collectUpdateFiles(String databaseName, DbUpdateFileCollector collector)
@@ -312,45 +243,29 @@ public class DatabaseVersionManager
         log.info(info.getId() + ": Updating database " + info.getDatabase() + " to version " +
                 info.getVersion() + "...");
 
-        conn.setAutoCommit(false, r3 -> {
-            if (r3.failed()) {
-                f.completeExceptionally(r3.cause());
-                return;
-            }
-
-            conn.execute(data, r -> {
-                if (r.failed()) {
-                    conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
-                    f.completeExceptionally(r.cause());
-                    return;
-                }
-
-                if (!versionData.containsKey(info.getId())) {
-                    versionData.put(info.getId(), new JsonObject());
-                }
-
-                versionData.getJsonObject(info.getId()).put("version", info.getVersion());
-
-                conn.updateWithParams("UPDATE lightfur.version_data SET data = ?::jsonb", new JsonArray().add(versionData.toString()), r2 -> {
-                    if (r2.failed()) {
-                        conn.rollback(h -> conn.setAutoCommit(true, h2 -> {}));
-                        f.completeExceptionally(r2.cause());
-                        return;
+        conn.beginTransaction()
+                .thenCompose(r -> conn.executeWithoutPreparing(data))
+                .thenCompose(r -> {
+                    if (!versionData.containsKey(info.getId())) {
+                        versionData.put(info.getId(), new JsonObject());
                     }
 
-                    conn.setAutoCommit(true, r4 -> {
-                        if (r4.failed()) {
-                            f.completeExceptionally(r4.cause());
-                            return;
-                        }
+                    versionData.getJsonObject(info.getId()).put("version", info.getVersion());
 
-                        log.info(info.getId() + ": Updated database " + info.getDatabase() + " to version " +
-                                info.getVersion() + " with script " + info.getPath());
-                        f.complete(null);
-                    });
+                    return conn.execute("UPDATE lightfur.version_data SET data = ?::jsonb", versionData.toString());
+                })
+                .thenCompose(r -> conn.commit(true))
+                .thenAccept(r -> {
+                    log.info(info.getId() + ": Updated database " + info.getDatabase() + " to version " +
+                            info.getVersion() + " with script " + info.getPath());
+                    f.complete(null);
+                })
+                .exceptionally(ex -> {
+                    conn.rollback(true)
+                            .thenAccept(r -> f.completeExceptionally(ex));
+
+                    return null;
                 });
-            });
-        });
 
         return f;
     }

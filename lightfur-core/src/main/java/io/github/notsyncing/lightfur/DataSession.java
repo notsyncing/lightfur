@@ -208,6 +208,35 @@ public class DataSession
     }
 
     /**
+     * 异步执行一条 SQL 语句，不使用 PreparedStatement
+     * @param sql 要执行的 SQL 语句
+     * @return 包含执行结果的 CompletableFuture 对象
+     */
+    public CompletableFuture<UpdateResult> executeWithoutPreparing(String sql)
+    {
+        Exception ex = new Exception();
+
+        return ensureConnection().thenCompose(c -> {
+            CompletableFuture<UpdateResult> f = new CompletableFuture<>();
+
+            c.update(sql, r -> {
+                if (r.succeeded()) {
+                    f.complete(r.result());
+                } else {
+                    log.warning("Error occured when executing SQL: " + sql);
+
+                    ex.initCause(r.cause());
+
+                    ex.printStackTrace();
+                    f.completeExceptionally(ex);
+                }
+            });
+
+            return f;
+        });
+    }
+
+    /**
      * 异步执行一条 SQL 语句
      * @param sql 要执行的 SQL 语句
      * @param params 该语句的参数列表

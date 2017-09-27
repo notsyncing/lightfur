@@ -5,17 +5,22 @@ import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
 import io.github.notsyncing.lightfur.ql.permission.QueryPermissions
-import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.sql.ResultSet
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.util.concurrent.CompletableFuture
 
 class QueryExecutor {
+    companion object {
+        private var resultProcessor: RawQueryResultProcessor? = null
+
+        fun setRawQueryResultProcessor(p: RawQueryResultProcessor) {
+            resultProcessor = p
+        }
+    }
+
     val parser = QueryParser()
 
-    private var _queryFunction: (EntitySelectDSL<*>) -> CompletableFuture<ResultSet> = { it.queryRaw() }
+    private var _queryFunction: (EntitySelectDSL<*>) -> CompletableFuture<Any?> = { it.queryRaw() }
 
     fun execute(query: JSONObject, permissions: QueryPermissions = QueryPermissions.ALL) = future {
         val resolvedQueries = parser.parse(query, permissions)
@@ -33,8 +38,12 @@ class QueryExecutor {
 
     fun execute(query: String, permissions: QueryPermissions = QueryPermissions.ALL) = execute(JSON.parseObject(query), permissions)
 
-    private fun aggregateResultSet(rootKey: String, currQuery: JSONObject, r: ResultSet): JSONArray {
-        val data = r.rows.map { it.map }
+    private fun aggregateResultSet(rootKey: String, currQuery: JSONObject, r: Any?): JSONArray {
+        if (resultProcessor == null) {
+            throw RuntimeException("You must specify a RawQueryResultProcessor!")
+        }
+
+        val data = resultProcessor!!.resultSetToList(r)
 
         return recursiveAggregateResults(rootKey, currQuery, data)
     }
@@ -63,14 +72,7 @@ class QueryExecutor {
                     }
                 }
 
-                var value = row[modelAliasPrefix + currKey]
-
-                if (value is JsonArray) {
-                    value = JSON.parseArray(value.toString())
-                } else if (value is JsonObject) {
-                    value = JSON.parseObject(value.toString())
-                }
-
+                val value = resultProcessor!!.processValue(row[modelAliasPrefix + currKey])
                 currLayerObject.put(it, value)
             }
 

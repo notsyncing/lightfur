@@ -1,10 +1,13 @@
-package io.github.notsyncing.lightfur.tests;
+package io.github.notsyncing.lightfur.integration.vertx.tests;
 
+import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.DatabaseManager;
 import io.github.notsyncing.lightfur.common.LightfurConfig;
 import io.github.notsyncing.lightfur.common.LightfurConfigBuilder;
+import io.github.notsyncing.lightfur.integration.vertx.VertxDataSession;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -46,6 +49,8 @@ public class DatabaseVersionManagerTest
     @Before
     public void setUp(TestContext context)
     {
+        DataSession.setCreator(() -> new VertxDataSession());
+
         Async async = context.async();
 
         db = DatabaseManager.getInstance();
@@ -82,7 +87,9 @@ public class DatabaseVersionManagerTest
 
         db.init(configTest)
                 .thenCompose(r -> db.getConnection())
-                .thenAccept(c -> {
+                .thenAccept(cc -> {
+                    SQLConnection c = (SQLConnection) cc;
+
                     c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
                         if (result.failed()) {
                             c.close();
@@ -154,7 +161,9 @@ public class DatabaseVersionManagerTest
         db.init(config)
                 .thenCompose(r -> db.createDatabase(TEST_DB, true))
                 .thenCompose(r -> db.getConnection())
-                .thenCompose(c -> {
+                .thenCompose(cc -> {
+                    SQLConnection c = (SQLConnection) cc;
+
                     CompletableFuture<Void> f = new CompletableFuture<>();
 
                     String sql = "CREATE SCHEMA lightfur;\n" +
@@ -184,7 +193,9 @@ public class DatabaseVersionManagerTest
                     return db.init(config);
                 })
                 .thenCompose(r -> db.getConnection())
-                .thenAccept(c -> {
+                .thenAccept(cc -> {
+                    SQLConnection c = (SQLConnection) cc;
+
                     c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
                         if (result.failed()) {
                             c.close();
@@ -252,7 +263,9 @@ public class DatabaseVersionManagerTest
 
         db.init(configTest)
                 .thenCompose(r -> db.getConnection())
-                .thenAccept(c -> {
+                .thenAccept(cc -> {
+                    SQLConnection c = (SQLConnection) cc;
+
                     c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
                         if (result.failed()) {
                             c.close();

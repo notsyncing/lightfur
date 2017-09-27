@@ -1,10 +1,11 @@
 package io.github.notsyncing.lightfur.versioning;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.matchprocessor.FileMatchProcessorWithContext;
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.DatabaseManager;
-import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
@@ -24,7 +25,7 @@ public class DatabaseVersionManager
     private DatabaseManager db;
     private DataSession conn;
     private FastClasspathScanner scanner;
-    private JsonObject versionData;
+    private JSONObject versionData;
     private Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     public DatabaseVersionManager(DatabaseManager db, FastClasspathScanner scanner)
@@ -41,7 +42,7 @@ public class DatabaseVersionManager
             ff = CompletableFuture.completedFuture(null);
         } else {
             ff = db.setDatabase("postgres")
-                    .thenAccept(r -> conn = new DataSession())
+                    .thenAccept(r -> conn = DataSession.start())
                     .thenCompose(r -> createDatabaseIfNotExists(dbName))
                     .thenCompose(r -> conn.end())
                     .thenCompose(r -> db.setDatabase(dbName));
@@ -50,10 +51,12 @@ public class DatabaseVersionManager
         CompletableFuture<Void> fff = new CompletableFuture<>();
 
         ff.thenCompose(r -> {
-                    conn = new DataSession();
+            log.info("Checking for update for database " + dbName);
 
-                    return initLightfurTables();
-                })
+            conn = DataSession.start();
+
+            return initLightfurTables();
+        })
                 .thenCompose(r -> getCurrentDatabaseVersionData())
                 .thenCompose(r -> {
                     versionData = r;
@@ -73,12 +76,14 @@ public class DatabaseVersionManager
                             final int[] currVersion = {-1};
 
                             if (versionData.containsKey(id)) {
-                                currVersion[0] = versionData.getJsonObject(id).getInteger("version");
+                                currVersion[0] = versionData.getJSONObject(id).getInteger("version");
                             }
 
                             final CompletableFuture<Void>[] c = new CompletableFuture[]{null};
 
                             if ((currVersion[0] < 0) && (maxFullVersion != null)) {
+                                log.info("Database part " + maxFullVersion.getId() + " has update from version " +
+                                        currVersion[0] + " to version " + maxFullVersion.getVersion());
                                 c[0] = doUpdate(maxFullVersion).thenAccept(x -> currVersion[0] = maxFullVersion.getVersion());
                             } else {
                                 c[0] = CompletableFuture.completedFuture(null);
@@ -110,7 +115,7 @@ public class DatabaseVersionManager
                 .thenCompose(r -> conn.end())
                 .thenAccept(r -> fff.complete(null))
                 .exceptionally(ex -> {
-                    conn.end().thenAccept(r -> fff.completeExceptionally(ex));
+                    conn.end().thenAccept(r -> fff.completeExceptionally((Throwable)ex));
 
                     return null;
                 });
@@ -124,10 +129,10 @@ public class DatabaseVersionManager
 
     private CompletableFuture<Void> createDatabaseIfNotExists(String name)
     {
-        return conn.query("SELECT 1 FROM pg_database WHERE datname = ?", name)
+        return conn.queryFirstValue("SELECT 1 FROM pg_database WHERE datname = ?", name)
                 .thenCompose(result -> {
-                    if (result.getNumRows() <= 0) {
-                        return conn.execute("CREATE DATABASE \"" + name + "\"");
+                    if (result == null) {
+                        return conn.executeWithoutPreparing("CREATE DATABASE \"" + name + "\"");
                     } else {
                         return CompletableFuture.completedFuture(null);
                     }
@@ -137,13 +142,13 @@ public class DatabaseVersionManager
 
     private CompletableFuture<Void> initLightfurTables()
     {
-        JsonObject initData = new JsonObject();
+        JSONObject initData = new JSONObject();
 
         CompletableFuture<Void> f = new CompletableFuture<>();
 
         conn.beginTransaction()
-                .thenCompose(r -> conn.execute("CREATE SCHEMA IF NOT EXISTS lightfur"))
-                .thenCompose(r -> conn.execute("CREATE TABLE IF NOT EXISTS lightfur.version_data (data JSONB)"))
+                .thenCompose(r -> conn.executeWithoutPreparing("CREATE SCHEMA IF NOT EXISTS lightfur"))
+                .thenCompose(r -> conn.executeWithoutPreparing("CREATE TABLE IF NOT EXISTS lightfur.version_data (data JSONB)"))
                 .thenCompose(r -> {
                     String sql = "INSERT INTO lightfur.version_data (data)\n" +
                             "SELECT ?::jsonb\n" +
@@ -155,7 +160,7 @@ public class DatabaseVersionManager
                 .thenAccept(r -> f.complete(null))
                 .exceptionally(ex -> {
                     conn.rollback(true)
-                            .thenAccept(r -> f.completeExceptionally(ex));
+                            .thenAccept(r -> f.completeExceptionally((Throwable)ex));
 
                     return null;
                 });
@@ -163,12 +168,12 @@ public class DatabaseVersionManager
         return f;
     }
 
-    private CompletableFuture<JsonObject> getCurrentDatabaseVersionData()
+    private CompletableFuture<JSONObject> getCurrentDatabaseVersionData()
     {
-        return conn.query("SELECT COALESCE(data::text, '{}') FROM lightfur.version_data LIMIT 1")
+        return conn.queryFirstValue("SELECT COALESCE(data::text, '{}') FROM lightfur.version_data LIMIT 1")
                 .thenApply(r -> {
-                    String s = r.getResults().get(0).getString(0);
-                    return new JsonObject(s);
+                    String s = r.toString();
+                    return JSON.parseObject(s);
                 });
     }
 
@@ -202,7 +207,7 @@ public class DatabaseVersionManager
                 }
 
                 String json = s.substring(start, end + 1);
-                JsonObject data = new JsonObject(json);
+                JSONObject data = JSON.parseObject(json);
                 DbVersionUpdateInfo info = new DbVersionUpdateInfo();
                 info.setData(data);
                 info.setPath(absolutePath.toPath().resolve(relativePathStr));
@@ -247,10 +252,10 @@ public class DatabaseVersionManager
                 .thenCompose(r -> conn.executeWithoutPreparing(data))
                 .thenCompose(r -> {
                     if (!versionData.containsKey(info.getId())) {
-                        versionData.put(info.getId(), new JsonObject());
+                        versionData.put(info.getId(), new JSONObject());
                     }
 
-                    versionData.getJsonObject(info.getId()).put("version", info.getVersion());
+                    versionData.getJSONObject(info.getId()).put("version", info.getVersion());
 
                     return conn.execute("UPDATE lightfur.version_data SET data = ?::jsonb", versionData.toString());
                 })
@@ -262,7 +267,7 @@ public class DatabaseVersionManager
                 })
                 .exceptionally(ex -> {
                     conn.rollback(true)
-                            .thenAccept(r -> f.completeExceptionally(ex));
+                            .thenAccept(r -> f.completeExceptionally((Throwable) ex));
 
                     return null;
                 });

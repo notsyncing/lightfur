@@ -1,10 +1,11 @@
-package io.github.notsyncing.lightfur.ql.tests
+package io.github.notsyncing.lightfur.integration.vertx.ql.tests
 
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
+import io.github.notsyncing.lightfur.integration.vertx.ql.VertxRawQueryResultProcessor
+import io.github.notsyncing.lightfur.integration.vertx.ql.tests.toys.UserContactDetailsModel
+import io.github.notsyncing.lightfur.integration.vertx.ql.tests.toys.UserContactInfoModel
 import io.github.notsyncing.lightfur.ql.QueryExecutor
-import io.github.notsyncing.lightfur.ql.tests.toys.UserContactDetailsModel
-import io.github.notsyncing.lightfur.ql.tests.toys.UserContactInfoModel
-import io.github.notsyncing.lightfur.ql.tests.toys.UserModel
+import io.github.notsyncing.lightfur.integration.vertx.ql.tests.toys.UserModel
 import io.vertx.core.json.JsonArray
 import io.vertx.kotlin.ext.sql.ResultSet
 import org.junit.Assert.assertEquals
@@ -20,6 +21,8 @@ class QueryExecutorTest {
         simpleQuery = javaClass.getResourceAsStream("/testSimple.json").bufferedReader().use { it.readText() }
         nestedQuery = javaClass.getResourceAsStream("/testNested.json").bufferedReader().use { it.readText() }
         deepQuery = javaClass.getResourceAsStream("/testDeep.json").bufferedReader().use { it.readText() }
+
+        QueryExecutor.setRawQueryResultProcessor(VertxRawQueryResultProcessor())
     }
 
     @Test

@@ -1,14 +1,14 @@
-package io.github.notsyncing.lightfur.tests;
+package io.github.notsyncing.lightfur.integration.vertx.tests;
 
 import io.github.notsyncing.lightfur.DatabaseManager;
-import io.vertx.core.impl.verticle.PackageHelper;
+import io.github.notsyncing.lightfur.integration.vertx.VertxPostgreSQLDriver;
 import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -21,6 +21,8 @@ public class DatabaseManagerTest
     @Before
     public void setUp()
     {
+        DatabaseManager.setDriver(new VertxPostgreSQLDriver());
+
         db = DatabaseManager.getInstance();
         db.init("postgres");
     }
@@ -46,7 +48,9 @@ public class DatabaseManagerTest
         Async async = context.async();
 
         db.getConnection()
-                .thenAccept(c -> {
+                .thenAccept(cc -> {
+                    SQLConnection c = (SQLConnection) cc;
+
                     context.assertNotNull(c);
                     c.close();
                     async.complete();
@@ -65,7 +69,9 @@ public class DatabaseManagerTest
 
         db.createDatabase(TEST_DB, false)
                 .thenCompose(r -> db.getConnection())
-                .thenAccept(c -> {
+                .thenAccept(cc -> {
+                    SQLConnection c = (SQLConnection) cc;
+
                     c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
                         c.close();
 
@@ -93,32 +99,36 @@ public class DatabaseManagerTest
         Async async = context.async();
 
         db.getConnection()
-                .thenAccept(c -> c.execute("CREATE DATABASE " + TEST_DB, h -> {
-                    if (h.failed()) {
-                        c.close();
-                        context.fail(h.cause());
-                        return;
-                    }
+                .thenAccept(cc -> {
+                    SQLConnection c = (SQLConnection) cc;
 
-                    db.dropDatabase(TEST_DB)
-                            .thenAccept(r -> c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
-                                c.close();
+                    c.execute("CREATE DATABASE " + TEST_DB, h -> {
+                        if (h.failed()) {
+                            c.close();
+                            context.fail(h.cause());
+                            return;
+                        }
 
-                                if (result.failed()) {
-                                    context.fail(result.cause());
-                                } else {
-                                    ResultSet data = result.result();
-                                    context.assertEquals(0, data.getNumRows());
-                                }
+                        db.dropDatabase(TEST_DB)
+                                .thenAccept(r -> c.query("SELECT 1 FROM pg_database WHERE datname = '" + TEST_DB + "'", result -> {
+                                    c.close();
 
-                                async.complete();
-                            }))
-                            .exceptionally(ex -> {
-                                context.fail(ex);
-                                async.complete();
-                                return null;
-                            });
-                }))
+                                    if (result.failed()) {
+                                        context.fail(result.cause());
+                                    } else {
+                                        ResultSet data = result.result();
+                                        context.assertEquals(0, data.getNumRows());
+                                    }
+
+                                    async.complete();
+                                }))
+                                .exceptionally(ex -> {
+                                    context.fail(ex);
+                                    async.complete();
+                                    return null;
+                                });
+                    });
+                })
                 .exceptionally(ex -> {
                     context.fail(ex);
                     async.complete();

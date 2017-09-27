@@ -1,7 +1,5 @@
 package io.github.notsyncing.lightfur.common;
 
-import io.vertx.core.json.JsonObject;
-
 public class LightfurConfig
 {
     private String host;
@@ -80,16 +78,5 @@ public class LightfurConfig
     public void setEnableDatabaseVersioning(boolean enableDatabaseVersioning)
     {
         this.enableDatabaseVersioning = enableDatabaseVersioning;
-    }
-
-    public JsonObject toVertxConfig()
-    {
-        return new JsonObject()
-                .put("host", host)
-                .put("port", port)
-                .put("username", username)
-                .put("password", password)
-                .put("database", database)
-                .put("maxPoolSize", maxPoolSize);
     }
 }

@@ -1,6 +1,7 @@
 package io.github.notsyncing.lightfur.ql.tests.performance
 
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
+import io.github.notsyncing.lightfur.integration.vertx.ql.VertxRawQueryResultProcessor
 import io.github.notsyncing.lightfur.ql.QueryExecutor
 import io.github.notsyncing.lightfur.ql.tests.toys.UserContactDetailsModel
 import io.github.notsyncing.lightfur.ql.tests.toys.UserContactInfoModel
@@ -21,6 +22,8 @@ open class QueryExecutorPerformanceTest {
         val executor: QueryExecutor
 
         init {
+            QueryExecutor.setRawQueryResultProcessor(VertxRawQueryResultProcessor())
+
             val q = QueryExecutor()
             val m1 = UserModel()
             val m2 = UserContactInfoModel()

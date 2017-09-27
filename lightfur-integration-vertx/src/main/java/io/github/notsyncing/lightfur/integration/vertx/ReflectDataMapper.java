@@ -1,4 +1,4 @@
-package io.github.notsyncing.lightfur.entity;
+package io.github.notsyncing.lightfur.integration.vertx;
 
 import io.github.notsyncing.lightfur.annotations.entity.Column;
 import io.vertx.core.json.JsonObject;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ReflectDataMapper extends DataMapper
+public class ReflectDataMapper extends VertxDataMapper
 {
     @Override
     public <T> T mapSingleRow(Class<T> clazz, JsonObject row) throws IllegalAccessException, InstantiationException

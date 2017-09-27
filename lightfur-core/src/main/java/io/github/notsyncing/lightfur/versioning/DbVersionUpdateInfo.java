@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.versioning;
 
-import io.vertx.core.json.JsonObject;
+import com.alibaba.fastjson.JSONObject;
 
 import java.nio.file.Path;
 
@@ -11,7 +11,7 @@ public class DbVersionUpdateInfo
     private String id;
     private int version;
     private boolean fullVersion;
-    private JsonObject data;
+    private JSONObject data;
     private String updateContent;
 
     public String getDatabase()
@@ -64,19 +64,24 @@ public class DbVersionUpdateInfo
         this.fullVersion = fullVersion;
     }
 
-    public JsonObject getData()
+    public JSONObject getData()
     {
         return data;
     }
 
-    public void setData(JsonObject data)
+    public void setData(JSONObject data)
     {
         this.data = data;
 
         this.version = data.getInteger("version");
         this.database = data.getString("database");
         this.id = data.getString("id");
-        this.fullVersion = data.getBoolean("full_version", false);
+
+        if (data.containsKey("full_version")) {
+            this.fullVersion = data.getBoolean("full_version");
+        } else {
+            fullVersion = false;
+        }
     }
 
     public String getUpdateContent()

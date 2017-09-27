@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 public abstract class DataMapperTest
 {
     private Class<? extends DataMapper> dataMapperClass;
-    protected DataMapper dataMapper;
+    protected DataMapper<ResultSet> dataMapper;
 
     public enum TestEnum
     {

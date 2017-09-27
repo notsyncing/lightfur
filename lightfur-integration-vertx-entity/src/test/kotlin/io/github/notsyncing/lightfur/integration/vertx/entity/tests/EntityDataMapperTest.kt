@@ -1,7 +1,7 @@
-package io.github.notsyncing.lightfur.entity.tests
+package io.github.notsyncing.lightfur.integration.vertx.entity.tests
 
-import io.github.notsyncing.lightfur.entity.EntityDataMapper
 import io.github.notsyncing.lightfur.entity.EntityModel
+import io.github.notsyncing.lightfur.integration.vertx.entity.VertxEntityDataMapper
 import io.github.notsyncing.lightfur.tests.DataMapperTest
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-class EntityDataMapperTest : DataMapperTest(EntityDataMapper::class.java) {
+class EntityDataMapperTest : DataMapperTest(VertxEntityDataMapper::class.java) {
     class TestObject : EntityModel(table = "") {
         var id: Int by field(column = "id")
 

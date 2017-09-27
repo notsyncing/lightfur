@@ -1,8 +1,11 @@
-package io.github.notsyncing.lightfur.entity
+package io.github.notsyncing.lightfur.integration.vertx.entity
 
+import io.github.notsyncing.lightfur.entity.EntityField
+import io.github.notsyncing.lightfur.entity.EntityModel
+import io.github.notsyncing.lightfur.integration.vertx.VertxDataMapper
 import io.vertx.core.json.JsonObject
 
-class EntityDataMapper : DataMapper() {
+class VertxEntityDataMapper : VertxDataMapper() {
     override fun <T : Any> mapSingleRow(clazz: Class<T>?, row: JsonObject?): T? {
         if (clazz == null) {
             return null

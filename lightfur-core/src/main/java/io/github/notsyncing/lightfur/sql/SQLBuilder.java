@@ -6,7 +6,6 @@ import io.github.notsyncing.lightfur.sql.builders.InsertQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
-import io.vertx.ext.sql.UpdateResult;
 
 public class SQLBuilder
 {

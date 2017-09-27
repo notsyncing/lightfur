@@ -1,0 +1,93 @@
+plugins {
+    id "java"
+    id "maven-publish"
+    id "com.jfrog.bintray" version "1.7.3"
+}
+
+apply plugin: "kotlin"
+
+sourceCompatibility = 1.8
+def ver = rootProject.ext.ver
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+
+    maven {
+        url "https://dl.bintray.com/kotlin/kotlinx"
+    }
+}
+
+dependencies {
+    compile project(":lightfur-entity")
+    compile project(":lightfur-integration-vertx")
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'io.vertx:vertx-unit:3.4.2'
+    testCompile 'org.slf4j:slf4j-api:1.7.21'
+    testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
+    testCompile project(":lightfur-core").sourceSets.test.output
+}
+
+compileJava {
+    options.encoding = "utf-8"
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+javadoc {
+    options.encoding = "UTF-8"
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier "sources"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier "javadoc"
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'io.github.notsyncing.lightfur'
+            artifactId 'lightfur-integration-vertx-entity'
+            version ver
+            from components.java
+
+            artifact sourceJar
+            artifact javadocJar
+        }
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenLocal()
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+
+    pkg {
+        repo = 'maven'
+        name = 'lightfur-integration-vertx-entity'
+        licenses = [ 'GPL-3.0' ]
+        vcsUrl = 'https://github.com/notsyncing/lightfur.git'
+
+        version {
+            name = ver
+            vcsTag = ver
+        }
+    }
+
+    publications = [ 'maven' ]
+}

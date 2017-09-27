@@ -1,7 +1,8 @@
-package io.github.notsyncing.lightfur.tests;
+package io.github.notsyncing.lightfur.integration.vertx.tests;
 
 import io.github.notsyncing.lightfur.annotations.entity.Column;
-import io.github.notsyncing.lightfur.entity.ReflectDataMapper;
+import io.github.notsyncing.lightfur.integration.vertx.ReflectDataMapper;
+import io.github.notsyncing.lightfur.tests.DataMapperTest;
 import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 

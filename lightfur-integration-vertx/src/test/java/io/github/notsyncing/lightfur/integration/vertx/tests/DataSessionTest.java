@@ -1,7 +1,10 @@
-package io.github.notsyncing.lightfur.tests;
+package io.github.notsyncing.lightfur.integration.vertx.tests;
 
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.DatabaseManager;
+import io.github.notsyncing.lightfur.integration.vertx.VertxDataSession;
+import io.github.notsyncing.lightfur.integration.vertx.VertxPostgreSQLDriver;
+import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -23,6 +26,9 @@ public class DataSessionTest
     @Before
     public void setUp(TestContext context)
     {
+        DatabaseManager.setDriver(new VertxPostgreSQLDriver());
+        DataSession.setCreator(() -> new VertxDataSession());
+
         Async async = context.async();
 
         db = DatabaseManager.getInstance();
@@ -30,7 +36,9 @@ public class DataSessionTest
         db.dropDatabase(TEST_DB, true)
                 .thenCompose(r -> db.createDatabase(TEST_DB, true))
                 .thenCompose(r -> db.getConnection())
-                .thenCompose(c -> {
+                .thenCompose(cc -> {
+                    SQLConnection c = (SQLConnection) cc;
+
                     CompletableFuture f = new CompletableFuture();
 
                     c.execute("CREATE TABLE test (id SERIAL PRIMARY KEY, message TEXT, flag INTEGER, arr INTEGER[], text_arr TEXT[], price NUMERIC(38,6))", h -> {
@@ -77,7 +85,7 @@ public class DataSessionTest
     {
         Async async = context.async();
 
-        DataSession session = new DataSession();
+        VertxDataSession session = DataSession.start();
         session.executeWithReturning("INSERT INTO test (message, flag) VALUES (?, ?) RETURNING id", "test", 1)
                 .thenAccept(r -> {
                     context.assertEquals(1, r.getNumRows());
@@ -101,7 +109,7 @@ public class DataSessionTest
     {
         Async async = context.async();
 
-        DataSession session = new DataSession();
+        VertxDataSession session = DataSession.start();
         session.execute("INSERT INTO test (message, flag, arr, price) VALUES (?, ?, ?, ?)", "test2", 2, new int[] { 1, 2, 3 }, new BigDecimal("23445345343.000000"))
                 .thenAccept(r -> context.assertEquals(1, r.getUpdated()))
                 .thenCompose(r -> session.query("SELECT message, flag, arr::text, price FROM test"))
@@ -130,7 +138,7 @@ public class DataSessionTest
     {
         Async async = context.async();
 
-        DataSession session = new DataSession();
+        VertxDataSession session = DataSession.start();
         session.execute("INSERT INTO test (message, flag, arr) VALUES (?, ?, ?)", "test2", 2, new int[] { 1, 2, 3 })
                 .thenAccept(r -> context.assertEquals(1, r.getUpdated()))
                 .thenCompose(r -> session.query("SELECT message, flag, arr::text FROM test WHERE flag = ANY(?)", new Object[] { new int[] { 1, 2, 3 } }))
@@ -158,7 +166,7 @@ public class DataSessionTest
     {
         Async async = context.async();
 
-        DataSession session = new DataSession();
+        VertxDataSession session = DataSession.start();
         session.execute("INSERT INTO test (message, flag, text_arr) VALUES (?, ?, ?)", "test2", 2, new String[] { "b" })
                 .thenAccept(r -> context.assertEquals(1, r.getUpdated()))
                 .thenCompose(r -> session.query("SELECT message, flag, text_arr::text FROM test WHERE text_arr && ?::text[]", new Object[] { new String[] { "b" } }))

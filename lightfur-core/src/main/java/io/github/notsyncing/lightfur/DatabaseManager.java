@@ -5,11 +5,6 @@ import io.github.notsyncing.lightfur.common.LightfurConfig;
 import io.github.notsyncing.lightfur.common.LightfurConfigBuilder;
 import io.github.notsyncing.lightfur.versioning.DatabaseVersionManager;
 import io.github.notsyncing.lightfur.versioning.DbUpdateFileCollector;
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
-import io.vertx.ext.asyncsql.AsyncSQLClient;
-import io.vertx.ext.asyncsql.PostgreSQLClient;
-import io.vertx.ext.sql.SQLConnection;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,10 +14,10 @@ import java.util.concurrent.CompletableFuture;
 public class DatabaseManager
 {
     private static DatabaseManager instance = new DatabaseManager();
+    private static DatabaseDriver driver;
 
-    private Vertx vertx;
-    private AsyncSQLClient client;
-    private LightfurConfig configs;
+    public LightfurConfig configs;
+
     private FastClasspathScanner cpScanner;
     private String currentDatabase;
 
@@ -40,6 +35,10 @@ public class DatabaseManager
         return instance;
     }
 
+    public static void setDriver(DatabaseDriver driver) {
+        DatabaseManager.driver = driver;
+    }
+
     public LightfurConfig getConfigs()
     {
         return configs;
@@ -55,13 +54,13 @@ public class DatabaseManager
      */
     public CompletableFuture<Void> init(LightfurConfig config)
     {
-        VertxOptions opts = new VertxOptions()
-                .setBlockedThreadCheckInterval(60 * 60 * 1000);
-
-        vertx = Vertx.vertx(opts);
-
         configs = config;
-        client = PostgreSQLClient.createNonShared(vertx, configs.toVertxConfig());
+
+        if (driver == null) {
+            throw new RuntimeException("You must specify a DatabaseDriver!");
+        }
+
+        driver.init(config);
 
         if ((config.isEnableDatabaseVersioning()) && (!config.getDatabase().equals("postgres"))) {
             DatabaseVersionManager versionManager = new DatabaseVersionManager(this, cpScanner);
@@ -122,45 +121,16 @@ public class DatabaseManager
      */
     public CompletableFuture<Void> close()
     {
-        CompletableFuture<Void> f = new CompletableFuture<>();
-
-        client.close(r -> {
-            if (r.failed()) {
-                f.completeExceptionally(r.cause());
-                return;
-            }
-
-            vertx.close(r2 -> {
-                if (r2.failed()) {
-                    f.completeExceptionally(r2.cause());
-                    return;
-                }
-
-                f.complete(r2.result());
-            });
-        });
-
-        return f;
+        return driver.close();
     }
 
     /**
      * 异步获取数据库连接对象
      * @return 包含数据库连接对象的 CompletableFuture 对象
      */
-    public CompletableFuture<SQLConnection> getConnection()
+    public CompletableFuture<Object> getConnection()
     {
-        CompletableFuture<SQLConnection> future = new CompletableFuture<>();
-
-        client.getConnection(r -> {
-            if (r.succeeded()) {
-                future.complete(r.result());
-            } else {
-                r.cause().printStackTrace();
-                future.completeExceptionally(r.cause());
-            }
-        });
-
-        return future;
+        return driver.getConnection();
     }
 
     /**
@@ -171,26 +141,7 @@ public class DatabaseManager
      */
     public CompletableFuture<Void> createDatabase(String databaseName, boolean switchTo)
     {
-        CompletableFuture<Void> f = new CompletableFuture<>();
-
-        client.getConnection(r -> {
-            if (!r.succeeded()) {
-                f.completeExceptionally(r.cause());
-                return;
-            }
-
-            SQLConnection c = r.result();
-            c.execute("CREATE DATABASE \"" + databaseName + "\"", r2 -> {
-                c.close();
-
-                if (!r2.succeeded()) {
-                    f.completeExceptionally(r2.cause());
-                    return;
-                }
-
-                f.complete(r2.result());
-            });
-        });
+        CompletableFuture<Void> f = driver.createDatabase(databaseName);
 
         if (!switchTo) {
             return f;
@@ -208,37 +159,7 @@ public class DatabaseManager
     public CompletableFuture<Void> dropDatabase(String databaseName, boolean ifExists)
     {
         return setDatabase("postgres")
-                .thenCompose(x -> {
-                    CompletableFuture<Void> f = new CompletableFuture<>();
-
-                    client.getConnection(r -> {
-                        if (!r.succeeded()) {
-                            f.completeExceptionally(r.cause());
-                            return;
-                        }
-
-                        SQLConnection c = r.result();
-
-                        String sql = "DROP DATABASE";
-
-                        if (ifExists) {
-                            sql += " IF EXISTS";
-                        }
-
-                        c.execute(sql + " \"" + databaseName + "\"", r2 -> {
-                            c.close();
-
-                            if (!r2.succeeded()) {
-                                f.completeExceptionally(r2.cause());
-                                return;
-                            }
-
-                            f.complete(r2.result());
-                        });
-                    });
-
-                    return f;
-                });
+                .thenCompose(x -> driver.dropDatabase(databaseName, ifExists));
     }
 
     /**
@@ -257,27 +178,12 @@ public class DatabaseManager
      */
     public CompletableFuture<Void> setDatabase(String databaseName)
     {
-        CompletableFuture<Void> f = new CompletableFuture<>();
+        configs.setDatabase(databaseName);
 
-        if (client != null) {
-            client.close(r -> {
-                if (!r.succeeded()) {
-                    f.completeExceptionally(r.cause());
-                    return;
-                }
-
-                f.complete(r.result());
-            });
-        } else {
-            f.complete(null);
-        }
-
-        return f.thenAccept(r -> {
-            configs.setDatabase(databaseName);
-            client = PostgreSQLClient.createNonShared(vertx, configs.toVertxConfig());
-
-            currentDatabase = databaseName;
-        });
+        return driver.recreate(configs)
+                .thenAccept(r -> {
+                    currentDatabase = databaseName;
+                });
     }
 
     /**

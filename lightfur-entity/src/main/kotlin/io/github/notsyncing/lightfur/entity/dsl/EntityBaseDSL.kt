@@ -1,24 +1,21 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
 import io.github.notsyncing.lightfur.DataSession
-import io.github.notsyncing.lightfur.entity.EntityDataMapper
-import io.github.notsyncing.lightfur.entity.EntityFieldInfo
-import io.github.notsyncing.lightfur.entity.EntityGlobal
-import io.github.notsyncing.lightfur.entity.EntityModel
+import io.github.notsyncing.lightfur.entity.*
 import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.ColumnModel
 import io.github.notsyncing.lightfur.sql.models.TableModel
-import io.vertx.ext.sql.ResultSet
+import io.github.notsyncing.lightfur.utils.FutureUtils
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KMutableProperty
 
-abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
-                                             private val isQuery: Boolean = false,
-                                             private val isInsert: Boolean = false,
+abstract class EntityBaseDSL<F: EntityModel>(val finalModel: F?,
+                                             val isQuery: Boolean = false,
+                                             val isInsert: Boolean = false,
                                              private val cacheTag: String? = null) {
     abstract protected val builder: SQLPart
     private var cachedSQL: String? = null
@@ -29,6 +26,12 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
     var requireTableAlias = false
 
     companion object {
+        private var executor: EntityQueryExecutor<Any, Any>? = null
+
+        fun setQueryExecutor(e: EntityQueryExecutor<*, *>) {
+            executor = e as EntityQueryExecutor<Any, Any>
+        }
+
         @JvmStatic
         protected fun getTableModelFromEntityModel(m: EntityModel): TableModel {
             val table = TableModel()
@@ -83,58 +86,15 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
         }
     }
 
-    fun execute(session: DataSession? = null): CompletableFuture<Pair<List<F>, Int>> {
-        val ex = Exception()
-
-        return future<Pair<List<F>, Int>> {
-            val sql = toSQL()
-
-            if (sql == UpdateQueryBuilder.NOTHING_TO_UPDATE) {
-                return@future Pair(emptyList(), 0)
-            }
-
-            val params = toSQLParameters().toTypedArray()
-            val db = session ?: DataSession(EntityDataMapper())
-
-            try {
-                val r: List<F>
-                val c: Int
-
-                if (isQuery) {
-                    r = db.queryList(finalModel!!::class.java, sql, *params).await()
-                    c = r.size
-                } else if (isInsert) {
-                    val rs = db.executeWithReturning(sql, *params).await()
-
-                    if (rs.numRows == 1) {
-                        for ((i, pkf) in finalModel!!.primaryKeyFields.withIndex()) {
-                            val p = pkf as KMutableProperty<Any>
-                            p.setter.call(finalModel, rs.rows[0].getValue(finalModel.primaryKeyFieldInfos[i].inner.dbColumn))
-                        }
-                    }
-
-                    r = listOf(finalModel!!)
-                    c = rs.numRows
-                } else {
-                    val u = db.execute(sql, *params).await()
-
-                    r = if (finalModel == null) emptyList() else listOf(finalModel)
-                    c = u.updated
-                }
-
-                return@future Pair(r, c)
-            } catch (e: Exception) {
-                ex.initCause(e)
-                throw ex
-            } finally {
-                if (session == null) {
-                    db.end().await()
-                }
-            }
+    fun execute(session: DataSession<*, *>? = null): CompletableFuture<Pair<List<F>, Int>> {
+        if (executor == null) {
+            return FutureUtils.failed(RuntimeException("You must specify an EntityQueryExecutor!"))
         }
+
+        return executor!!.execute(this, session as DataSession<Any, Any>?) as CompletableFuture<Pair<List<F>, Int>>
     }
 
-    fun executeFirst(session: DataSession? = null): CompletableFuture<F?> {
+    fun executeFirst(session: DataSession<*, *>? = null): CompletableFuture<F?> {
         return execute(session)
                 .thenApply { (l, c) ->
                     if (c > 0) {
@@ -145,29 +105,15 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
                 }
     }
 
-    fun queryRaw(session: DataSession? = null) = future {
-        val sql = toSQL()
-        val params = toSQLParameters().toTypedArray()
-        val db = session ?: DataSession(EntityDataMapper())
-
-        try {
-            val r: ResultSet
-
-            if (isQuery) {
-                r = db.query(sql, *params).await()
-            } else {
-                r = db.executeWithReturning(sql, *params).await()
-            }
-
-            r
-        } finally {
-            if (session == null) {
-                db.end().await()
-            }
+    fun queryRaw(session: DataSession<*, *>? = null): CompletableFuture<Any?> {
+        if (executor == null) {
+            return FutureUtils.failed(RuntimeException("You must specify an EntityQueryExecutor!"))
         }
+
+        return executor!!.queryRaw(this, session as DataSession<Any, Any>?) as CompletableFuture<Any?>
     }
 
-    fun executeRaw(session: DataSession? = null) = future {
+    fun executeRaw(session: DataSession<*, *>? = null) = future {
         val sql = toSQL()
 
         if (sql == UpdateQueryBuilder.NOTHING_TO_UPDATE) {
@@ -175,10 +121,10 @@ abstract class EntityBaseDSL<F: EntityModel>(private val finalModel: F?,
         }
 
         val params = toSQLParameters().toTypedArray()
-        val db = session ?: DataSession(EntityDataMapper())
+        val db = session ?: DataSession.start()
 
         try {
-            db.execute(sql, *params).await()
+            db.update(sql, *params).await()
         } finally {
             if (session == null) {
                 db.end().await()

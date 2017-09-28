@@ -5,6 +5,7 @@ import io.github.notsyncing.lightfur.DatabaseManager;
 import io.github.notsyncing.lightfur.common.LightfurConfig;
 import io.github.notsyncing.lightfur.common.LightfurConfigBuilder;
 import io.github.notsyncing.lightfur.integration.vertx.VertxDataSession;
+import io.github.notsyncing.lightfur.integration.vertx.VertxPostgreSQLDriver;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
@@ -49,6 +50,7 @@ public class DatabaseVersionManagerTest
     @Before
     public void setUp(TestContext context)
     {
+        DatabaseManager.setDriver(new VertxPostgreSQLDriver());
         DataSession.setCreator(() -> new VertxDataSession());
 
         Async async = context.async();

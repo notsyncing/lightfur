@@ -23,7 +23,7 @@ import static java.util.stream.Collectors.*;
 public class DatabaseVersionManager
 {
     private DatabaseManager db;
-    private DataSession conn;
+    private DataSession<Object, Object, Object> conn;
     private FastClasspathScanner scanner;
     private JSONObject versionData;
     private Logger log = Logger.getLogger(this.getClass().getSimpleName());
@@ -36,17 +36,11 @@ public class DatabaseVersionManager
 
     public CompletableFuture<Void> upgradeToLatest(String dbName, DbUpdateFileCollector collector)
     {
-        CompletableFuture<Void> ff;
-
-        if (dbName.equals(db.getCurrentDatabase())) {
-            ff = CompletableFuture.completedFuture(null);
-        } else {
-            ff = db.setDatabase("postgres")
-                    .thenAccept(r -> conn = DataSession.start())
-                    .thenCompose(r -> createDatabaseIfNotExists(dbName))
-                    .thenCompose(r -> conn.end())
-                    .thenCompose(r -> db.setDatabase(dbName));
-        }
+        CompletableFuture<Void> ff = db.setDatabase("postgres")
+                .thenAccept(r -> conn = DataSession.start())
+                .thenCompose(r -> createDatabaseIfNotExists(dbName))
+                .thenCompose(r -> conn.end())
+                .thenCompose(r -> db.setDatabase(dbName));
 
         CompletableFuture<Void> fff = new CompletableFuture<>();
 
@@ -132,7 +126,7 @@ public class DatabaseVersionManager
         return conn.queryFirstValue("SELECT 1 FROM pg_database WHERE datname = ?", name)
                 .thenCompose(result -> {
                     if (result == null) {
-                        return conn.executeWithoutPreparing("CREATE DATABASE \"" + name + "\"");
+                        return conn.updateWithoutPreparing("CREATE DATABASE \"" + name + "\"");
                     } else {
                         return CompletableFuture.completedFuture(null);
                     }
@@ -147,14 +141,14 @@ public class DatabaseVersionManager
         CompletableFuture<Void> f = new CompletableFuture<>();
 
         conn.beginTransaction()
-                .thenCompose(r -> conn.executeWithoutPreparing("CREATE SCHEMA IF NOT EXISTS lightfur"))
-                .thenCompose(r -> conn.executeWithoutPreparing("CREATE TABLE IF NOT EXISTS lightfur.version_data (data JSONB)"))
+                .thenCompose(r -> conn.updateWithoutPreparing("CREATE SCHEMA IF NOT EXISTS lightfur"))
+                .thenCompose(r -> conn.updateWithoutPreparing("CREATE TABLE IF NOT EXISTS lightfur.version_data (data JSONB)"))
                 .thenCompose(r -> {
                     String sql = "INSERT INTO lightfur.version_data (data)\n" +
                             "SELECT ?::jsonb\n" +
                             "WHERE NOT EXISTS (SELECT 1 FROM lightfur.version_data)";
 
-                    return conn.query(sql, initData.toString());
+                    return conn.update(sql, initData.toString());
                 })
                 .thenCompose(r -> conn.commit(true))
                 .thenAccept(r -> f.complete(null))
@@ -249,7 +243,7 @@ public class DatabaseVersionManager
                 info.getVersion() + "...");
 
         conn.beginTransaction()
-                .thenCompose(r -> conn.executeWithoutPreparing(data))
+                .thenCompose(r -> conn.updateWithoutPreparing(data))
                 .thenCompose(r -> {
                     if (!versionData.containsKey(info.getId())) {
                         versionData.put(info.getId(), new JSONObject());
@@ -257,7 +251,7 @@ public class DatabaseVersionManager
 
                     versionData.getJSONObject(info.getId()).put("version", info.getVersion());
 
-                    return conn.execute("UPDATE lightfur.version_data SET data = ?::jsonb", versionData.toString());
+                    return conn.update("UPDATE lightfur.version_data SET data = ?::jsonb", versionData.toString());
                 })
                 .thenCompose(r -> conn.commit(true))
                 .thenAccept(r -> {

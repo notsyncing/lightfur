@@ -1,13 +1,13 @@
 package io.github.notsyncing.lightfur.models;
 
 public class ExecutionResult {
-    private int updated;
+    private long updated;
 
-    public ExecutionResult(int updated) {
+    public ExecutionResult(long updated) {
         this.updated = updated;
     }
 
-    public int getUpdated() {
+    public long getUpdated() {
         return updated;
     }
 

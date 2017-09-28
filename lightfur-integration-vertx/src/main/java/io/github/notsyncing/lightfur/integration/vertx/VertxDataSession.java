@@ -12,10 +12,7 @@ import java.math.BigDecimal;
 import java.time.temporal.Temporal;
 import java.util.concurrent.CompletableFuture;
 
-public class VertxDataSession extends DataSession<ResultSet, UpdateResult> {
-    private SQLConnection conn = null;
-    private CompletableFuture<Void> connFuture;
-
+public class VertxDataSession extends DataSession<SQLConnection, ResultSet, UpdateResult> {
     public VertxDataSession()
     {
         this(new ReflectDataMapper());
@@ -24,8 +21,6 @@ public class VertxDataSession extends DataSession<ResultSet, UpdateResult> {
     public VertxDataSession(VertxDataMapper dataMapper)
     {
         super(dataMapper);
-
-        connFuture = mgr.getConnection().thenAccept(c -> conn = (SQLConnection)c);
     }
 
     protected CompletableFuture<Void> setAutoCommit(boolean autoCommit)
@@ -35,8 +30,8 @@ public class VertxDataSession extends DataSession<ResultSet, UpdateResult> {
 
             c.setAutoCommit(autoCommit, r -> {
                 if (r.succeeded()) {
-                    inTransaction = !autoCommit;
-                    f.complete(r.result());
+                    super.setAutoCommit(autoCommit)
+                            .thenAccept(r2 -> f.complete(r.result()));
                 } else {
                     r.cause().printStackTrace();
                     f.completeExceptionally(r.cause());
@@ -47,16 +42,8 @@ public class VertxDataSession extends DataSession<ResultSet, UpdateResult> {
         });
     }
 
-    private CompletableFuture<SQLConnection> ensureConnection()
-    {
-        if (connFuture.isDone()) {
-            return CompletableFuture.completedFuture(conn);
-        } else {
-            return connFuture.thenApply(o -> conn);
-        }
-    }
-
-    private CompletableFuture<Void> commitCore()
+    @Override
+    protected CompletableFuture<Void> _commit()
     {
         return ensureConnection().thenCompose(c -> {
             CompletableFuture<Void> f = new CompletableFuture<>();
@@ -75,16 +62,7 @@ public class VertxDataSession extends DataSession<ResultSet, UpdateResult> {
     }
 
     @Override
-    public CompletableFuture<Void> commit(boolean endTransaction)
-    {
-        if (endTransaction) {
-            return setAutoCommit(true);
-        } else {
-            return commitCore();
-        }
-    }
-
-    private CompletableFuture<Void> rollbackCore()
+    protected CompletableFuture<Void> _rollback()
     {
         return ensureConnection().thenCompose(c -> {
             CompletableFuture<Void> f = new CompletableFuture<>();
@@ -99,18 +77,6 @@ public class VertxDataSession extends DataSession<ResultSet, UpdateResult> {
             });
 
             return f;
-        });
-    }
-
-    @Override
-    public CompletableFuture<Void> rollback(boolean endTransaction)
-    {
-        return rollbackCore().thenCompose(o -> {
-            if (endTransaction) {
-                return setAutoCommit(true);
-            } else {
-                return CompletableFuture.completedFuture(o);
-            }
         });
     }
 
@@ -264,16 +230,8 @@ public class VertxDataSession extends DataSession<ResultSet, UpdateResult> {
     }
 
     @Override
-    public CompletableFuture<Void> end()
+    protected CompletableFuture<Void> _end()
     {
-        if (ended) {
-            return CompletableFuture.completedFuture(null);
-        }
-
-        if (conn == null) {
-            return CompletableFuture.completedFuture(null);
-        }
-
         CompletableFuture<Void> f = new CompletableFuture<>();
 
         conn.setAutoCommit(false, r -> {

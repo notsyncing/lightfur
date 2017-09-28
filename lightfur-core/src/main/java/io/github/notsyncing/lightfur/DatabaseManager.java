@@ -60,11 +60,16 @@ public class DatabaseManager
             throw new RuntimeException("You must specify a DatabaseDriver!");
         }
 
-        driver.init(config);
-
         if ((config.isEnableDatabaseVersioning()) && (!config.getDatabase().equals("postgres"))) {
+            String currentDatabase = config.getDatabase();
+            config.setDatabase("postgres");
+            driver.init(config);
+
             DatabaseVersionManager versionManager = new DatabaseVersionManager(this, cpScanner);
-            return versionManager.upgradeToLatest(config.getDatabase());
+            return versionManager.upgradeToLatest(currentDatabase)
+                    .thenCompose(r -> setDatabase(currentDatabase));
+        } else {
+            driver.init(config);
         }
 
         currentDatabase = config.getDatabase();
@@ -178,6 +183,10 @@ public class DatabaseManager
      */
     public CompletableFuture<Void> setDatabase(String databaseName)
     {
+        if (configs.getDatabase().equals(databaseName)) {
+            return CompletableFuture.completedFuture(null);
+        }
+
         configs.setDatabase(databaseName);
 
         return driver.recreate(configs)

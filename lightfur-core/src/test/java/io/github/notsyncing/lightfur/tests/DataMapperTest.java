@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -84,8 +85,7 @@ public abstract class DataMapperTest
     }
 
     @Test
-    public void testMap() throws InstantiationException, IllegalAccessException, ParseException
-    {
+    public void testMap() throws InstantiationException, IllegalAccessException, ParseException, SQLException {
         ResultSet r = new ResultSet();
         r.setColumnNames(Arrays.asList("id", "username", "date", "type", "list", "list2", "complex", "complex2", "long_number"));
 
@@ -130,8 +130,7 @@ public abstract class DataMapperTest
     }
 
     @Test
-    public void testMapLong() throws InstantiationException, IllegalAccessException
-    {
+    public void testMapLong() throws InstantiationException, IllegalAccessException, SQLException {
         ResultSet r = new ResultSet();
         r.setColumnNames(Arrays.asList("id", "list"));
 

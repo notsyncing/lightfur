@@ -9,17 +9,18 @@ import io.github.notsyncing.lightfur.utils.PageUtils;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
 /**
  * 数据操作会话类
  */
-public abstract class DataSession<R, U>
+public abstract class DataSession<C, R, U>
 {
     private static DataSessionCreator creator = null;
 
     protected DatabaseManager mgr;
+    protected C conn;
+    protected CompletableFuture<Void> connFuture;
     protected boolean inTransaction = false;
     protected DataMapper<R> dataMapper;
     protected boolean ended = false;
@@ -30,6 +31,8 @@ public abstract class DataSession<R, U>
         this.dataMapper = dataMapper;
 
         mgr = DatabaseManager.getInstance();
+
+        connFuture = mgr.getConnection().thenAccept(c -> conn = (C) c);
     }
 
     public static void setCreator(DataSessionCreator creator) {
@@ -47,12 +50,25 @@ public abstract class DataSession<R, U>
         return (D) creator.create();
     }
 
+    protected CompletableFuture<C> ensureConnection()
+    {
+        if (connFuture.isDone()) {
+            return CompletableFuture.completedFuture(conn);
+        } else {
+            return connFuture.thenApply(o -> conn);
+        }
+    }
+
     public boolean isInTransaction()
     {
         return inTransaction;
     }
 
-    protected abstract CompletableFuture<Void> setAutoCommit(boolean autoCommit);
+    protected CompletableFuture<Void> setAutoCommit(boolean autoCommit) {
+        inTransaction = !autoCommit;
+
+        return CompletableFuture.completedFuture(null);
+    }
 
     /**
      * 异步开始一个数据库事务
@@ -63,13 +79,21 @@ public abstract class DataSession<R, U>
         return setAutoCommit(false);
     }
 
+    protected abstract CompletableFuture<Void> _commit();
+
     /**
      * 异步提交当前数据库事务
      * 应先调用 {@link DataSession#beginTransaction} 来开始一个事务
      * @param endTransaction 提交后是否结束事务
      * @return 指示提交是否已完成的 CompletableFuture 对象
      */
-    public abstract CompletableFuture<Void> commit(boolean endTransaction);
+    public CompletableFuture<Void> commit(boolean endTransaction) {
+        if (endTransaction) {
+            return setAutoCommit(true);
+        } else {
+            return _commit();
+        }
+    }
 
     /**
      * 异步提交当前数据库事务，并结束当前事务
@@ -81,13 +105,23 @@ public abstract class DataSession<R, U>
         return commit(true);
     }
 
+    protected abstract CompletableFuture<Void> _rollback();
+
     /**
      * 异步回滚当前数据库事务
      * 应先调用 {@link DataSession#beginTransaction} 来开始一个事务
      * @param endTransaction 回滚后是否结束事务
      * @return 指示回滚是否已完成的 CompletableFuture 对象
      */
-    public abstract CompletableFuture<Void> rollback(boolean endTransaction);
+    public CompletableFuture<Void> rollback(boolean endTransaction) {
+        return _rollback().thenCompose(o -> {
+            if (endTransaction) {
+                return setAutoCommit(true);
+            } else {
+                return CompletableFuture.completedFuture(o);
+            }
+        });
+    }
 
     /**
      * 异步回滚当前数据库事务，并结束当前事务
@@ -140,13 +174,25 @@ public abstract class DataSession<R, U>
      */
     public abstract CompletableFuture<R> query(String sql, Object... params);
 
+    protected abstract CompletableFuture<Void> _end();
+
     /**
      * 结束当前数据会话，并关闭数据库连接
      * 在执行此函数之后，当前数据会话对象上的所有后续操作将失败
      * 要再次操作，请重新实例化一个 {@link DataSession} 以开始一个新的数据会话
      * @return 指示是否关闭连接的 CompletableFuture 对象
      */
-    public abstract CompletableFuture<Void> end();
+    public CompletableFuture<Void> end() {
+        if (ended) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        if (conn == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        return _end();
+    }
 
     /**
      * 异步执行一条 SQL 查询语句，并将第一条查询结果映射到指定类型的类/实体

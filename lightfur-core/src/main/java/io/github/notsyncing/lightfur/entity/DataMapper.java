@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.ObjectSerializer;
 
 import java.lang.reflect.Array;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -151,7 +152,7 @@ public abstract class DataMapper<R>
         return enumClass.getEnumConstants()[value];
     }
 
-    public abstract <T> T map(Class<T> clazz, R results) throws IllegalAccessException, InstantiationException;
+    public abstract <T> T map(Class<T> clazz, R results) throws IllegalAccessException, InstantiationException, SQLException;
 
-    public abstract <T> List<T> mapToList(Class<T> clazz, R results) throws InstantiationException, IllegalAccessException;
+    public abstract <T> List<T> mapToList(Class<T> clazz, R results) throws InstantiationException, IllegalAccessException, SQLException;
 }

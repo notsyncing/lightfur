@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur;
 
 @FunctionalInterface
-public interface DataSessionCreator<R, U> {
-    DataSession<R, U> create();
+public interface DataSessionCreator<C, R, U> {
+    DataSession<C, R, U> create();
 }

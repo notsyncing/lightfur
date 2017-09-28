@@ -26,10 +26,10 @@ abstract class EntityBaseDSL<F: EntityModel>(val finalModel: F?,
     var requireTableAlias = false
 
     companion object {
-        private var executor: EntityQueryExecutor<Any, Any>? = null
+        private var executor: EntityQueryExecutor<Any, Any, Any>? = null
 
-        fun setQueryExecutor(e: EntityQueryExecutor<*, *>) {
-            executor = e as EntityQueryExecutor<Any, Any>
+        fun setQueryExecutor(e: EntityQueryExecutor<*, *, *>) {
+            executor = e as EntityQueryExecutor<Any, Any, Any>
         }
 
         @JvmStatic
@@ -86,15 +86,15 @@ abstract class EntityBaseDSL<F: EntityModel>(val finalModel: F?,
         }
     }
 
-    fun execute(session: DataSession<*, *>? = null): CompletableFuture<Pair<List<F>, Int>> {
+    fun execute(session: DataSession<*, *, *>? = null): CompletableFuture<Pair<List<F>, Int>> {
         if (executor == null) {
             return FutureUtils.failed(RuntimeException("You must specify an EntityQueryExecutor!"))
         }
 
-        return executor!!.execute(this, session as DataSession<Any, Any>?) as CompletableFuture<Pair<List<F>, Int>>
+        return executor!!.execute(this, session as DataSession<Any, Any, Any>?) as CompletableFuture<Pair<List<F>, Int>>
     }
 
-    fun executeFirst(session: DataSession<*, *>? = null): CompletableFuture<F?> {
+    fun executeFirst(session: DataSession<*, *, *>? = null): CompletableFuture<F?> {
         return execute(session)
                 .thenApply { (l, c) ->
                     if (c > 0) {
@@ -105,15 +105,15 @@ abstract class EntityBaseDSL<F: EntityModel>(val finalModel: F?,
                 }
     }
 
-    fun queryRaw(session: DataSession<*, *>? = null): CompletableFuture<Any?> {
+    fun queryRaw(session: DataSession<*, *, *>? = null): CompletableFuture<Any?> {
         if (executor == null) {
             return FutureUtils.failed(RuntimeException("You must specify an EntityQueryExecutor!"))
         }
 
-        return executor!!.queryRaw(this, session as DataSession<Any, Any>?) as CompletableFuture<Any?>
+        return executor!!.queryRaw(this, session as DataSession<Any, Any, Any>?) as CompletableFuture<Any?>
     }
 
-    fun executeRaw(session: DataSession<*, *>? = null) = future {
+    fun executeRaw(session: DataSession<*, *, *>? = null) = future {
         val sql = toSQL()
 
         if (sql == UpdateQueryBuilder.NOTHING_TO_UPDATE) {

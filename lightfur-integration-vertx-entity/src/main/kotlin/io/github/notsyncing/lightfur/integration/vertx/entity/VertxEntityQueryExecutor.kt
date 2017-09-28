@@ -5,14 +5,15 @@ import io.github.notsyncing.lightfur.entity.EntityQueryExecutor
 import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 import io.vertx.ext.sql.ResultSet
+import io.vertx.ext.sql.SQLConnection
 import io.vertx.ext.sql.UpdateResult
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KMutableProperty
 
-class VertxEntityQueryExecutor : EntityQueryExecutor<ResultSet, UpdateResult> {
-    override fun execute(dsl: EntityBaseDSL<*>, session: DataSession<ResultSet, UpdateResult>?): CompletableFuture<Pair<List<Any?>, Int>> {
+class VertxEntityQueryExecutor : EntityQueryExecutor<SQLConnection, ResultSet, UpdateResult> {
+    override fun execute(dsl: EntityBaseDSL<*>, session: DataSession<SQLConnection, ResultSet, UpdateResult>?): CompletableFuture<Pair<List<Any?>, Int>> {
         val ex = Exception()
 
         return future<Pair<List<Any?>, Int>> {
@@ -46,10 +47,10 @@ class VertxEntityQueryExecutor : EntityQueryExecutor<ResultSet, UpdateResult> {
                     r = listOf(dsl.finalModel!!)
                     c = rs.numRows
                 } else {
-                    val u = db.execute(sql, *params).await()
+                    val u = db.update(sql, *params).await()
 
                     r = if (dsl.finalModel == null) emptyList() else listOf(dsl.finalModel)
-                    c = u.updated
+                    c = u.updated.toInt()
                 }
 
                 return@future Pair(r, c)
@@ -64,7 +65,7 @@ class VertxEntityQueryExecutor : EntityQueryExecutor<ResultSet, UpdateResult> {
         }
     }
 
-    override fun queryRaw(dsl: EntityBaseDSL<*>, session: DataSession<ResultSet, UpdateResult>?) = future {
+    override fun queryRaw(dsl: EntityBaseDSL<*>, session: DataSession<SQLConnection, ResultSet, UpdateResult>?) = future {
         val sql = dsl.toSQL()
         val params = dsl.toSQLParameters().toTypedArray()
         val db = session ?: DataSession.start()

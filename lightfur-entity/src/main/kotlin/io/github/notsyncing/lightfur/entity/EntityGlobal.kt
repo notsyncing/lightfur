@@ -21,7 +21,7 @@ object EntityGlobal {
         sqlCache.clear()
     }
 
-    fun setQueryExecutor(e: EntityQueryExecutor<*, *>) {
+    fun setQueryExecutor(e: EntityQueryExecutor<*, *, *>) {
         return EntityBaseDSL.setQueryExecutor(e)
     }
 }

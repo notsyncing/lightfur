@@ -36,11 +36,17 @@ public class DatabaseVersionManager
 
     public CompletableFuture<Void> upgradeToLatest(String dbName, DbUpdateFileCollector collector)
     {
-        CompletableFuture<Void> ff = db.setDatabase("postgres")
-                .thenAccept(r -> conn = DataSession.start())
-                .thenCompose(r -> createDatabaseIfNotExists(dbName))
-                .thenCompose(r -> conn.end())
-                .thenCompose(r -> db.setDatabase(dbName));
+        CompletableFuture<Void> ff;
+
+        if (dbName.equals(db.getCurrentDatabase())) {
+            ff = CompletableFuture.completedFuture(null);
+        } else {
+            ff = db.setDatabase("postgres")
+                    .thenAccept(r -> conn = DataSession.start())
+                    .thenCompose(r -> createDatabaseIfNotExists(dbName))
+                    .thenCompose(r -> conn.end())
+                    .thenCompose(r -> db.setDatabase(dbName));
+        }
 
         CompletableFuture<Void> fff = new CompletableFuture<>();
 

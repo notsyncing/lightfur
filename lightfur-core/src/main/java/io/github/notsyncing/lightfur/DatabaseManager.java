@@ -55,6 +55,7 @@ public class DatabaseManager
     public CompletableFuture<Void> init(LightfurConfig config)
     {
         configs = config;
+        currentDatabase = null;
 
         if (driver == null) {
             throw new RuntimeException("You must specify a DatabaseDriver!");
@@ -67,12 +68,13 @@ public class DatabaseManager
 
             DatabaseVersionManager versionManager = new DatabaseVersionManager(this, cpScanner);
             return versionManager.upgradeToLatest(currentDatabase)
-                    .thenCompose(r -> setDatabase(currentDatabase));
+                    .thenCompose(r -> setDatabase(currentDatabase))
+                    .thenAccept(r -> this.currentDatabase = config.getDatabase());
         } else {
             driver.init(config);
-        }
 
-        currentDatabase = config.getDatabase();
+            currentDatabase = config.getDatabase();
+        }
 
         return CompletableFuture.completedFuture(null);
     }

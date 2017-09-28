@@ -3,18 +3,25 @@ package io.github.notsyncing.lightfur.integration.jdbc.entity
 import io.github.notsyncing.lightfur.entity.EntityField
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.integration.jdbc.JdbcDataMapper
+import io.github.notsyncing.lightfur.integration.jdbc.ResultSetUtils
 import java.sql.ResultSet
 
 class JdbcEntityDataMapper : JdbcDataMapper() {
     private fun <T: Any?> mapCurrentRow(clazz: Class<T>?, results: ResultSet?): T {
-        if (clazz == null) {
+        if ((clazz == null) || (results == null)) {
             return null as T
         }
 
         val o = clazz.newInstance() as EntityModel
 
         o.fieldMap.forEach {
-            val v = valueToType(it.value.fieldType, results?.getObject(o.fieldMap[it.key]?.info?.inner?.dbColumn))
+            val columnIndex = ResultSetUtils.findColumnIndex(results, o.fieldMap[it.key]?.info?.inner?.dbColumn)
+
+            if (columnIndex <= 0) {
+                return@forEach
+            }
+
+            val v = valueToType(it.value.fieldType, results.getObject(columnIndex))
             val field = it.value as EntityField<Any?>
 
             field.data = v
@@ -43,8 +50,8 @@ class JdbcEntityDataMapper : JdbcDataMapper() {
             return list
         }
 
-        while (!results.next()) {
-            list.add(map(clazz, results))
+        while (results.next()) {
+            list.add(mapCurrentRow(clazz, results))
         }
 
         return list

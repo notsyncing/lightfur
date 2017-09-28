@@ -27,6 +27,7 @@ public class JdbcPostgreSQLDriver extends DatabaseDriver<Connection> {
         hc.setJdbcUrl("jdbc:postgresql://" + config.getHost() + ":" + config.getPort() + "/" + config.getDatabase());
         hc.setUsername(config.getUsername());
         hc.setPassword(config.getPassword());
+        hc.setMinimumIdle(1);
         hc.setMaximumPoolSize(config.getMaxPoolSize());
 
         db = new HikariDataSource(hc);

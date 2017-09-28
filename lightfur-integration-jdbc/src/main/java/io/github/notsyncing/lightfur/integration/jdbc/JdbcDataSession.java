@@ -108,7 +108,7 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
         } else if ((type == Short.class) || (type == short.class)) {
             return "smallint";
         } else if ((type == Long.class) || (type == long.class)) {
-            return "long";
+            return "bigint";
         }
 
         return "text";
@@ -133,11 +133,13 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
         for (int i = 0; i < params.length; i++) {
             Object param = params[i];
 
-            if (param.getClass().isArray()) {
-                param = ps.getConnection().createArrayOf(javaTypeToPostgreSQLType(param.getClass().getComponentType()),
-                        makeSureObjectArray(param));
-            } else if (param instanceof List) {
-                param = ((List)param).toArray();
+            if (param != null) {
+                if (param.getClass().isArray()) {
+                    param = ps.getConnection().createArrayOf(javaTypeToPostgreSQLType(param.getClass().getComponentType()),
+                            makeSureObjectArray(param));
+                } else if (param instanceof List) {
+                    param = ((List) param).toArray();
+                }
             }
 
             ps.setObject(i + 1, param);

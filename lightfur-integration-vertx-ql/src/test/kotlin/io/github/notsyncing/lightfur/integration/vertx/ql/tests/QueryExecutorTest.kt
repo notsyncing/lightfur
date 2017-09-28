@@ -1,7 +1,7 @@
 package io.github.notsyncing.lightfur.integration.vertx.ql.tests
 
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
-import io.github.notsyncing.lightfur.integration.vertx.ql.VertxRawQueryResultProcessor
+import io.github.notsyncing.lightfur.integration.vertx.ql.VertxRawQueryProcessor
 import io.github.notsyncing.lightfur.integration.vertx.ql.tests.toys.UserContactDetailsModel
 import io.github.notsyncing.lightfur.integration.vertx.ql.tests.toys.UserContactInfoModel
 import io.github.notsyncing.lightfur.ql.QueryExecutor
@@ -22,7 +22,7 @@ class QueryExecutorTest {
         nestedQuery = javaClass.getResourceAsStream("/testNested.json").bufferedReader().use { it.readText() }
         deepQuery = javaClass.getResourceAsStream("/testDeep.json").bufferedReader().use { it.readText() }
 
-        QueryExecutor.setRawQueryResultProcessor(VertxRawQueryResultProcessor())
+        QueryExecutor.setRawQueryProcessor { VertxRawQueryProcessor() }
     }
 
     @Test

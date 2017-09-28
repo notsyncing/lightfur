@@ -1,16 +1,22 @@
 package io.github.notsyncing.lightfur.integration.jdbc.ql
 
-import com.alibaba.fastjson.JSON
-import io.github.notsyncing.lightfur.ql.RawQueryResultProcessor
+import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
+import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
+import io.github.notsyncing.lightfur.integration.jdbc.JdbcDataSession
+import io.github.notsyncing.lightfur.ql.RawQueryProcessor
 import java.sql.Array
 import java.sql.ResultSet
+import java.util.concurrent.CompletableFuture
 
-class JdbcRawQueryResultProcessor : RawQueryResultProcessor {
+class JdbcRawQueryProcessor : RawQueryProcessor {
+    private lateinit var db: JdbcDataSession
+
     private fun currentRowToMap(rs: ResultSet): Map<String, Any?> {
         val count = rs.metaData.columnCount
         val map = mutableMapOf<String, Any?>()
 
-        for (i in 0 until count) {
+        for (i in 1..count) {
             map.put(rs.metaData.getColumnLabel(i), rs.getObject(i))
         }
 
@@ -21,7 +27,7 @@ class JdbcRawQueryResultProcessor : RawQueryResultProcessor {
         if (resultSet is ResultSet) {
             val list = mutableListOf<Map<String, Any?>>()
 
-            while (!resultSet.next()) {
+            while (resultSet.next()) {
                 list.add(currentRowToMap(resultSet))
             }
 
@@ -37,5 +43,16 @@ class JdbcRawQueryResultProcessor : RawQueryResultProcessor {
         }
 
         return value
+    }
+
+    override fun query(dsl: EntitySelectDSL<*>): CompletableFuture<Any?> {
+        db = DataSession.start()
+
+        return dsl.queryRaw(db)
+    }
+
+    override fun end(): CompletableFuture<Unit> {
+        return db.end()
+                .thenApply {  }
     }
 }

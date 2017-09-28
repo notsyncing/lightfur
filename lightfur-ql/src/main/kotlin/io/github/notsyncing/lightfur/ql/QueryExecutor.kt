@@ -11,26 +11,40 @@ import java.util.concurrent.CompletableFuture
 
 class QueryExecutor {
     companion object {
-        private var resultProcessor: RawQueryResultProcessor? = null
+        private var processorCreator: (() -> RawQueryProcessor)? = null
 
-        fun setRawQueryResultProcessor(p: RawQueryResultProcessor) {
-            resultProcessor = p
+        fun setRawQueryProcessor(p: () -> RawQueryProcessor) {
+            processorCreator = p
         }
+    }
+
+    private val processor: RawQueryProcessor
+
+    init {
+        if (processorCreator == null) {
+            throw RuntimeException("You must specify a RawQueryProcessor!")
+        }
+
+        processor = processorCreator!!.invoke()
     }
 
     val parser = QueryParser()
 
-    private var _queryFunction: (EntitySelectDSL<*>) -> CompletableFuture<Any?> = { it.queryRaw() }
+    private val _queryFunction: (EntitySelectDSL<*>) -> CompletableFuture<Any?> = { processor.query(it) }
 
     fun execute(query: JSONObject, permissions: QueryPermissions = QueryPermissions.ALL) = future {
         val resolvedQueries = parser.parse(query, permissions)
         val result = JSONObject()
 
-        for ((key, q) in resolvedQueries.entries) {
-            val r = _queryFunction(q).await()
-            val data = aggregateResultSet(key, query.getJSONObject(key), r)
+        try {
+            for ((key, q) in resolvedQueries.entries) {
+                val r = _queryFunction(q).await()
+                val data = aggregateResultSet(key, query.getJSONObject(key), r)
 
-            result.put(key, data)
+                result.put(key, data)
+            }
+        } finally {
+            processor.end().await()
         }
 
         result
@@ -39,11 +53,7 @@ class QueryExecutor {
     fun execute(query: String, permissions: QueryPermissions = QueryPermissions.ALL) = execute(JSON.parseObject(query), permissions)
 
     private fun aggregateResultSet(rootKey: String, currQuery: JSONObject, r: Any?): JSONArray {
-        if (resultProcessor == null) {
-            throw RuntimeException("You must specify a RawQueryResultProcessor!")
-        }
-
-        val data = resultProcessor!!.resultSetToList(r)
+        val data = processor.resultSetToList(r)
 
         return recursiveAggregateResults(rootKey, currQuery, data)
     }
@@ -72,7 +82,7 @@ class QueryExecutor {
                     }
                 }
 
-                val value = resultProcessor!!.processValue(row[modelAliasPrefix + currKey])
+                val value = processor.processValue(row[modelAliasPrefix + currKey])
                 currLayerObject.put(it, value)
             }
 

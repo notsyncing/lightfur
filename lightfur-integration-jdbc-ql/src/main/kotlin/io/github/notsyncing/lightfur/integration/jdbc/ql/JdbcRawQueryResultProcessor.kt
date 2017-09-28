@@ -33,7 +33,7 @@ class JdbcRawQueryResultProcessor : RawQueryResultProcessor {
 
     override fun processValue(value: Any?): Any? {
         if (value is Array) {
-
+            return value.array
         }
 
         return value

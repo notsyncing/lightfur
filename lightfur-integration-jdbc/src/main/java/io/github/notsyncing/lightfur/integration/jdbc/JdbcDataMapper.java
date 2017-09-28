@@ -12,17 +12,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public abstract class JdbcDataMapper extends DataMapper<ResultSet> {
-    protected Object valueToType(Class<?> type, Object value) throws IllegalAccessException
-    {
+    protected Object valueToType(Class<?> type, Object value) throws IllegalAccessException, SQLException {
         if (type == Instant.class) {
             return valueToInstant(value);
         } else if (type == LocalDateTime.class) {
             return valueToLocalDateTime(value);
         } else if (Enum.class.isAssignableFrom(type)) {
-            return valueToEnum(type, (Integer)value);
+            return valueToEnum(type, (Integer) value);
         } else if (type.isArray()) {
             if (value == null) {
                 return null;
+            } else if (value instanceof java.sql.Array) {
+                return ((java.sql.Array) value).getArray();
             } else if (value.getClass().isArray()) {
                 return value;
             } else if (value instanceof String) {
@@ -37,12 +38,6 @@ public abstract class JdbcDataMapper extends DataMapper<ResultSet> {
                 }
             } else {
                 throw new IllegalAccessException("Invalid array result " + value);
-            }
-        } else if (type.equals(java.math.BigDecimal.class)) {
-            if (value != null) {
-                return new java.math.BigDecimal((String)value);
-            } else {
-                return null;
             }
         } else {
             if (value instanceof String) {

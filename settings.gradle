@@ -7,4 +7,5 @@ include 'lightfur-integration-vertx-entity'
 include 'lightfur-integration-vertx-ql'
 include 'lightfur-integration-jdbc'
 include 'lightfur-integration-jdbc-entity'
+include 'lightfur-integration-jdbc-ql'
 

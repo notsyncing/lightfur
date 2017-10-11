@@ -1,10 +1,10 @@
 package io.github.notsyncing.lightfur.entity;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.ObjectSerializer;
 
 import java.lang.reflect.Array;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -76,6 +76,10 @@ public abstract class DataMapper<R>
                     e.printStackTrace();
                 }
             }
+        }
+
+        if (value instanceof Timestamp) {
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(((Timestamp) value).getTime()), ZoneId.systemDefault());
         }
 
         return null;

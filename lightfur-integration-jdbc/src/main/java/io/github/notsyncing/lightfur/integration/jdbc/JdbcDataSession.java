@@ -1,20 +1,11 @@
 package io.github.notsyncing.lightfur.integration.jdbc;
 
-import com.alibaba.fastjson.JSON;
 import io.github.notsyncing.lightfur.DataSession;
-import io.github.notsyncing.lightfur.entity.DataMapper;
 import io.github.notsyncing.lightfur.models.ExecutionResult;
-import jdk.nashorn.internal.scripts.JD;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -139,6 +130,8 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
                             makeSureObjectArray(param));
                 } else if (param instanceof List) {
                     param = ((List) param).toArray();
+                } else if (param.getClass().isEnum()) {
+                    param = ((Enum)param).ordinal();
                 }
             }
 

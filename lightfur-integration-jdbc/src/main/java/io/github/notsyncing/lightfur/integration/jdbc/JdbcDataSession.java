@@ -9,8 +9,11 @@ import java.sql.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.logging.Logger;
 
 public class JdbcDataSession extends DataSession<Connection, ResultSet, ExecutionResult> {
+    private Logger log = Logger.getLogger(this.getClass().getSimpleName());
+
     public JdbcDataSession() {
         this(new ReflectDataMapper());
     }
@@ -120,6 +123,28 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
         return result;
     }
 
+    private Object enumToSQLType(Enum param, int targetType) {
+        switch (targetType) {
+            case Types.BIGINT:
+            case Types.BIT:
+            case Types.INTEGER:
+            case Types.SMALLINT:
+            case Types.CHAR:
+                return param.ordinal();
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.CLOB:
+            case Types.LONGNVARCHAR:
+            case Types.NVARCHAR:
+                return param.name();
+            default:
+                log.warning("Unsupported SQL type " + targetType + " when converting enum param " + param +
+                        ", will be treat as integer");
+
+                return param.ordinal();
+        }
+    }
+
     private void putParametersIntoPreparedStatement(PreparedStatement ps, Object[] params) throws SQLException {
         for (int i = 0; i < params.length; i++) {
             Object param = params[i];
@@ -131,7 +156,8 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
                 } else if (param instanceof List) {
                     param = ((List) param).toArray();
                 } else if (param.getClass().isEnum()) {
-                    param = ((Enum)param).ordinal();
+                    int targetType = ps.getParameterMetaData().getParameterType(i + 1);
+                    param = enumToSQLType((Enum) param, targetType);
                 }
             }
 

@@ -16,8 +16,6 @@ import org.junit.runner.RunWith;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.Function;
 
@@ -45,7 +43,8 @@ public class DataSessionTest
                         Connection c = (Connection) cc;
                         Statement s = c.createStatement();
 
-                        s.execute("CREATE TABLE test (id SERIAL PRIMARY KEY, message TEXT, flag INTEGER, arr INTEGER[], text_arr TEXT[], price NUMERIC(38,6))");
+                        s.execute("CREATE TABLE test (id SERIAL PRIMARY KEY, message TEXT, flag INTEGER, " +
+                                "arr INTEGER[], text_arr TEXT[], price NUMERIC(38,6), obj JSONB)");
 
                         s.close();
                         c.close();
@@ -193,6 +192,37 @@ public class DataSessionTest
                         context.assertEquals("test2", r.getString(1));
                         context.assertEquals(2, r.getInt(2));
                         Assert.assertArrayEquals(new String[] {"b"}, (String[]) r.getArray(3).getArray());
+                        context.assertFalse(r.next());
+                    } catch (Exception e) {
+                        context.fail(e);
+                    }
+
+                    async.complete();
+
+                    session.end();
+                })
+                .exceptionally(ex -> {
+                    session.end();
+                    context.fail((Throwable) ex);
+                    async.complete();
+                    return null;
+                });
+    }
+
+    @Test
+    public void testQueryWithJSONB(TestContext context)
+    {
+        Async async = context.async();
+
+        JdbcDataSession session = DataSession.start();
+        session.execute("INSERT INTO test (obj) VALUES (?::jsonb)", "{\"a\":1}")
+                .thenAccept(r -> context.assertEquals(1L, r.getUpdated()))
+                .thenCompose(r -> session.query("SELECT obj FROM test LIMIT 1"))
+                .thenAccept(r -> {
+                    try {
+                        context.assertTrue(r.next());
+                        context.assertEquals(1, r.getMetaData().getColumnCount());
+                        context.assertEquals("{\"a\": 1}", r.getObject(1).toString());
                         context.assertFalse(r.next());
                     } catch (Exception e) {
                         context.fail(e);

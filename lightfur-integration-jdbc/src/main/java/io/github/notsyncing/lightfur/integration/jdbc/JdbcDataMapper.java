@@ -2,9 +2,8 @@ package io.github.notsyncing.lightfur.integration.jdbc;
 
 import com.alibaba.fastjson.JSON;
 import io.github.notsyncing.lightfur.entity.DataMapper;
+import org.postgresql.util.PGobject;
 
-import java.lang.reflect.Array;
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -50,6 +49,8 @@ public abstract class JdbcDataMapper extends DataMapper<ResultSet> {
                         return JSON.parseArray(s, type);
                     }
                 }
+            } else if (value instanceof PGobject) {
+                return valueToType(type, value.toString());
             }
 
             return value;

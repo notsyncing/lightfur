@@ -14,4 +14,8 @@ public class ExecutionResult {
     public void setUpdated(int updated) {
         this.updated = updated;
     }
+
+    public boolean hasUpdated() {
+        return updated > 0L;
+    }
 }

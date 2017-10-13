@@ -13,6 +13,8 @@ public class LightfurConfigBuilder
         config.setPassword(null);
         config.setHost("localhost");
         config.setPort(5432);
+        config.setEnableDataSessionLeakChecking(true);
+        config.setDataSessionLeakCheckingInterval(5000);
     }
 
     public LightfurConfigBuilder host(String host)
@@ -54,6 +56,16 @@ public class LightfurConfigBuilder
     public LightfurConfigBuilder databaseVersioning(boolean enable)
     {
         config.setEnableDatabaseVersioning(enable);
+        return this;
+    }
+
+    public LightfurConfigBuilder dataSessionLeakChecking(boolean enable) {
+        config.setEnableDataSessionLeakChecking(enable);
+        return this;
+    }
+
+    public LightfurConfigBuilder dataSessionLeakCheckingInterval(int ms) {
+        config.setDataSessionLeakCheckingInterval(ms);
         return this;
     }
 

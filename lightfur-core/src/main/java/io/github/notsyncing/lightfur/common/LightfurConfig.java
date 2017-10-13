@@ -9,6 +9,8 @@ public class LightfurConfig
     private String database;
     private int maxPoolSize;
     private boolean enableDatabaseVersioning;
+    private boolean enableDataSessionLeakChecking;
+    private int dataSessionLeakCheckingInterval;
 
     public String getHost()
     {
@@ -78,5 +80,21 @@ public class LightfurConfig
     public void setEnableDatabaseVersioning(boolean enableDatabaseVersioning)
     {
         this.enableDatabaseVersioning = enableDatabaseVersioning;
+    }
+
+    public boolean isEnableDataSessionLeakChecking() {
+        return enableDataSessionLeakChecking;
+    }
+
+    public void setEnableDataSessionLeakChecking(boolean enableDataSessionLeakChecking) {
+        this.enableDataSessionLeakChecking = enableDataSessionLeakChecking;
+    }
+
+    public int getDataSessionLeakCheckingInterval() {
+        return dataSessionLeakCheckingInterval;
+    }
+
+    public void setDataSessionLeakCheckingInterval(int dataSessionLeakCheckingInterval) {
+        this.dataSessionLeakCheckingInterval = dataSessionLeakCheckingInterval;
     }
 }

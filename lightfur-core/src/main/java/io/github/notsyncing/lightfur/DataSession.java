@@ -8,7 +8,7 @@ import io.github.notsyncing.lightfur.utils.PageUtils;
 
 import java.security.InvalidParameterException;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 /**
@@ -18,6 +18,13 @@ public abstract class DataSession<C, R, U>
 {
     private static DataSessionCreator creator = null;
 
+    private static ScheduledExecutorService leakChecker = Executors.newScheduledThreadPool(1, r -> {
+        Thread thread = new Thread(r);
+        thread.setName("lightfur-datasession-leak-checker");
+        thread.setDaemon(true);
+        return thread;
+    });
+
     protected DatabaseManager mgr;
     protected C conn;
     protected CompletableFuture<Void> connFuture;
@@ -26,17 +33,34 @@ public abstract class DataSession<C, R, U>
     protected boolean ended = false;
     protected Logger log = Logger.getLogger(getClass().getSimpleName());
 
+    private String lastQuery;
+    private ScheduledFuture leakCheckingFuture;
+
     public DataSession(DataMapper<R> dataMapper)
     {
         this.dataMapper = dataMapper;
 
         mgr = DatabaseManager.getInstance();
 
-        connFuture = mgr.getConnection().thenAccept(c -> conn = (C) c);
+        connFuture = mgr.getConnection().thenAccept(c -> {
+            conn = (C) c;
+
+            if (mgr.configs.isEnableDataSessionLeakChecking()) {
+                leakCheckingFuture = leakChecker.schedule(() -> {
+                    log.warning("DataSession " + this + " is still not ended after " +
+                            mgr.configs.getDataSessionLeakCheckingInterval() + "ms, maybe leaked? " +
+                            "Last query: " + lastQuery);
+                }, mgr.configs.getDataSessionLeakCheckingInterval(), TimeUnit.MILLISECONDS);
+            }
+        });
     }
 
     public static void setCreator(DataSessionCreator creator) {
         DataSession.creator = creator;
+    }
+
+    protected void setLastQuery(String lastQuery) {
+        this.lastQuery = lastQuery;
     }
 
     /**
@@ -184,14 +208,27 @@ public abstract class DataSession<C, R, U>
      */
     public CompletableFuture<Void> end() {
         if (ended) {
+            if (leakCheckingFuture != null) {
+                leakCheckingFuture.cancel(true);
+            }
+
             return CompletableFuture.completedFuture(null);
         }
 
         if (conn == null) {
+            if (leakCheckingFuture != null) {
+                leakCheckingFuture.cancel(true);
+            }
+
             return CompletableFuture.completedFuture(null);
         }
 
-        return _end();
+        return _end()
+                .thenAccept(r -> {
+                    if (leakCheckingFuture != null) {
+                        leakCheckingFuture.cancel(true);
+                    }
+                });
     }
 
     /**

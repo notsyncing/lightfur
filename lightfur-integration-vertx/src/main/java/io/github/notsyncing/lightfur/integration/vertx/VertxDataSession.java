@@ -83,6 +83,7 @@ public class VertxDataSession extends DataSession<SQLConnection, ResultSet, Upda
     private CompletableFuture<UpdateResult> execute(String sql, JsonArray params)
     {
         Exception ex = new Exception();
+        setLastQuery(sql);
 
         return ensureConnection().thenCompose(c -> {
             CompletableFuture<UpdateResult> f = new CompletableFuture<>();
@@ -108,6 +109,7 @@ public class VertxDataSession extends DataSession<SQLConnection, ResultSet, Upda
     public CompletableFuture<UpdateResult> executeWithoutPreparing(String sql)
     {
         Exception ex = new Exception();
+        setLastQuery(sql);
 
         return ensureConnection().thenCompose(c -> {
             CompletableFuture<UpdateResult> f = new CompletableFuture<>();
@@ -195,6 +197,7 @@ public class VertxDataSession extends DataSession<SQLConnection, ResultSet, Upda
     private CompletableFuture<ResultSet> query(String sql, JsonArray params)
     {
         Exception ex = new Exception();
+        setLastQuery(sql);
 
         return ensureConnection().thenCompose(c -> {
             CompletableFuture<ResultSet> f = new CompletableFuture<>();

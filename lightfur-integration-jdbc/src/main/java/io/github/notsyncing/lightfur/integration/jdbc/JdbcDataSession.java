@@ -63,6 +63,7 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
     @Override
     public CompletableFuture<ExecutionResult> executeWithoutPreparing(String sql) {
         Exception ex = new Exception();
+        setLastQuery(sql);
 
         return ensureConnection().thenApply(c -> {
             try {
@@ -168,6 +169,7 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
     @Override
     public CompletableFuture<ExecutionResult> execute(String sql, Object... params) {
         Exception ex = new Exception();
+        setLastQuery(sql);
 
         return ensureConnection().thenApply(c -> {
             try {
@@ -192,6 +194,7 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
     @Override
     public CompletableFuture<ResultSet> executeWithReturning(String sql, Object... params) {
         Exception ex = new Exception();
+        setLastQuery(sql);
 
         return ensureConnection().thenApply(c -> {
             try {
@@ -211,6 +214,7 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
     @Override
     public CompletableFuture<ResultSet> query(String sql, Object... params) {
         Exception ex = new Exception();
+        setLastQuery(sql);
 
         return ensureConnection().thenApply(c -> {
             try {

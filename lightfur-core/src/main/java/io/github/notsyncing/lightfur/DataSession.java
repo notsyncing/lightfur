@@ -34,8 +34,8 @@ public abstract class DataSession<C, R, U>
     protected boolean ended = false;
     protected Logger log = Logger.getLogger(getClass().getSimpleName());
 
-    private String lastQuery;
-    private Throwable lastStack;
+    private String lastQuery = "<CREATE>";
+    private Throwable lastStack = new Exception("Just created here");
     private ScheduledFuture leakCheckingFuture;
 
     public DataSession(DataMapper<R> dataMapper)

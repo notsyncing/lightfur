@@ -9,6 +9,7 @@ import io.github.notsyncing.lightfur.utils.PageUtils;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -34,6 +35,7 @@ public abstract class DataSession<C, R, U>
     protected Logger log = Logger.getLogger(getClass().getSimpleName());
 
     private String lastQuery;
+    private Throwable lastStack;
     private ScheduledFuture leakCheckingFuture;
 
     public DataSession(DataMapper<R> dataMapper)
@@ -47,9 +49,17 @@ public abstract class DataSession<C, R, U>
 
             if (mgr.configs.isEnableDataSessionLeakChecking()) {
                 leakCheckingFuture = leakChecker.schedule(() -> {
-                    log.warning("DataSession " + this + " is still not ended after " +
+                    String msg = "DataSession " + this + " is still not ended after " +
                             mgr.configs.getDataSessionLeakCheckingInterval() + "ms, maybe leaked? " +
-                            "Last query: " + lastQuery);
+                            "Last query: " + lastQuery;
+
+                    if (lastStack != null) {
+                        msg += ", last stacktrace:";
+                        log.log(Level.WARNING, msg, lastStack);
+                    } else {
+                        log.warning(msg);
+                    }
+
                 }, mgr.configs.getDataSessionLeakCheckingInterval(), TimeUnit.MILLISECONDS);
             }
         });
@@ -61,6 +71,7 @@ public abstract class DataSession<C, R, U>
 
     protected void setLastQuery(String lastQuery) {
         this.lastQuery = lastQuery;
+        this.lastStack = new Exception("Last query at here: " + lastQuery);
     }
 
     /**
@@ -100,6 +111,8 @@ public abstract class DataSession<C, R, U>
      */
     public CompletableFuture<Void> beginTransaction()
     {
+        setLastQuery("<BEGIN TRANSACTION>");
+
         return setAutoCommit(false);
     }
 
@@ -112,6 +125,8 @@ public abstract class DataSession<C, R, U>
      * @return 指示提交是否已完成的 CompletableFuture 对象
      */
     public CompletableFuture<Void> commit(boolean endTransaction) {
+        setLastQuery("<COMMIT> endTransaction: " + endTransaction);
+
         if (endTransaction) {
             return setAutoCommit(true);
         } else {
@@ -138,6 +153,8 @@ public abstract class DataSession<C, R, U>
      * @return 指示回滚是否已完成的 CompletableFuture 对象
      */
     public CompletableFuture<Void> rollback(boolean endTransaction) {
+        setLastQuery("<ROLLBACK> endTransaction: " + endTransaction);
+
         return _rollback().thenCompose(o -> {
             if (endTransaction) {
                 return setAutoCommit(true);

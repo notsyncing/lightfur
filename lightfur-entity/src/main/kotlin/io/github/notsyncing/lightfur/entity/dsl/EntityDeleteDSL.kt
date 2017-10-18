@@ -4,7 +4,7 @@ import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import io.github.notsyncing.lightfur.sql.builders.DeleteQueryBuilder
 
-class EntityDeleteDSL<F: EntityModel>(val deleteModel: F) : EntityBaseDSL<F>(deleteModel, isQuery = true) {
+class EntityDeleteDSL<F: EntityModel>(val deleteModel: F) : EntityBaseDSL<F>(deleteModel) {
     override val builder = DeleteQueryBuilder()
 
     private var firstWhere = true

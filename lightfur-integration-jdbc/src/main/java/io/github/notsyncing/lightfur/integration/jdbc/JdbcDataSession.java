@@ -15,11 +15,15 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
     private Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     public JdbcDataSession() {
-        this(new ReflectDataMapper());
+        this(new Exception("Jdbc data session started here"));
     }
 
-    public JdbcDataSession(JdbcDataMapper dataMapper) {
-        super(dataMapper);
+    public JdbcDataSession(Exception createStack) {
+        this(new ReflectDataMapper(), createStack);
+    }
+
+    public JdbcDataSession(JdbcDataMapper dataMapper, Exception createStack) {
+        super(dataMapper, createStack);
     }
 
     @Override

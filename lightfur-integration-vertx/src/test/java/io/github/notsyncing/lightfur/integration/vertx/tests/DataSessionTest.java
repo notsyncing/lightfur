@@ -27,7 +27,7 @@ public class DataSessionTest
     public void setUp(TestContext context)
     {
         DatabaseManager.setDriver(new VertxPostgreSQLDriver());
-        DataSession.setCreator(() -> new VertxDataSession());
+        DataSession.setCreator(VertxDataSession::new);
 
         Async async = context.async();
 

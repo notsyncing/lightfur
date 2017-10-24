@@ -29,7 +29,7 @@ public class DataSessionTest
     public void setUp(TestContext context)
     {
         DatabaseManager.setDriver(new JdbcPostgreSQLDriver());
-        DataSession.setCreator(() -> new JdbcDataSession());
+        DataSession.setCreator(JdbcDataSession::new);
 
         Async async = context.async();
 

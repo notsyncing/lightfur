@@ -13,14 +13,18 @@ import java.time.temporal.Temporal;
 import java.util.concurrent.CompletableFuture;
 
 public class VertxDataSession extends DataSession<SQLConnection, ResultSet, UpdateResult> {
-    public VertxDataSession()
-    {
-        this(new ReflectDataMapper());
+    public VertxDataSession() {
+        this(new Exception("Vertx data session started here"));
     }
 
-    public VertxDataSession(VertxDataMapper dataMapper)
+    public VertxDataSession(Exception createStack)
     {
-        super(dataMapper);
+        this(new ReflectDataMapper(), createStack);
+    }
+
+    public VertxDataSession(VertxDataMapper dataMapper, Exception createStack)
+    {
+        super(dataMapper, createStack);
     }
 
     protected CompletableFuture<Void> setAutoCommit(boolean autoCommit)

@@ -35,11 +35,13 @@ public abstract class DataSession<C, R, U>
     protected Logger log = Logger.getLogger(getClass().getSimpleName());
 
     private String lastQuery = "<CREATE>";
-    private Throwable lastStack = new Exception("Just created here");
+    private Throwable lastStack;
     private ScheduledFuture leakCheckingFuture;
 
-    public DataSession(DataMapper<R> dataMapper)
+    public DataSession(DataMapper<R> dataMapper, Exception createStack)
     {
+        lastStack = new Exception("Just created here", createStack);
+
         this.dataMapper = dataMapper;
 
         mgr = DatabaseManager.getInstance();
@@ -77,12 +79,16 @@ public abstract class DataSession<C, R, U>
     /**
      * 开始一个数据操作会话
      */
-    public static <D extends DataSession> D start() {
+    public static <D extends DataSession> D start(Exception createStack) {
         if (creator == null) {
             throw new RuntimeException("You must specify a DataSessionCreator!");
         }
 
-        return (D) creator.create();
+        return (D) creator.create(createStack);
+    }
+
+    public static <D extends DataSession> D start() {
+        return start(new Exception("Data session starts at here"));
     }
 
     protected CompletableFuture<C> ensureConnection()

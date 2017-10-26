@@ -5,11 +5,13 @@ import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
+import java.security.InvalidParameterException
 
 class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(updateModel) {
     override val builder = UpdateQueryBuilder()
 
     private var firstWhere = true
+    private var skippedSomePrimaryKeyFields = false
     private var parentDsl: EntityBaseDSL<F>? = null
 
     var skipTableName
@@ -42,7 +44,14 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
 
         for (v in updateModel.primaryKeyFieldInfos) {
             val c = getColumnModelFromEntityFieldInfo(v)
-            val value = updateModel.primaryKeyFields.first { it.name == v.inner.name }.getter.call(updateModel)
+            val fieldInfo = updateModel.fieldMap[v.inner.name]!!
+
+            val value = fieldInfo.data
+
+            if ((value == null) && (!fieldInfo.nullable)) {
+                skippedSomePrimaryKeyFields = true
+                continue
+            }
 
             builder.where(ExpressionBuilder().column(c).eq().parameter(value))
         }
@@ -81,5 +90,14 @@ class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(upd
         parentDsl?.requireTableAlias = true
 
         return this
+    }
+
+    override fun toSQL(): String {
+        if ((firstWhere) && (skippedSomePrimaryKeyFields)) {
+            throw InvalidParameterException("You have neither specified a where condition, " +
+                    "nor filled all the primary key fields in $finalModel")
+        }
+
+        return super.toSQL()
     }
 }

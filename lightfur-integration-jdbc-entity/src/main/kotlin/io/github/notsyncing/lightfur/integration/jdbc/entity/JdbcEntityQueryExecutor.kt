@@ -1,5 +1,6 @@
 package io.github.notsyncing.lightfur.integration.jdbc.entity
 
+import com.alibaba.fastjson.JSONObject
 import io.github.notsyncing.lightfur.DataSession
 import io.github.notsyncing.lightfur.entity.EntityQueryExecutor
 import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
@@ -88,5 +89,23 @@ class JdbcEntityQueryExecutor : EntityQueryExecutor<Connection, ResultSet, Execu
                 db.end().await()
             }
         }
+    }
+
+    override fun queryJson(dsl: EntityBaseDSL<*>, session: DataSession<Connection, ResultSet, ExecutionResult>?) = future {
+        val result = queryRaw(dsl, session).await()
+
+        val list = mutableListOf<JSONObject>()
+
+        while (result.next()) {
+            val o = JSONObject()
+
+            for (i in 1..result.metaData.columnCount) {
+                o.put(result.metaData.getColumnLabel(i), result.getObject(i))
+            }
+
+            list.add(o)
+        }
+
+        list.toList()
     }
 }

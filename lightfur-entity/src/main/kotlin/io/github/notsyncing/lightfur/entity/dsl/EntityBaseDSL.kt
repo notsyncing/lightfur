@@ -1,7 +1,11 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
+import com.alibaba.fastjson.JSONObject
 import io.github.notsyncing.lightfur.DataSession
-import io.github.notsyncing.lightfur.entity.*
+import io.github.notsyncing.lightfur.entity.EntityFieldInfo
+import io.github.notsyncing.lightfur.entity.EntityGlobal
+import io.github.notsyncing.lightfur.entity.EntityModel
+import io.github.notsyncing.lightfur.entity.EntityQueryExecutor
 import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
@@ -11,7 +15,6 @@ import io.github.notsyncing.lightfur.utils.FutureUtils
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.util.concurrent.CompletableFuture
-import kotlin.reflect.KMutableProperty
 
 abstract class EntityBaseDSL<F: EntityModel>(val finalModel: F?,
                                              val isQuery: Boolean = false,
@@ -111,6 +114,14 @@ abstract class EntityBaseDSL<F: EntityModel>(val finalModel: F?,
         }
 
         return executor!!.queryRaw(this, session as DataSession<Any, Any, Any>?) as CompletableFuture<Any?>
+    }
+
+    fun queryJson(session: DataSession<*, *, *>? = null): CompletableFuture<List<JSONObject>> {
+        if (executor == null) {
+            return FutureUtils.failed(RuntimeException("You must specify an EntityQueryExecutor!"))
+        }
+
+        return executor!!.queryJson(this, session as DataSession<Any, Any, Any>?)
     }
 
     fun executeRaw(session: DataSession<*, *, *>? = null) = future {

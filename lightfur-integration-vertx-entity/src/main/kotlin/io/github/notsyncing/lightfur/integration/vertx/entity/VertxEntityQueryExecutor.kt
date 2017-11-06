@@ -1,5 +1,7 @@
 package io.github.notsyncing.lightfur.integration.vertx.entity
 
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONObject
 import io.github.notsyncing.lightfur.DataSession
 import io.github.notsyncing.lightfur.entity.EntityQueryExecutor
 import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
@@ -85,5 +87,10 @@ class VertxEntityQueryExecutor : EntityQueryExecutor<SQLConnection, ResultSet, U
                 db.end().await()
             }
         }
+    }
+
+    override fun queryJson(dsl: EntityBaseDSL<*>, session: DataSession<SQLConnection, ResultSet, UpdateResult>?): CompletableFuture<List<JSONObject>> {
+        return queryRaw(dsl, session)
+                .thenApply { it.rows.map { JSON.parseObject(it.encode()) } }
     }
 }

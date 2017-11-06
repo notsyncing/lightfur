@@ -33,6 +33,7 @@ public abstract class DataSession<C, R, U>
     protected boolean inTransaction = false;
     protected DataMapper<R> dataMapper;
     protected boolean ended = false;
+    protected boolean leakDetectTriggered = false;
     protected Logger log = Logger.getLogger(getClass().getSimpleName());
 
     private String lastQuery = "<CREATE>";
@@ -63,6 +64,7 @@ public abstract class DataSession<C, R, U>
                         log.warning(msg);
                     }
 
+                    leakDetectTriggered = true;
                 }, mgr.configs.getDataSessionLeakCheckingInterval(), TimeUnit.MILLISECONDS);
             }
         });
@@ -233,6 +235,10 @@ public abstract class DataSession<C, R, U>
      * @return 指示是否关闭连接的 CompletableFuture 对象
      */
     public CompletableFuture<Void> end() {
+        if (leakDetectTriggered) {
+            log.info("Data session " + this + " which seems leaked now has ended.");
+        }
+
         if (ended) {
             if (leakCheckingFuture != null) {
                 leakCheckingFuture.cancel(true);

@@ -1,5 +1,6 @@
 package io.github.notsyncing.lightfur;
 
+import com.alibaba.fastjson.JSONObject;
 import io.github.notsyncing.lightfur.entity.DataMapper;
 import io.github.notsyncing.lightfur.models.ExecutionResult;
 import io.github.notsyncing.lightfur.models.PageResult;
@@ -220,6 +221,8 @@ public abstract class DataSession<C, R, U>
      * @return 包含查询结果集的 CompletableFuture 对象
      */
     public abstract CompletableFuture<R> query(String sql, Object... params);
+
+    public abstract CompletableFuture<List<JSONObject>> queryJson(String sql, Object... params);
 
     protected abstract CompletableFuture<Void> _end();
 

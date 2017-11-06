@@ -1,11 +1,13 @@
 package io.github.notsyncing.lightfur.integration.jdbc;
 
+import com.alibaba.fastjson.JSONObject;
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.models.ExecutionResult;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -231,6 +233,30 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
                 throw new CompletionException(ex);
             }
         });
+    }
+
+    @Override
+    public CompletableFuture<List<JSONObject>> queryJson(String sql, Object... params) {
+        return query(sql, params)
+                .thenApply(r -> {
+                    try {
+                        List<JSONObject> list = new ArrayList<>();
+
+                        while (r.next()) {
+                            JSONObject o = new JSONObject();
+
+                            for (int i = 1; i <= r.getMetaData().getColumnCount(); i++) {
+                                o.put(r.getMetaData().getColumnLabel(i), r.getObject(i));
+                            }
+
+                            list.add(o);
+                        }
+
+                        return list;
+                    } catch (Exception e) {
+                        throw new CompletionException(e);
+                    }
+                });
     }
 
     @Override

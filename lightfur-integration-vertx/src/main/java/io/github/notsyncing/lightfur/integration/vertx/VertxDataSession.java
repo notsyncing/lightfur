@@ -1,5 +1,6 @@
 package io.github.notsyncing.lightfur.integration.vertx;
 
+import com.alibaba.fastjson.JSONObject;
 import io.github.notsyncing.lightfur.DataSession;
 import io.github.notsyncing.lightfur.models.ExecutionResult;
 import io.vertx.core.json.JsonArray;
@@ -10,7 +11,9 @@ import io.vertx.ext.sql.UpdateResult;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.time.temporal.Temporal;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class VertxDataSession extends DataSession<SQLConnection, ResultSet, UpdateResult> {
     public VertxDataSession() {
@@ -234,6 +237,14 @@ public class VertxDataSession extends DataSession<SQLConnection, ResultSet, Upda
     public CompletableFuture<ResultSet> query(String sql, Object... params)
     {
         return query(sql, objectsToJsonArray(params));
+    }
+
+    @Override
+    public CompletableFuture<List<JSONObject>> queryJson(String sql, Object... params) {
+        return query(sql, params)
+                .thenApply(r -> r.getRows().stream()
+                        .map(row -> JSONObject.parseObject(row.encode()))
+                        .collect(Collectors.toList()));
     }
 
     @Override

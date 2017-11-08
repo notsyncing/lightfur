@@ -145,14 +145,19 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
         } else {
             buf.append("\nVALUES (");
 
-            for (Object o : values) {
+            for (int i = 0; i < values.size(); i++) {
+                Object o = values.get(i);
+                ColumnModel c = columns.get(i);
+
+                String castTo = c.getFieldType() == null ? "" : ("::" + c.getFieldType());
+
                 if (o instanceof SQLPart) {
                     String v = o.toString();
-                    buf.append(v).append(", ");
+                    buf.append(v).append(castTo).append(", ");
 
                     getParameters().addAll(((SQLPart) o).getParameters());
                 } else {
-                    buf.append("?, ");
+                    buf.append("?").append(castTo).append(", ");
 
                     getParameters().add(o);
                 }

@@ -2,7 +2,6 @@ package io.github.notsyncing.lightfur.tests.builders;
 
 import io.github.notsyncing.lightfur.sql.SQLBuilder;
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder;
-import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder;
 import io.github.notsyncing.lightfur.sql.models.ColumnModel;
 import io.github.notsyncing.lightfur.sql.models.TableModel;
 import org.junit.Test;
@@ -14,6 +13,7 @@ public class SQLBuilderUpdateTest
     private TableModel tableA = new TableModel();
     private ColumnModel columnId_A = new ColumnModel(tableA);
     private ColumnModel columnName_A = new ColumnModel(tableA);
+    private ColumnModel columnNameCast_A = new ColumnModel(tableA);
 
     private TableModel tableB = new TableModel();
     private ColumnModel columnId_B = new ColumnModel(tableB);
@@ -26,6 +26,8 @@ public class SQLBuilderUpdateTest
 
         columnId_A.setColumn("id");
         columnName_A.setColumn("name");
+        columnNameCast_A.setColumn("name");
+        columnNameCast_A.setFieldType("text");
 
         tableB.setName("test_table_sub");
 
@@ -43,6 +45,19 @@ public class SQLBuilderUpdateTest
 
         String expected = "UPDATE \"test_table\"\n" +
                 "SET \"id\" = ('1'), \"name\" = (\"id\")";
+
+        assertEquals(expected, sql);
+    }
+
+    @Test
+    public void testSimpleUpdateWithCast()
+    {
+        String sql = SQLBuilder.update(tableA).set(columnId_A, new ExpressionBuilder().literal("1"))
+                .set(columnNameCast_A, columnId_A)
+                .toString();
+
+        String expected = "UPDATE \"test_table\"\n" +
+                "SET \"id\" = ('1'), \"name\" = (\"id\")::text";
 
         assertEquals(expected, sql);
     }

@@ -5,7 +5,7 @@ import kotlin.reflect.KProperty
 
 class EntityField<T>(val fieldType: Class<T>,
                      val column: String? = null,
-                     val type: String = "",
+                     val type: String? = null,
                      val length: Int = 0,
                      var nullable: Boolean = false,
                      val defaultValue: T? = null,

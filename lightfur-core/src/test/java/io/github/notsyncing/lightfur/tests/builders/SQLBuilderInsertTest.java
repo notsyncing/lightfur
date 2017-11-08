@@ -17,6 +17,7 @@ public class SQLBuilderInsertTest
     private TableModel tableA = new TableModel();
     private ColumnModel columnId_A = new ColumnModel(tableA);
     private ColumnModel columnName_A = new ColumnModel(tableA);
+    private ColumnModel columnNameCast_A = new ColumnModel(tableA);
 
     private TableModel tableB = new TableModel();
     private ColumnModel columnId_B = new ColumnModel(tableB);
@@ -30,6 +31,8 @@ public class SQLBuilderInsertTest
 
         columnId_A.setColumn("id");
         columnName_A.setColumn("name");
+        columnNameCast_A.setColumn("name");
+        columnNameCast_A.setFieldType("text");
 
         tableB.setName("test_table_sub");
 
@@ -48,6 +51,20 @@ public class SQLBuilderInsertTest
 
         String expected = "INSERT INTO \"test_table\" (\"id\", \"name\")\n" +
                 "VALUES (?, ?)";
+
+        assertEquals(expected, sql);
+        assertArrayEquals(new Object[] { "1", "a" }, params.toArray());
+    }
+
+    @Test
+    public void testSimpleInsertWithCast() {
+        QueryBuilder query = SQLBuilder.insert().into(tableA)
+                .column(columnId_A, "1").column(columnNameCast_A, "a");
+        String sql = query.toString();
+        List<Object> params = query.getParameters();
+
+        String expected = "INSERT INTO \"test_table\" (\"id\", \"name\")\n" +
+                "VALUES (?, ?::text)";
 
         assertEquals(expected, sql);
         assertArrayEquals(new Object[] { "1", "a" }, params.toArray());

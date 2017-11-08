@@ -107,7 +107,10 @@ public class UpdateQueryBuilder extends ReturningQueryBuilder implements SQLPart
         buf.append("\nSET ");
 
         buf.append(setColumns.entrySet().stream()
-            .map(e -> e.getKey().toColumnString() + " = (" + e.getValue().toUpdateColumnString() + ")")
+            .map(e -> {
+                String castTo = e.getKey().getFieldType() == null ? "" : ("::" + e.getKey().getFieldType());
+                return e.getKey().toColumnString() + " = (" + e.getValue().toUpdateColumnString() + ")" + castTo;
+            })
             .collect(Collectors.joining(", ")));
 
         for (SQLPart p : setColumns.values()) {

@@ -147,13 +147,23 @@ public abstract class DataMapper<R>
         return (T[])vals;
     }
 
-    protected Object valueToEnum(Class<?> enumClass, Integer value)
+    protected Object valueToEnum(Class<?> enumClass, Object value)
     {
         if (value == null) {
             return null;
         }
 
-        return enumClass.getEnumConstants()[value];
+        if (value instanceof String) {
+            for (Object enumItem : enumClass.getEnumConstants()) {
+                if (((Enum)enumItem).name().equals(value)) {
+                    return enumItem;
+                }
+            }
+
+            return null;
+        } else {
+            return enumClass.getEnumConstants()[(Integer)value];
+        }
     }
 
     public abstract <T> T map(Class<T> clazz, R results) throws IllegalAccessException, InstantiationException, SQLException;

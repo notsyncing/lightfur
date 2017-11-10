@@ -5,17 +5,11 @@ import io.github.notsyncing.lightfur.entity.DataMapper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
-import scala.Char;
 import scala.math.BigDecimal;
 
 import java.lang.reflect.Array;
-import java.text.SimpleDateFormat;
-import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +22,7 @@ public abstract class VertxDataMapper extends DataMapper<ResultSet>
         } else if (type == LocalDateTime.class) {
             return valueToLocalDateTime(value);
         } else if (Enum.class.isAssignableFrom(type)) {
-            return valueToEnum(type, (Integer)value);
+            return valueToEnum(type, value);
         } else if (type.isArray()) {
             if (value instanceof JsonArray) {
                 JsonArray arr = (JsonArray) value;

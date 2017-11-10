@@ -17,7 +17,7 @@ public abstract class JdbcDataMapper extends DataMapper<ResultSet> {
         } else if (type == LocalDateTime.class) {
             return valueToLocalDateTime(value);
         } else if (Enum.class.isAssignableFrom(type)) {
-            return valueToEnum(type, (Integer) value);
+            return valueToEnum(type, value);
         } else if (type.isArray()) {
             if (value == null) {
                 return null;

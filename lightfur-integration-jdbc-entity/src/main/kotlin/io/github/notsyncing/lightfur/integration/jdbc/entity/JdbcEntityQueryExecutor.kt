@@ -35,21 +35,28 @@ class JdbcEntityQueryExecutor : EntityQueryExecutor<Connection, ResultSet, Execu
                     r = db.queryList(dsl.finalModel!!::class.java, sql, *params).await()
                     c = r.size
                 } else if (dsl.isInsert) {
-                    val rs = db.executeWithReturning(sql, *params).await()
-                    var count = 0
+                    if (dsl.finalModel!!.primaryKeyFields.isNotEmpty()) {
+                        val rs = db.executeWithReturning(sql, *params).await()
+                        var count = 0
 
-                    while (rs.next()) {
-                        for ((i, pkf) in dsl.finalModel!!.primaryKeyFields.withIndex()) {
-                            val p = pkf as KMutableProperty<Any>
-                            p.setter.call(dsl.finalModel,
-                                    rs.getObject(dsl.finalModel!!.primaryKeyFieldInfos[i].inner.dbColumn))
+                        while (rs.next()) {
+                            for ((i, pkf) in dsl.finalModel!!.primaryKeyFields.withIndex()) {
+                                val p = pkf as KMutableProperty<Any>
+                                p.setter.call(dsl.finalModel,
+                                        rs.getObject(dsl.finalModel!!.primaryKeyFieldInfos[i].inner.dbColumn))
+                            }
+
+                            count++
                         }
 
-                        count++
-                    }
+                        r = listOf(dsl.finalModel!!)
+                        c = count
+                    } else {
+                        val u = db.update(sql, *params).await()
 
-                    r = listOf(dsl.finalModel!!)
-                    c = count
+                        r = if (dsl.finalModel == null) emptyList() else listOf(dsl.finalModel)
+                        c = u.updated.toInt()
+                    }
                 } else {
                     val u = db.update(sql, *params).await()
 

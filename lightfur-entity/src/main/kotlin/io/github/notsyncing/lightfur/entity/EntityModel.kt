@@ -77,6 +77,14 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
         fieldMap.forEach { it.value.changed = true }
     }
 
+    fun assumeChanged(property: KProperty<*>) {
+        fieldMap[property.name]!!.changed = true
+    }
+
+    fun assumeNoChange(property: KProperty<*>) {
+        fieldMap[property.name]!!.changed = false
+    }
+
     fun hasChanged() = fieldMap.any { it.value.changed }
 
     fun copyFieldsTo(obj: Any) {

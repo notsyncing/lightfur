@@ -35,7 +35,7 @@ class JdbcEntityQueryExecutor : EntityQueryExecutor<Connection, ResultSet, Execu
                     r = db.queryList(dsl.finalModel!!::class.java, sql, *params).await()
                     c = r.size
                 } else if (dsl.isInsert) {
-                    if (dsl.finalModel!!.primaryKeyFields.isNotEmpty()) {
+                    if (dsl.finalModel!!.primaryKeyFieldInfos.isNotEmpty()) {
                         val rs = db.executeWithReturning(sql, *params).await()
                         var count = 0
 

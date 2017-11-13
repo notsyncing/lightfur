@@ -35,6 +35,10 @@ open class SqlStatement(val sql: String,
         return db.queryJson(sql, *params.toTypedArray())
     }
 
+    infix fun queryV(db: DataSession<*, *, *>): CompletableFuture<Any?> {
+        return db.queryFirstValue(sql, *params.toTypedArray())
+    }
+
     infix fun update(db: DataSession<*, *, *>): CompletableFuture<ExecutionResult> {
         return db.update(sql, *params.toTypedArray())
     }

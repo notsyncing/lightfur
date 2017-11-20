@@ -1,10 +1,11 @@
 package io.github.notsyncing.lightfur.integration.jdbc.ql
 
 import io.github.notsyncing.lightfur.DataSession
-import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
 import io.github.notsyncing.lightfur.integration.jdbc.JdbcDataSession
 import io.github.notsyncing.lightfur.ql.RawQueryProcessor
+import kotlinx.coroutines.experimental.future.await
+import kotlinx.coroutines.experimental.future.future
 import java.sql.Array
 import java.sql.ResultSet
 import java.util.concurrent.CompletableFuture
@@ -45,10 +46,18 @@ class JdbcRawQueryProcessor : RawQueryProcessor {
         return value
     }
 
-    override fun query(dsl: EntitySelectDSL<*>): CompletableFuture<Any?> {
+    override fun query(dsl: EntitySelectDSL<*>) = future {
         db = DataSession.start()
 
-        return dsl.queryRaw(db)
+        try {
+            dsl.queryRaw(db).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            db.end().await()
+
+            throw e
+        }
     }
 
     override fun end(): CompletableFuture<Unit> {

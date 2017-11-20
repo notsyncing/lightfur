@@ -246,7 +246,13 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
                             JSONObject o = new JSONObject();
 
                             for (int i = 1; i <= r.getMetaData().getColumnCount(); i++) {
-                                o.put(r.getMetaData().getColumnLabel(i), r.getObject(i));
+                                Object value = r.getObject(i);
+
+                                if (value instanceof java.sql.Array) {
+                                    value = ((java.sql.Array) value).getArray();
+                                }
+
+                                o.put(r.getMetaData().getColumnLabel(i), value);
                             }
 
                             list.add(o);

@@ -161,7 +161,8 @@ public class JdbcDataSession extends DataSession<Connection, ResultSet, Executio
                     param = ps.getConnection().createArrayOf(javaTypeToPostgreSQLType(param.getClass().getComponentType()),
                             makeSureObjectArray(param));
                 } else if (param instanceof List) {
-                    param = ((List) param).toArray();
+                    param = ps.getConnection().createArrayOf(javaTypeToPostgreSQLType(param.getClass().getComponentType()),
+                            ((List) param).toArray());
                 } else if (param.getClass().isEnum()) {
                     int targetType = ps.getParameterMetaData().getParameterType(i + 1);
                     param = enumToSQLType((Enum) param, targetType);

@@ -49,9 +49,15 @@ public class JoinClauseInfo
     {
         StringBuilder buf = new StringBuilder();
 
-        buf.append(joinType).append(" JOIN ")
-                .append("(").append(targetTable).append(")")
-                .append(" ON ").append(joinCondition);
+        buf.append(joinType).append(" JOIN ");
+
+        if (targetTable.isSubQuery()) {
+            buf.append("(").append(targetTable).append(")");
+        } else {
+            buf.append(targetTable);
+        }
+
+        buf.append(" ON ").append(joinCondition);
 
         return buf.toString();
     }

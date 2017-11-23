@@ -238,18 +238,38 @@ public class ExpressionBuilder implements SQLPart
         return operator("IS");
     }
 
-    public ExpressionBuilder namedParameter(String name, Object parameter)
+    public ExpressionBuilder namedParameter(String name, Object parameter, String castTo)
     {
         buf.append(":").append(name);
+
+        if (castTo != null) {
+            buf.append("::").append(castTo);
+        }
+
+        parameters.add(parameter);
+        return this;
+    }
+
+    public ExpressionBuilder namedParameter(String name, Object parameter)
+    {
+        return namedParameter(name, parameter, null);
+    }
+
+    public ExpressionBuilder parameter(Object parameter, String castTo)
+    {
+        buf.append("?");
+
+        if (castTo != null) {
+            buf.append("::").append(castTo);
+        }
+
         parameters.add(parameter);
         return this;
     }
 
     public ExpressionBuilder parameter(Object parameter)
     {
-        buf.append("?");
-        parameters.add(parameter);
-        return this;
+        return parameter(parameter, null);
     }
 
     public ExpressionBuilder raw(String s)

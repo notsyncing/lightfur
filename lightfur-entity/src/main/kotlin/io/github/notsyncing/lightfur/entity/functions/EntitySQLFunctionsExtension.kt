@@ -14,6 +14,9 @@ fun function(func: String, vararg param: Any?): ExpressionBuilder {
                 b.field(p).separator()
             } else if (p is SQLPart) {
                 b.expr(p).separator()
+            } else if (p is Pair<*, *>) {
+                val (rp, castTo) = p
+                b.parameter(rp, castTo as String).separator()
             } else {
                 b.parameter(p).separator()
             }

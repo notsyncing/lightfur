@@ -54,7 +54,7 @@ open class SqlTypedStatement<T>(sql: String, params: List<Any?>,
         return db.queryList(type, sql, *params.toTypedArray())
     }
 
-    infix fun query1(db: DataSession<*, *, *>): CompletableFuture<T> {
+    infix fun query1(db: DataSession<*, *, *>): CompletableFuture<T?> {
         return db.queryFirst(type, sql, *params.toTypedArray())
     }
 }

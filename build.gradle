@@ -17,7 +17,7 @@ plugins {
 sourceCompatibility = 1.8
 
 project.ext {
-    ver = '0.4.1'
+    ver = '0.4.2'
 }
 
 repositories {

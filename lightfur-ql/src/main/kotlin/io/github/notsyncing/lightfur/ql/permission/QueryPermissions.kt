@@ -9,7 +9,7 @@ class QueryPermissions {
 
     val allowEntities = mutableListOf<EntityPermission<*>>()
 
-    fun <T: EntityModel> entity(entityModel: T, f: (EntityPermission<T>) -> Unit): QueryPermissions {
+    fun <T: EntityModel> entity(entityModel: T, f: (EntityPermission<T>) -> Unit = { it.all() }): QueryPermissions {
         val ent = EntityPermission(entityModel)
         f(ent)
         allowEntities.add(ent)

@@ -12,7 +12,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public abstract class DataMapper<R>
 {
@@ -163,6 +165,45 @@ public abstract class DataMapper<R>
             return null;
         } else {
             return enumClass.getEnumConstants()[(Integer)value];
+        }
+    }
+
+    protected Object[] convertToObjectArray(Object array, Class<?> targetType) {
+        Class ofArray = array.getClass().getComponentType();
+
+        if (targetType.isEnum()) {
+            List ar = new ArrayList();
+            int length = Array.getLength(array);
+
+            for (int i = 0; i < length; i++) {
+                Object value = Array.get(array, i);
+
+                Object enumValue;
+
+                if (value instanceof String) {
+                    enumValue = Stream.of(targetType.getEnumConstants())
+                            .filter(e -> ((Enum)e).name().equals(value))
+                            .findFirst()
+                            .orElse(null);
+                } else {
+                    enumValue = targetType.getEnumConstants()[(int) value];
+                }
+
+                ar.add(enumValue);
+            }
+
+            return ar.toArray((Object[]) Array.newInstance(targetType, 0));
+        } else if (ofArray.isPrimitive()) {
+            List ar = new ArrayList();
+            int length = Array.getLength(array);
+
+            for (int i = 0; i < length; i++) {
+                ar.add(targetType.cast(Array.get(array, i)));
+            }
+
+            return ar.toArray();
+        } else {
+            return (Object[]) array;
         }
     }
 

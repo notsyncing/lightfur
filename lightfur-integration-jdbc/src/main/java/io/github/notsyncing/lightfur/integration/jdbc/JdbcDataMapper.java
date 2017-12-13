@@ -22,9 +22,9 @@ public abstract class JdbcDataMapper extends DataMapper<ResultSet> {
             if (value == null) {
                 return null;
             } else if (value instanceof java.sql.Array) {
-                return ((java.sql.Array) value).getArray();
+                return convertToObjectArray(((java.sql.Array) value).getArray(), type.getComponentType());
             } else if (value.getClass().isArray()) {
-                return value;
+                return convertToObjectArray(value, type.getComponentType());
             } else if (value instanceof String) {
                 String s = (String) value;
 

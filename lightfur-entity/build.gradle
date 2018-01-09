@@ -30,6 +30,7 @@ dependencies {
     testCompile 'org.slf4j:slf4j-api:1.7.21'
     testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
     testCompile project(":lightfur-core").sourceSets.test.output
+    testCompile "io.mockk:mockk:1.6"
 
     jmh group: 'org.spf4j', name: 'spf4j-jmh', version: '8.1.6'
 }

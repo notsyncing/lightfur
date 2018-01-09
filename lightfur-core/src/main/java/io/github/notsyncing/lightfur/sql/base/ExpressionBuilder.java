@@ -107,6 +107,11 @@ public class ExpressionBuilder implements SQLPart
         return this;
     }
 
+    public ExpressionBuilder trimLastSeparator() {
+        buf.delete(buf.length() - 2, buf.length());
+        return this;
+    }
+
     public ExpressionBuilder literal(String l)
     {
         buf.append("'").append(l).append("'");

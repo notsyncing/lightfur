@@ -74,7 +74,7 @@ public class SQLBuilderSelectTest
 
         String expected = "SELECT \"test_table_sub\".\"flag\"\n" +
                 "FROM \"test_table\"\n" +
-                "LEFT JOIN (\"test_table_sub\") ON \"test_table_sub\".\"p_id\" = \"test_table\".\"id\"";
+                "LEFT JOIN \"test_table_sub\" ON \"test_table_sub\".\"p_id\" = \"test_table\".\"id\"";
 
         assertEquals(expected, sql);
     }

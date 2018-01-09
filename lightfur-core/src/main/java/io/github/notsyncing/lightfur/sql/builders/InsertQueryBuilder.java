@@ -17,7 +17,7 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
     private List<ColumnModel> columns = new ArrayList<>();
     private List<Object> values = new ArrayList<>();
     private boolean needOnConflict = false;
-    private ColumnModel onConflictColumn = null;
+    private List<ColumnModel> onConflictColumns = null;
     private SQLPart onConflictDo = null;
     private boolean needTableAlias = false;
 
@@ -82,10 +82,10 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
         return this;
     }
 
-    public InsertQueryBuilder whenExists(ColumnModel column, SQLPart alterOp)
+    public InsertQueryBuilder whenExists(List<ColumnModel> columns, SQLPart alterOp)
     {
         needOnConflict = true;
-        onConflictColumn = column;
+        onConflictColumns = columns;
         onConflictDo = alterOp;
         return this;
     }
@@ -171,8 +171,16 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
         if (needOnConflict) {
             buf.append("\nON CONFLICT ");
 
-            if (onConflictColumn != null) {
-                buf.append("(").append(onConflictColumn.toColumnString()).append(") ");
+            if (onConflictColumns != null) {
+                buf.append("(");
+
+                for (ColumnModel m : onConflictColumns) {
+                    buf.append(m.toColumnString())
+                            .append(", ");
+                }
+
+                buf.delete(buf.length() - 2, buf.length());
+                buf.append(") ");
             }
 
             buf.append("DO ");
@@ -180,7 +188,14 @@ public class InsertQueryBuilder extends ReturningQueryBuilder implements SQLPart
             if (onConflictDo == null) {
                 buf.append("NOTHING");
             } else {
-                buf.append(onConflictDo.toString());
+                String onConflictDoSql = onConflictDo.toString();
+
+                if (onConflictDoSql.equals(UpdateQueryBuilder.NOTHING_TO_UPDATE)) {
+                    buf.append("NOTHING");
+                } else {
+                    buf.append(onConflictDoSql);
+                }
+
                 getParameters().addAll(onConflictDo.getParameters());
             }
         }

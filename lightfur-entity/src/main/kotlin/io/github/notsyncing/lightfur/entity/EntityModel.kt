@@ -375,7 +375,7 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
         }
     }
 
-    fun dispatchEvents(db: DataSession<*, *, *>, recursive: Boolean = false) = future {
+    fun dispatchEvents(db: DataSession<*, *, *>, recursive: Boolean = false): CompletableFuture<Unit> = future {
         try {
             EntityEventDispatcher.dispatch(db, events).await()
         } catch (e: Exception) {

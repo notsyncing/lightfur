@@ -83,9 +83,11 @@ class QueryParser {
             } else {
                 val p = query.get(key)
                 var realKey = key
+                var isActualField = true
 
                 if (p is JSONObject) {
                     if (p.containsKey("_from")) {
+                        isActualField = false
                         innerList.add(Pair(key, p))
                     } else {
                         for (fieldKey in p.keys) {
@@ -108,7 +110,7 @@ class QueryParser {
                     dsl.column(fromModel.fieldMap[key]!!.info)
                 }
 
-                if (permissions != QueryPermissions.ALL) {
+                if ((isActualField) && (permissions != QueryPermissions.ALL)) {
                     val fieldPermissions = allowEntity!!.allowFields.firstOrNull { it.field.name == realKey }
 
                     if (fieldPermissions == null) {

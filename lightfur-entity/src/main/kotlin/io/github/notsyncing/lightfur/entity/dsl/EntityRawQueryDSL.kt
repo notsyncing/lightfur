@@ -10,10 +10,18 @@ open class EntityRawQueryDSL<F: EntityModel>(val model: F,
         get() = throw UnsupportedOperationException()
 
     override fun toSQL(): String {
+        if (sql.isBlank()) {
+            return super.toSQL()
+        }
+
         return sql
     }
 
     override fun toSQLParameters(): MutableList<Any?>? {
+        if (sql.isBlank()) {
+            return super.toSQLParameters()
+        }
+
         return params.toMutableList()
     }
 }

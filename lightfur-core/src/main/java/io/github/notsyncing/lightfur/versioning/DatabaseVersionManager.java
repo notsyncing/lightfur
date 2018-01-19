@@ -36,27 +36,27 @@ public class DatabaseVersionManager
 
     public CompletableFuture<Void> upgradeToLatest(String dbName, DbUpdateFileCollector collector)
     {
-        CompletableFuture<Void> ff;
+        CompletableFuture<Void> databaseFuture;
 
         if (dbName.equals(db.getCurrentDatabase())) {
-            ff = CompletableFuture.completedFuture(null);
+            databaseFuture = CompletableFuture.completedFuture(null);
         } else {
-            ff = db.setDatabase("postgres")
+            databaseFuture = db.setDatabase("postgres")
                     .thenAccept(r -> conn = DataSession.start())
                     .thenCompose(r -> createDatabaseIfNotExists(dbName))
                     .thenCompose(r -> conn.end())
                     .thenCompose(r -> db.setDatabase(dbName));
         }
 
-        CompletableFuture<Void> fff = new CompletableFuture<>();
+        CompletableFuture<Void> f = new CompletableFuture<>();
 
-        ff.thenCompose(r -> {
+        databaseFuture.thenCompose(r -> {
             log.info("Checking for update for database " + dbName);
 
             conn = DataSession.start();
-
-            return initLightfurTables();
+            return conn.beginTransaction();
         })
+                .thenCompose(r -> initLightfurTables())
                 .thenCompose(r -> getCurrentDatabaseVersionData())
                 .thenCompose(r -> {
                     versionData = r;
@@ -90,7 +90,7 @@ public class DatabaseVersionManager
                             }
 
                             c[0] = c[0].thenCompose(x -> {
-                                final CompletableFuture<Void>[] f = new CompletableFuture[]{CompletableFuture.completedFuture(null)};
+                                final CompletableFuture<Void>[] verFuture = new CompletableFuture[]{CompletableFuture.completedFuture(null)};
 
                                 list.stream()
                                         .filter(u -> !u.isFullVersion())
@@ -100,10 +100,10 @@ public class DatabaseVersionManager
                                                 return;
                                             }
 
-                                            f[0] = f[0].thenCompose(x2 -> doUpdate(u));
+                                            verFuture[0] = verFuture[0].thenCompose(x2 -> doUpdate(u));
                                         });
 
-                                return f[0];
+                                return verFuture[0];
                             });
 
                             return c[0];
@@ -112,15 +112,18 @@ public class DatabaseVersionManager
 
                     return co[0];
                 })
+                .thenCompose(r -> conn.commit())
                 .thenCompose(r -> conn.end())
-                .thenAccept(r -> fff.complete(null))
+                .thenAccept(r -> f.complete(null))
                 .exceptionally(ex -> {
-                    conn.end().thenAccept(r -> fff.completeExceptionally((Throwable)ex));
+                    conn.rollback()
+                            .thenCompose(r -> conn.end())
+                            .thenAccept(r -> f.completeExceptionally(ex));
 
                     return null;
                 });
 
-        return fff;
+        return f;
     }
 
     public CompletableFuture<Void> upgradeToLatest(String dbName) {
@@ -144,10 +147,7 @@ public class DatabaseVersionManager
     {
         JSONObject initData = new JSONObject();
 
-        CompletableFuture<Void> f = new CompletableFuture<>();
-
-        conn.beginTransaction()
-                .thenCompose(r -> conn.updateWithoutPreparing("CREATE SCHEMA IF NOT EXISTS lightfur"))
+        return conn.updateWithoutPreparing("CREATE SCHEMA IF NOT EXISTS lightfur")
                 .thenCompose(r -> conn.updateWithoutPreparing("CREATE TABLE IF NOT EXISTS lightfur.version_data (data JSONB)"))
                 .thenCompose(r -> {
                     String sql = "INSERT INTO lightfur.version_data (data)\n" +
@@ -156,16 +156,7 @@ public class DatabaseVersionManager
 
                     return conn.update(sql, initData.toString());
                 })
-                .thenCompose(r -> conn.commit(true))
-                .thenAccept(r -> f.complete(null))
-                .exceptionally(ex -> {
-                    conn.rollback(true)
-                            .thenAccept(r -> f.completeExceptionally((Throwable)ex));
-
-                    return null;
-                });
-
-        return f;
+                .thenApply(r -> null);
     }
 
     private CompletableFuture<JSONObject> getCurrentDatabaseVersionData()
@@ -242,14 +233,12 @@ public class DatabaseVersionManager
 
     private CompletableFuture<Void> doUpdate(DbVersionUpdateInfo info)
     {
-        CompletableFuture<Void> f = new CompletableFuture<>();
         String data = info.getUpdateContent();
 
         log.info(info.getId() + ": Updating database " + info.getDatabase() + " to version " +
                 info.getVersion() + "...");
 
-        conn.beginTransaction()
-                .thenCompose(r -> conn.updateWithoutPreparing(data))
+        return conn.updateWithoutPreparing(data)
                 .thenCompose(r -> {
                     if (!versionData.containsKey(info.getId())) {
                         versionData.put(info.getId(), new JSONObject());
@@ -263,15 +252,6 @@ public class DatabaseVersionManager
                 .thenAccept(r -> {
                     log.info(info.getId() + ": Updated database " + info.getDatabase() + " to version " +
                             info.getVersion() + " with script " + info.getPath());
-                    f.complete(null);
-                })
-                .exceptionally(ex -> {
-                    conn.rollback(true)
-                            .thenAccept(r -> f.completeExceptionally((Throwable) ex));
-
-                    return null;
                 });
-
-        return f;
     }
 }

@@ -51,7 +51,7 @@ public class DatabaseVersionManagerTest
     public void setUp(TestContext context)
     {
         DatabaseManager.setDriver(new VertxPostgreSQLDriver());
-        DataSession.setCreator(() -> new VertxDataSession());
+        DataSession.setCreator(VertxDataSession::new);
 
         Async async = context.async();
 
@@ -61,7 +61,7 @@ public class DatabaseVersionManagerTest
                 .thenCompose(r -> db.close())
                 .thenAccept(r -> async.complete())
                 .exceptionally(ex -> {
-                    context.fail((Throwable)ex);
+                    context.fail(ex);
                     return null;
                 });
     }
@@ -75,7 +75,7 @@ public class DatabaseVersionManagerTest
                 .thenCompose(r -> db.close())
                 .thenAccept(r -> async.complete())
                 .exceptionally(ex -> {
-                    context.fail((Throwable)ex);
+                    context.fail(ex);
                     return null;
                 });
     }

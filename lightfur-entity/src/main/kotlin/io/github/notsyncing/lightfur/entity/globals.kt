@@ -8,20 +8,11 @@ import java.util.concurrent.CompletableFuture
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.CoroutineContext
 
-class DatabaseOperationCoroutine<T>(override val context: CoroutineContext) : 
-        CompletableFuture<T>(), Continuation<T>, CoroutineScope {
-    val dataSession = DataSession.start<DataSession<Any, Any, Any>>()
-    
+interface DatabaseOperationCoroutineScope : CoroutineScope {
+    val dataSession: DataSession<*, *, *>
+
     override val coroutineContext: CoroutineContext get() = context
     override val isActive: Boolean get() = context[Job]!!.isActive
-    
-    override fun resume(value: T) { 
-        complete(value) 
-    }
-    
-    override fun resumeWithException(exception: Throwable) { 
-        completeExceptionally(exception) 
-    }
 
     fun beginTransaction(): CompletableFuture<Unit> {
         return dataSession.beginTransaction()
@@ -44,10 +35,23 @@ class DatabaseOperationCoroutine<T>(override val context: CoroutineContext) :
     }
 }
 
+class DatabaseOperationCoroutine<T>(override val context: CoroutineContext) :
+        CompletableFuture<T>(), Continuation<T>, DatabaseOperationCoroutineScope {
+    override val dataSession = DataSession.start<DataSession<Any, Any, Any>>()
+
+    override fun resume(value: T) { 
+        complete(value) 
+    }
+    
+    override fun resumeWithException(exception: Throwable) { 
+        completeExceptionally(exception) 
+    }
+}
+
 fun <T> database(context: CoroutineContext = DefaultDispatcher, 
                  start: CoroutineStart = CoroutineStart.DEFAULT, 
                  parent: Job? = null, 
-                 block: suspend DatabaseOperationCoroutine<T>.() -> T): CompletableFuture<T> {
+                 block: suspend DatabaseOperationCoroutineScope.() -> T): CompletableFuture<T> {
     require(!start.isLazy) { "$start start is not supported" }
     
     val newContext = newCoroutineContext(context, parent)

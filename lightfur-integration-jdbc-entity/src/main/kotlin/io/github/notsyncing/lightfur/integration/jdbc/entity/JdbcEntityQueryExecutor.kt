@@ -43,7 +43,7 @@ class JdbcEntityQueryExecutor : EntityQueryExecutor<Connection, ResultSet, Execu
                             for ((i, pkf) in dsl.finalModel!!.primaryKeyFields.withIndex()) {
                                 val p = pkf as KMutableProperty<Any>
                                 p.setter.call(dsl.finalModel,
-                                        rs.getObject(dsl.finalModel!!.primaryKeyFieldInfos[i].inner.dbColumn))
+                                        rs.getObject(dsl.finalModel!!.primaryKeyFieldInfos[i].dbColumn))
                             }
 
                             count++

@@ -6,9 +6,9 @@ import io.github.notsyncing.lightfur.sql.base.SQLPart
 import io.github.notsyncing.lightfur.sql.builders.CaseWhenBuilder
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
 
-infix fun EntityFieldInfo.eq(value: EntityFieldInfo): ExpressionBuilder {
-    val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
-    val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+infix fun EntityField<*>.eq(value: EntityField<*>): ExpressionBuilder {
+    val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)
+    val column2 = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -18,8 +18,8 @@ infix fun EntityFieldInfo.eq(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.eq(value: SQLPart): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.eq(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -29,8 +29,8 @@ infix fun EntityFieldInfo.eq(value: SQLPart): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.eq(value: Any?): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.eq(value: Any?): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     val b = ExpressionBuilder()
             .beginGroup()
@@ -45,9 +45,9 @@ infix fun EntityFieldInfo.eq(value: Any?): ExpressionBuilder {
     return b.endGroup()
 }
 
-infix fun EntityFieldInfo.neq(value: EntityFieldInfo): ExpressionBuilder {
-    val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
-    val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+infix fun EntityField<*>.neq(value: EntityField<*>): ExpressionBuilder {
+    val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)
+    val column2 = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -57,8 +57,8 @@ infix fun EntityFieldInfo.neq(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.neq(value: SQLPart): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.neq(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -68,8 +68,8 @@ infix fun EntityFieldInfo.neq(value: SQLPart): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.neq(value: Any?): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.neq(value: Any?): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     val b = ExpressionBuilder()
             .beginGroup()
@@ -84,9 +84,9 @@ infix fun EntityFieldInfo.neq(value: Any?): ExpressionBuilder {
     return b.endGroup()
 }
 
-infix fun EntityFieldInfo.gt(value: EntityFieldInfo): ExpressionBuilder {
-    val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
-    val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+infix fun EntityField<*>.gt(value: EntityField<*>): ExpressionBuilder {
+    val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)
+    val column2 = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -96,8 +96,8 @@ infix fun EntityFieldInfo.gt(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.gt(value: SQLPart): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.gt(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -107,8 +107,8 @@ infix fun EntityFieldInfo.gt(value: SQLPart): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.gt(value: Any): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.gt(value: Any): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -118,9 +118,9 @@ infix fun EntityFieldInfo.gt(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.lt(value: EntityFieldInfo): ExpressionBuilder {
-    val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
-    val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+infix fun EntityField<*>.lt(value: EntityField<*>): ExpressionBuilder {
+    val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)
+    val column2 = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -130,8 +130,8 @@ infix fun EntityFieldInfo.lt(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.lt(value: SQLPart): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.lt(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -142,8 +142,8 @@ infix fun EntityFieldInfo.lt(value: SQLPart): ExpressionBuilder {
 }
 
 
-infix fun EntityFieldInfo.lt(value: Any): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.lt(value: Any): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -153,9 +153,9 @@ infix fun EntityFieldInfo.lt(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.gte(value: EntityFieldInfo): ExpressionBuilder {
-    val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
-    val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+infix fun EntityField<*>.gte(value: EntityField<*>): ExpressionBuilder {
+    val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)
+    val column2 = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -165,8 +165,8 @@ infix fun EntityFieldInfo.gte(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.gte(value: SQLPart): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.gte(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -176,8 +176,8 @@ infix fun EntityFieldInfo.gte(value: SQLPart): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.gte(value: Any): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.gte(value: Any): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -187,9 +187,9 @@ infix fun EntityFieldInfo.gte(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.lte(value: EntityFieldInfo): ExpressionBuilder {
-    val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
-    val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+infix fun EntityField<*>.lte(value: EntityField<*>): ExpressionBuilder {
+    val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)
+    val column2 = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -199,8 +199,8 @@ infix fun EntityFieldInfo.lte(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.lte(value: SQLPart): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.lte(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -210,8 +210,8 @@ infix fun EntityFieldInfo.lte(value: SQLPart): ExpressionBuilder {
             .endGroup()
 }
 
-infix fun EntityFieldInfo.lte(value: Any): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+infix fun EntityField<*>.lte(value: Any): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -229,17 +229,17 @@ infix fun ExpressionBuilder.or(next: ExpressionBuilder): ExpressionBuilder {
     return this.or().expr(next)
 }
 
-infix fun EntityFieldInfo.desc(d: Boolean): OrderByColumnInfo {
+infix fun EntityField<*>.desc(d: Boolean): OrderByColumnInfo {
     val o = OrderByColumnInfo()
-    o.column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+    o.column = EntityBaseDSL.getColumnModelFromEntityField(this)
     o.isDesc = d
 
     return o
 }
 
-operator fun EntityFieldInfo.plus(value: EntityFieldInfo): ExpressionBuilder {
-    val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
-    val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+operator fun EntityField<*>.plus(value: EntityField<*>): ExpressionBuilder {
+    val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)
+    val column2 = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -249,8 +249,8 @@ operator fun EntityFieldInfo.plus(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.plus(value: SQLPart): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+operator fun EntityField<*>.plus(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -260,8 +260,8 @@ operator fun EntityFieldInfo.plus(value: SQLPart): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.plus(value: Any): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+operator fun EntityField<*>.plus(value: Any): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -271,8 +271,8 @@ operator fun EntityFieldInfo.plus(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun ExpressionBuilder.plus(value: EntityFieldInfo): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+operator fun ExpressionBuilder.plus(value: EntityField<*>): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -300,9 +300,9 @@ operator fun ExpressionBuilder.plus(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.minus(value: EntityFieldInfo): ExpressionBuilder {
-    val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
-    val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+operator fun EntityField<*>.minus(value: EntityField<*>): ExpressionBuilder {
+    val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)
+    val column2 = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -312,8 +312,8 @@ operator fun EntityFieldInfo.minus(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.minus(value: SQLPart): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+operator fun EntityField<*>.minus(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -332,8 +332,8 @@ operator fun ExpressionBuilder.minus(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun ExpressionBuilder.minus(value: EntityFieldInfo): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+operator fun ExpressionBuilder.minus(value: EntityField<*>): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -352,8 +352,8 @@ operator fun ExpressionBuilder.minus(value: SQLPart): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.minus(value: Any): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+operator fun EntityField<*>.minus(value: Any): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -363,9 +363,9 @@ operator fun EntityFieldInfo.minus(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.times(value: EntityFieldInfo): ExpressionBuilder {
-    val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
-    val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+operator fun EntityField<*>.times(value: EntityField<*>): ExpressionBuilder {
+    val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)
+    val column2 = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -375,8 +375,8 @@ operator fun EntityFieldInfo.times(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.times(value: SQLPart): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+operator fun EntityField<*>.times(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -386,8 +386,8 @@ operator fun EntityFieldInfo.times(value: SQLPart): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.times(value: Any): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+operator fun EntityField<*>.times(value: Any): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -397,8 +397,8 @@ operator fun EntityFieldInfo.times(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun ExpressionBuilder.times(value: EntityFieldInfo): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+operator fun ExpressionBuilder.times(value: EntityField<*>): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -426,9 +426,9 @@ operator fun ExpressionBuilder.times(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.div(value: EntityFieldInfo): ExpressionBuilder {
-    val column1 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
-    val column2 = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+operator fun EntityField<*>.div(value: EntityField<*>): ExpressionBuilder {
+    val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)
+    val column2 = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -438,8 +438,8 @@ operator fun EntityFieldInfo.div(value: EntityFieldInfo): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.div(value: SQLPart): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+operator fun EntityField<*>.div(value: SQLPart): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -449,8 +449,8 @@ operator fun EntityFieldInfo.div(value: SQLPart): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun EntityFieldInfo.div(value: Any): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(this)
+operator fun EntityField<*>.div(value: Any): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(this)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -460,8 +460,8 @@ operator fun EntityFieldInfo.div(value: Any): ExpressionBuilder {
             .endGroup()
 }
 
-operator fun ExpressionBuilder.div(value: EntityFieldInfo): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(value)
+operator fun ExpressionBuilder.div(value: EntityField<*>): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(value)
 
     return ExpressionBuilder()
             .beginGroup()
@@ -493,8 +493,8 @@ infix fun ExpressionBuilder.gt(next: SQLPart): ExpressionBuilder {
     return this.gt().expr(next)
 }
 
-infix fun ExpressionBuilder.gt(next: EntityFieldInfo): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(next)
+infix fun ExpressionBuilder.gt(next: EntityField<*>): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(next)
 
     return this.gt().column(column, true)
 }
@@ -507,8 +507,8 @@ infix fun ExpressionBuilder.gte(next: SQLPart): ExpressionBuilder {
     return this.gte().expr(next)
 }
 
-infix fun ExpressionBuilder.gte(next: EntityFieldInfo): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(next)
+infix fun ExpressionBuilder.gte(next: EntityField<*>): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(next)
 
     return this.gte().column(column, true)
 }
@@ -521,8 +521,8 @@ infix fun ExpressionBuilder.lt(next: SQLPart): ExpressionBuilder {
     return this.lt().expr(next)
 }
 
-infix fun ExpressionBuilder.lt(next: EntityFieldInfo): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(next)
+infix fun ExpressionBuilder.lt(next: EntityField<*>): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(next)
 
     return this.lt().column(column, true)
 }
@@ -535,8 +535,8 @@ infix fun ExpressionBuilder.lte(next: SQLPart): ExpressionBuilder {
     return this.lte().expr(next)
 }
 
-infix fun ExpressionBuilder.lte(next: EntityFieldInfo): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(next)
+infix fun ExpressionBuilder.lte(next: EntityField<*>): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(next)
 
     return this.lte().column(column, true)
 }
@@ -549,8 +549,8 @@ infix fun ExpressionBuilder.eq(next: SQLPart): ExpressionBuilder {
     return this.eq().expr(next)
 }
 
-infix fun ExpressionBuilder.eq(next: EntityFieldInfo): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(next)
+infix fun ExpressionBuilder.eq(next: EntityField<*>): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(next)
 
     return this.eq().column(column, true)
 }
@@ -559,8 +559,8 @@ infix fun ExpressionBuilder.eq(next: Any): ExpressionBuilder {
     return this.eq().parameter(next)
 }
 
-fun ExpressionBuilder.field(f: EntityFieldInfo): ExpressionBuilder {
-    val column = EntityBaseDSL.getColumnModelFromEntityFieldInfo(f)
+fun ExpressionBuilder.field(f: EntityField<*>): ExpressionBuilder {
+    val column = EntityBaseDSL.getColumnModelFromEntityField(f)
     return this.column(column, true)
 }
 

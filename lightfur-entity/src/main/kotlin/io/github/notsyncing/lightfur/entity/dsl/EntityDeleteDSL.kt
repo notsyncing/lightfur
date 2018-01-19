@@ -16,8 +16,8 @@ class EntityDeleteDSL<F: EntityModel>(val deleteModel: F) : EntityBaseDSL<F>(del
         builder.from(t)
 
         for (v in deleteModel.primaryKeyFieldInfos) {
-            val c = getColumnModelFromEntityFieldInfo(v)
-            val fieldInfo = deleteModel.fieldMap[v.inner.name]!!
+            val c = getColumnModelFromEntityField(v)
+            val fieldInfo = deleteModel.fieldMap[v.name]!!
 
             val value = fieldInfo.data
 

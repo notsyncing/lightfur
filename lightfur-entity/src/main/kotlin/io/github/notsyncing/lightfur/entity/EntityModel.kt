@@ -50,7 +50,7 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
     val referenceMap = ConcurrentHashMap<String, EntityReference<*>>()
 
     @JSONField(serialize = false, deserialize = false)
-    val primaryKeyFieldInfos = ArrayList<EntityFieldInfo>()
+    val primaryKeyFieldInfos = ArrayList<EntityField<*>>()
 
     @JSONField(serialize = false, deserialize = false)
     var skipTableName = false
@@ -69,14 +69,6 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
             t.schema = schema
 
             EntityGlobal.tableModels[this::class.java as Class<EntityModel>] = t
-        }
-
-        if (!EntityGlobal.fieldInfoInners.containsKey(this::class.java)) {
-            EntityGlobal.fieldInfoInners[this::class.java as Class<EntityModel>] = ConcurrentHashMap()
-        }
-
-        if (!EntityGlobal.referenceInfoInners.containsKey(this::class.java)) {
-            EntityGlobal.referenceInfoInners[this::class.java as Class<EntityModel>] = ConcurrentHashMap()
         }
     }
 
@@ -98,9 +90,9 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
         return EntityReference(T::class.java, I::class.java, refField.name, keyField?.name)
     }
 
-    infix fun F(property: KProperty0<*>): EntityFieldInfo = fieldMap[property.name]!!.info
+    infix fun F(property: KProperty0<*>): EntityField<*> = fieldMap[property.name]!!
 
-    infix fun R(property: KProperty0<*>): EntityReference.Info = referenceMap[property.name]!!.info
+    infix fun R(property: KProperty0<*>): EntityReference<*> = referenceMap[property.name]!!
 
     fun assumeNoChange() {
         fieldMap.forEach { it.value.changed = false }
@@ -148,46 +140,46 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
         }
     }
 
-    private fun getReferenceKeyField(ref: EntityReference.Info): EntityField<*> {
-        val keyFieldName = if (ref.inner.keyFieldName == null) {
+    private fun getReferenceKeyField(ref: EntityReference<*>): EntityField<*> {
+        val keyFieldName = if (ref.keyFieldName == null) {
             if (primaryKeyFields.size != 1) {
                 throw InvalidObjectException("To use reference, the model $this must contain only one primary key " +
                         "field, or specify a key field explicitly, while this model has " +
                         "${primaryKeyFields.size} primary key column(s), neither specified a key field!")
             }
 
-            primaryKeyFieldInfos[0].inner.name
+            primaryKeyFieldInfos[0].name
         } else {
-            ref.inner.keyFieldName
+            ref.keyFieldName
         }
 
         return fieldMap[keyFieldName]!!
     }
 
-    private fun getReferenceKeyFieldValue(ref: EntityReference.Info): Any? {
+    private fun getReferenceKeyFieldValue(ref: EntityReference<*>): Any? {
         return getReferenceKeyField(ref).data
     }
 
     class LoadResult(val _intermediateModel: EntityModel,
                      val data: Any?)
 
-    fun load(db: DataSession<*, *, *>, ref: EntityReference.Info) = future {
+    fun load(db: DataSession<*, *, *>, ref: EntityReference<*>) = future {
         val key = getReferenceKeyFieldValue(ref)
         val targetModel: EntityModel
 
         try {
-            targetModel = (ref.inner.componentClass ?: ref.inner.targetClass).newInstance()
+            targetModel = (ref.componentClass ?: ref.targetClass).newInstance()
         } catch (e: Exception) {
-            val ex = Exception("Target model ${ref.inner.componentClass ?: ref.inner.targetClass} cannot be " +
+            val ex = Exception("Target model ${ref.componentClass ?: ref.targetClass} cannot be " +
                     "instantiated, please make sure it contains a no-arg constructor!", e)
 
             throw ex
         }
 
         val query = targetModel.select()
-                .where { targetModel.fieldMap[ref.inner.refFieldName]!!.info eq key }
+                .where { targetModel.fieldMap[ref.refFieldName]!! eq key }
 
-        val data: Any? = if (ref.inner.componentClass == null) {
+        val data: Any? = if (ref.componentClass == null) {
             query.executeFirst(db)
                     .await()
         } else {
@@ -196,7 +188,7 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
                     .await()
         }
 
-        val refField = referenceMap[ref.inner.name]!! as EntityReference<Any>
+        val refField = referenceMap[ref.name]!! as EntityReference<Any>
         refField.data = data
         refField.changed = false
 
@@ -209,7 +201,7 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
 
     fun loadAll(db: DataSession<*, *, *>, recursive: Boolean = true): CompletableFuture<Unit> = future {
         for ((_, refField) in referenceMap) {
-            load(db, refField.info).await()
+            load(db, refField).await()
         }
 
         if (recursive) {
@@ -249,25 +241,25 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
         r
     }
 
-    fun save(db: DataSession<*, *, *>, refField: EntityReference.Info): CompletableFuture<SaveResult> = future {
+    fun save(db: DataSession<*, *, *>, refField: EntityReference<*>): CompletableFuture<SaveResult> = future {
         save(db).await()
 
         val keyField = getReferenceKeyField(refField)
-        val field = referenceMap[refField.inner.name]!!
+        val field = referenceMap[refField.name]!!
 
-        if (refField.inner.componentClass == null) {
+        if (refField.componentClass == null) {
             var refModel = field.data as? EntityModel
 
             val r = if (field.changed) {
                 if (refModel == null) {
-                    refModel = refField.inner.targetClass.newInstance()
-                    refModel!!.fieldMap[refField.inner.refFieldName]!!.data = keyField.data
+                    refModel = refField.targetClass.newInstance()
+                    refModel!!.fieldMap[refField.refFieldName]!!.data = keyField.data
 
                     refModel.delete()
                             .execute(db)
                             .await()
                 } else {
-                    refModel.fieldMap[refField.inner.refFieldName]!!.data = keyField.data
+                    refModel.fieldMap[refField.refFieldName]!!.data = keyField.data
 
                     refModel.save(db)
                             .await()
@@ -284,27 +276,27 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
             val refModelPrimaryKeyList = mutableListOf<MutableList<Any?>>()
 
             for (m in refModelList) {
-                m.fieldMap[refField.inner.refFieldName]!!.data = keyField.data
+                m.fieldMap[refField.refFieldName]!!.data = keyField.data
 
                 m.save(db).await()
 
                 val pkValues = mutableListOf<Any?>()
 
                 for (pkField in m.primaryKeyFieldInfos) {
-                    pkValues.add(m.fieldMap[pkField.inner.name]!!.data)
+                    pkValues.add(m.fieldMap[pkField.name]!!.data)
                 }
 
                 refModelPrimaryKeyList.add(pkValues)
             }
 
-            val refModel = refField.inner.componentClass.newInstance()
+            val refModel = refField.componentClass!!.newInstance()
 
             val notInCurrentKeys = if (refModelPrimaryKeyList.isNotEmpty()) {
                 ExpressionBuilder()
                         .beginGroup()
                         .apply {
                             for (pkField in refModel.primaryKeyFieldInfos) {
-                                column(EntityBaseDSL.getColumnModelFromEntityFieldInfo(pkField))
+                                column(EntityBaseDSL.getColumnModelFromEntityField(pkField))
                                         .separator()
                             }
                         }
@@ -336,7 +328,7 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
 
             val r = refModel.delete()
                     .where {
-                        (refModel.fieldMap[refField.inner.refFieldName]!!.info eq keyField.data) and notInCurrentKeys
+                        (refModel.fieldMap[refField.refFieldName]!! eq keyField.data) and notInCurrentKeys
                     }
                     .execute(db)
                     .await()
@@ -353,7 +345,7 @@ abstract class EntityModel(@field:JSONField(serialize = false, deserialize = fal
 
     fun saveAll(db: DataSession<*, *, *>, recursive: Boolean = true): CompletableFuture<Unit> = future {
         for ((_, refField) in referenceMap) {
-            save(db, refField.info).await()
+            save(db, refField).await()
         }
 
         if (recursive) {
@@ -412,8 +404,8 @@ fun <T: EntityModel> T.insert(): EntityInsertDSL<T> {
     this.assumeAllChanged()
 
     for ((i, v) in primaryKeyFieldInfos.withIndex()) {
-        if (v.inner.dbAutoGenerated == true) {
-            fieldMap[v.inner.name]!!.changed = false
+        if (v.dbAutoGenerated == true) {
+            fieldMap[v.name]!!.changed = false
         }
     }
 

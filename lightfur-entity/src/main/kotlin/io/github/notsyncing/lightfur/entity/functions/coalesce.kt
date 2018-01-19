@@ -1,11 +1,9 @@
 package io.github.notsyncing.lightfur.entity.functions
 
-import io.github.notsyncing.lightfur.entity.EntityFieldInfo
-import io.github.notsyncing.lightfur.entity.field
+import io.github.notsyncing.lightfur.entity.EntityField
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
-import io.github.notsyncing.lightfur.sql.base.SQLPart
 
-fun coalesce(field: EntityFieldInfo, defValue: Any?): ExpressionBuilder {
+fun coalesce(field: EntityField<*>, defValue: Any?): ExpressionBuilder {
     return function("COALESCE", field, defValue)
 }
 

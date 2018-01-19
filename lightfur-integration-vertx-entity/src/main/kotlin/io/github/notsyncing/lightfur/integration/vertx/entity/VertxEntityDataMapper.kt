@@ -14,7 +14,7 @@ class VertxEntityDataMapper : VertxDataMapper() {
         val o = clazz.newInstance() as EntityModel
 
         o.fieldMap.forEach {
-            val v = valueToType(it.value.fieldType, row?.getValue(o.fieldMap[it.key]?.info?.inner?.dbColumn))
+            val v = valueToType(it.value.fieldType, row?.getValue(o.fieldMap[it.key]?.dbColumn))
             val field = it.value as EntityField<Any?>
 
             field.data = v

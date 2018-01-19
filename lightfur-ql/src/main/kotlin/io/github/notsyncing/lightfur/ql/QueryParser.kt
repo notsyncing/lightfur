@@ -100,14 +100,14 @@ class QueryParser {
                             throw NoSuchFieldException("Field $realKey not found on model $fromModel")
                         }
 
-                        dsl.column(fromModel.fieldMap[realKey]!!.info)
+                        dsl.column(fromModel.fieldMap[realKey]!!)
                     }
                 } else {
                     if (!fromModel.fieldMap.containsKey(key)) {
                         throw NoSuchFieldException("Field $key not found on model $fromModel")
                     }
 
-                    dsl.column(fromModel.fieldMap[key]!!.info)
+                    dsl.column(fromModel.fieldMap[key]!!)
                 }
 
                 if ((isActualField) && (permissions != QueryPermissions.ALL)) {
@@ -128,7 +128,7 @@ class QueryParser {
             val pathSegments = path.split(".")
             val outerModelMapKey = parentQuery!!.getString("_from") + "_" + pathSegments.subList(0, pathSegments.size - 1).joinToString(".")
             val outerModel = modelMap[outerModelMapKey]!!
-            val joinConnector = { outerModel.fieldMap[joinOuter]!!.info eq fromModel.fieldMap[joinInner]!!.info }
+            val joinConnector = { outerModel.fieldMap[joinOuter]!! eq fromModel.fieldMap[joinInner]!! }
 
             when (joinType) {
                 "inner" -> {
@@ -156,10 +156,10 @@ class QueryParser {
         for (orderByKey in orderByList) {
             if (orderByKey is JSONObject) {
                 for (f in orderByKey.keys) {
-                    dsl.orderBy(fromModel.fieldMap[f]!!.info, orderByKey.getString(f) == "desc")
+                    dsl.orderBy(fromModel.fieldMap[f]!!, orderByKey.getString(f) == "desc")
                 }
             } else {
-                dsl.orderBy(fromModel.fieldMap[orderByKey]!!.info, false)
+                dsl.orderBy(fromModel.fieldMap[orderByKey]!!, false)
             }
         }
 
@@ -283,7 +283,7 @@ class QueryParser {
         return list
     }
 
-    private fun buildWhereClause(fieldCondRelation: String?, fieldCondInfo: EntityFieldInfo, fieldCondTarget: Any?): ExpressionBuilder? {
+    private fun buildWhereClause(fieldCondRelation: String?, fieldCondInfo: EntityField<*>, fieldCondTarget: Any?): ExpressionBuilder? {
         val expBuilder = ExpressionBuilder()
 
         when (fieldCondRelation) {
@@ -325,7 +325,7 @@ class QueryParser {
         return expBuilder
     }
 
-    private fun resolveFieldInfo(rootKey: String, fullQuery: JSONObject, path: String): EntityFieldInfo {
+    private fun resolveFieldInfo(rootKey: String, fullQuery: JSONObject, path: String): EntityField<*> {
         val segments = path.split(".")
 
         var currQuery = fullQuery
@@ -349,6 +349,6 @@ class QueryParser {
 
         val model = modelMap[modelMapKey]!!
 
-        return model.fieldMap[segments.last()]!!.info
+        return model.fieldMap[segments.last()]!!
     }
 }

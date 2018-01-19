@@ -46,7 +46,7 @@ FROM "test_table" AS "TestModel_$h""""
 FROM "test_table" AS "TestModel_$hs""""
 
         Assert.assertEquals(expected, s)
-        Assert.assertArrayEquals(arrayOf("_test", 2), p.toTypedArray())
+        Assert.assertArrayEquals(arrayOf("_test", 2), p?.toTypedArray())
     }
 
     @Test
@@ -64,7 +64,7 @@ FROM "test_table" AS "TestModel_$h"
 WHERE (("TestModel_$h"."id" > ?))"""
 
         Assert.assertEquals(expected, s)
-        Assert.assertArrayEquals(arrayOf(4), p.toTypedArray())
+        Assert.assertArrayEquals(arrayOf(4), p?.toTypedArray())
     }
 
     @Test

@@ -15,7 +15,7 @@ class JdbcEntityDataMapper : JdbcDataMapper() {
         val o = clazz.newInstance() as EntityModel
 
         o.fieldMap.forEach {
-            val columnIndex = ResultSetUtils.findColumnIndex(results, o.fieldMap[it.key]?.info?.inner?.dbColumn)
+            val columnIndex = ResultSetUtils.findColumnIndex(results, o.fieldMap[it.key]?.dbColumn)
 
             if (columnIndex <= 0) {
                 return@forEach

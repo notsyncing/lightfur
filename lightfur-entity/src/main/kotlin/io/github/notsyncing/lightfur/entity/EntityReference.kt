@@ -7,12 +7,6 @@ open class EntityReference<T>(val fieldType: Class<T>,
                               val fieldComponentType: Class<out EntityModel>? = null,
                               val refFieldName: String,
                               val keyFieldName: String? = null) : ReadWriteProperty<EntityModel, T> {
-    class Info(val entity: EntityModel, val inner: Inner) {
-        data class Inner(val name: String, val targetClass: Class<EntityModel>,
-                         val componentClass: Class<EntityModel>?, val refFieldName: String,
-                         val keyFieldName: String?, val dbKeyColumn: String?)
-    }
-
     var data: T? = null
         get() = field
         set(value) {
@@ -22,7 +16,16 @@ open class EntityReference<T>(val fieldType: Class<T>,
 
     var changed = false
 
-    lateinit var info: Info
+    var name: String = ""
+        private set
+
+    val targetClass get() = fieldType as Class<EntityModel>
+    val componentClass get() = fieldComponentType as Class<EntityModel>?
+
+    var dbKeyColumn: String? = null
+        private set
+
+    lateinit var entity: EntityModel
 
     override fun getValue(thisRef: EntityModel, property: KProperty<*>): T {
         return data as T
@@ -43,17 +46,12 @@ open class EntityReference<T>(val fieldType: Class<T>,
             data = mutableListOf<Any>() as T
         }
 
+        entity = thisRef
+
         val propertyName = property.name
-        var inner = EntityGlobal.referenceInfoInners[thisRef::class.java]!![propertyName]
+        name = propertyName
 
-        if (inner == null) {
-            inner = Info.Inner(propertyName, fieldType as Class<EntityModel>, fieldComponentType as Class<EntityModel>?,
-                    refFieldName, keyFieldName, if (keyFieldName == null) null else thisRef.fieldMap[keyFieldName]?.column)
-
-            EntityGlobal.referenceInfoInners[thisRef::class.java]!![propertyName] = inner
-        }
-
-        info = Info(thisRef, inner)
+        dbKeyColumn = if (keyFieldName == null) null else entity.fieldMap[keyFieldName]?.column
 
         thisRef.referenceMap[propertyName] = this
 

@@ -42,7 +42,7 @@ class VertxEntityQueryExecutor : EntityQueryExecutor<SQLConnection, ResultSet, U
                         for ((i, pkf) in dsl.finalModel!!.primaryKeyFields.withIndex()) {
                             val p = pkf as KMutableProperty<Any>
                             p.setter.call(dsl.finalModel,
-                                    rs.rows[0].getValue(dsl.finalModel!!.primaryKeyFieldInfos[i].inner.dbColumn))
+                                    rs.rows[0].getValue(dsl.finalModel!!.primaryKeyFieldInfos[i].dbColumn))
                         }
                     }
 

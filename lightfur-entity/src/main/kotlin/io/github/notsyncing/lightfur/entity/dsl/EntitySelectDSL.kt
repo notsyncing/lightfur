@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
-import io.github.notsyncing.lightfur.entity.EntityFieldInfo
+import io.github.notsyncing.lightfur.entity.EntityField
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
 import io.github.notsyncing.lightfur.sql.base.SQLPart
@@ -12,9 +12,9 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityRawQueryDSL<F
     override val builder = SelectQueryBuilder()
 
     init {
-        resultModel.fieldMap.map { it.value.info }
-                .sortedBy { it.inner.name }
-                .forEach { builder.select(getColumnModelFromEntityFieldInfo(it)) }
+        resultModel.fieldMap.map { it.value }
+                .sortedBy { it.name }
+                .forEach { builder.select(getColumnModelFromEntityField(it)) }
     }
 
     fun customColumns(): EntitySelectDSL<F> {
@@ -23,15 +23,15 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityRawQueryDSL<F
         return this
     }
 
-    fun columns(columnList: List<EntityFieldInfo>): EntitySelectDSL<F> {
+    fun columns(columnList: List<EntityField<*>>): EntitySelectDSL<F> {
         builder.selectColumns.clear()
-        columnList.forEach { builder.select(getColumnModelFromEntityFieldInfo(it)) }
+        columnList.forEach { builder.select(getColumnModelFromEntityField(it)) }
 
         return this
     }
 
-    fun column(col: EntityFieldInfo): EntitySelectDSL<F> {
-        builder.select(getColumnModelFromEntityFieldInfo(col))
+    fun column(col: EntityField<*>): EntitySelectDSL<F> {
+        builder.select(getColumnModelFromEntityField(col))
 
         return this
     }
@@ -101,8 +101,8 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityRawQueryDSL<F
         return this
     }
 
-    fun groupBy(vararg columns: EntityFieldInfo): EntitySelectDSL<F> {
-        builder.groupBy(*columns.map { getColumnModelFromEntityFieldInfo(it) }.toTypedArray())
+    fun groupBy(vararg columns: EntityField<*>): EntitySelectDSL<F> {
+        builder.groupBy(*columns.map { getColumnModelFromEntityField(it) }.toTypedArray())
 
         return this
     }
@@ -113,8 +113,8 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityRawQueryDSL<F
         return this
     }
 
-    fun orderBy(column: EntityFieldInfo, isDesc: Boolean = false): EntitySelectDSL<F> {
-        builder.orderBy(OrderByColumnInfo(getColumnModelFromEntityFieldInfo(column), isDesc))
+    fun orderBy(column: EntityField<*>, isDesc: Boolean = false): EntitySelectDSL<F> {
+        builder.orderBy(OrderByColumnInfo(getColumnModelFromEntityField(column), isDesc))
 
         return this
     }
@@ -137,26 +137,26 @@ class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityRawQueryDSL<F
         return this
     }
 
-    fun map(sourceColumn: EntityFieldInfo, asColumn: EntityFieldInfo): EntitySelectDSL<F> {
-        val sc = getColumnModelFromEntityFieldInfo(sourceColumn)
-        val asc = getColumnModelFromEntityFieldInfo(asColumn)
+    fun map(sourceColumn: EntityField<*>, asColumn: EntityField<*>): EntitySelectDSL<F> {
+        val sc = getColumnModelFromEntityField(sourceColumn)
+        val asc = getColumnModelFromEntityField(asColumn)
         builder.selectAs(sc, asc)
 
         return this
     }
 
-    fun map(sourceColumn: EntityFieldInfo, asColumn: KProperty0<*>): EntitySelectDSL<F> {
-        return map(sourceColumn, resultModel.fieldMap[asColumn.name]!!.info)
+    fun map(sourceColumn: EntityField<*>, asColumn: KProperty0<*>): EntitySelectDSL<F> {
+        return map(sourceColumn, resultModel.fieldMap[asColumn.name]!!)
     }
 
-    fun map(sourceExpr: SQLPart, asColumn: EntityFieldInfo): EntitySelectDSL<F> {
-        val asc = getColumnModelFromEntityFieldInfo(asColumn)
+    fun map(sourceExpr: SQLPart, asColumn: EntityField<*>): EntitySelectDSL<F> {
+        val asc = getColumnModelFromEntityField(asColumn)
         builder.selectAs(sourceExpr, asc)
 
         return this
     }
 
     fun map(sourceExpr: SQLPart, asColumn: KProperty0<*>): EntitySelectDSL<F> {
-        return map(sourceExpr, resultModel.fieldMap[asColumn.name]!!.info)
+        return map(sourceExpr, resultModel.fieldMap[asColumn.name]!!)
     }
 }

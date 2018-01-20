@@ -5,7 +5,7 @@ import io.github.notsyncing.lightfur.sql.base.SQLPart
 
 open class EntityRawQueryDSL<F: EntityModel>(val model: F,
                                              val sql: String,
-                                             val params: Array<Any?>) : EntityBaseDSL<F>(model, isQuery = true) {
+                                             val params: Array<Any?>) : EntityQueryDSL<F>(model) {
     override val builder: SQLPart
         get() = throw UnsupportedOperationException()
 

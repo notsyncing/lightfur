@@ -8,7 +8,7 @@ import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
 import kotlin.reflect.KProperty0
 
-class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityRawQueryDSL<F>(resultModel, "", emptyArray()) {
+class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityQueryDSL<F>(resultModel) {
     override val builder = SelectQueryBuilder()
 
     init {

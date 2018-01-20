@@ -1,12 +1,12 @@
 package io.github.notsyncing.lightfur.entity.tests
 
+import io.github.notsyncing.lightfur.core.sql.builders.UpdateQueryBuilder
 import io.github.notsyncing.lightfur.entity.EntityGlobal
 import io.github.notsyncing.lightfur.entity.dsl.EntityUpdateDSL
 import io.github.notsyncing.lightfur.entity.gt
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModel
 import io.github.notsyncing.lightfur.entity.tests.toys.TestModelMultiPK
 import io.github.notsyncing.lightfur.entity.update
-import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test

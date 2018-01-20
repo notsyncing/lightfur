@@ -1,8 +1,8 @@
 package io.github.notsyncing.lightfur.testing
 
-import io.github.notsyncing.lightfur.DataSession
-import io.github.notsyncing.lightfur.DatabaseManager
-import io.github.notsyncing.lightfur.common.LightfurConfigBuilder
+import io.github.notsyncing.lightfur.core.DataSession
+import io.github.notsyncing.lightfur.core.DatabaseManager
+import io.github.notsyncing.lightfur.core.common.LightfurConfigBuilder
 import io.github.notsyncing.lightfur.entity.EntityGlobal
 import io.github.notsyncing.lightfur.integration.jdbc.JdbcDataSession
 import io.github.notsyncing.lightfur.integration.jdbc.JdbcPostgreSQLDriver

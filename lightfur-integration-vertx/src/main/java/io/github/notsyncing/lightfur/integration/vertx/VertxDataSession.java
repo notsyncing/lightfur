@@ -1,8 +1,8 @@
 package io.github.notsyncing.lightfur.integration.vertx;
 
 import com.alibaba.fastjson.JSONObject;
-import io.github.notsyncing.lightfur.DataSession;
-import io.github.notsyncing.lightfur.models.ExecutionResult;
+import io.github.notsyncing.lightfur.core.DataSession;
+import io.github.notsyncing.lightfur.core.models.ExecutionResult;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class VertxDataSession extends DataSession<SQLConnection, ResultSet, UpdateResult> {
+public class VertxDataSession extends DataSession<SQLConnection, ResultSet, UpdateResult>
+{
     public VertxDataSession() {
         this(new Exception("Vertx data session started here"));
     }

@@ -6,7 +6,7 @@ plugins {
 
 apply plugin: "kotlin"
 
-sourceCompatibility = 1.8
+sourceCompatibility = 9
 def ver = rootProject.ext.ver
 
 repositories {

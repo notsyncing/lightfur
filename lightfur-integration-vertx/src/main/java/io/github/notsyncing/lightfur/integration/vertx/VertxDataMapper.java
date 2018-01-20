@@ -1,7 +1,7 @@
 package io.github.notsyncing.lightfur.integration.vertx;
 
 import com.alibaba.fastjson.JSON;
-import io.github.notsyncing.lightfur.entity.DataMapper;
+import io.github.notsyncing.lightfur.core.entity.DataMapper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;

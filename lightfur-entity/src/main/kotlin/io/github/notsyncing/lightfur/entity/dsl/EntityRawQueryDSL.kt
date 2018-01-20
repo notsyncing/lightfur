@@ -1,7 +1,7 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
+import io.github.notsyncing.lightfur.core.sql.base.SQLPart
 import io.github.notsyncing.lightfur.entity.EntityModel
-import io.github.notsyncing.lightfur.sql.base.SQLPart
 
 open class EntityRawQueryDSL<F: EntityModel>(val model: F,
                                              val sql: String,

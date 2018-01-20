@@ -1,11 +1,11 @@
 package io.github.notsyncing.lightfur.integration.jdbc.entity
 
 import com.alibaba.fastjson.JSONObject
-import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.core.DataSession
+import io.github.notsyncing.lightfur.core.models.ExecutionResult
+import io.github.notsyncing.lightfur.core.sql.builders.UpdateQueryBuilder
 import io.github.notsyncing.lightfur.entity.EntityQueryExecutor
 import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
-import io.github.notsyncing.lightfur.models.ExecutionResult
-import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.sql.Connection

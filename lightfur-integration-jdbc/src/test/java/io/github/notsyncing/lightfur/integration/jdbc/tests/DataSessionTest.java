@@ -1,7 +1,7 @@
 package io.github.notsyncing.lightfur.integration.jdbc.tests;
 
-import io.github.notsyncing.lightfur.DataSession;
-import io.github.notsyncing.lightfur.DatabaseManager;
+import io.github.notsyncing.lightfur.core.DataSession;
+import io.github.notsyncing.lightfur.core.DatabaseManager;
 import io.github.notsyncing.lightfur.integration.jdbc.JdbcDataSession;
 import io.github.notsyncing.lightfur.integration.jdbc.JdbcPostgreSQLDriver;
 import io.vertx.ext.unit.Async;

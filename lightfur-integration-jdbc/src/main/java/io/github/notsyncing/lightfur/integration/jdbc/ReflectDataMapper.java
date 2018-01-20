@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.integration.jdbc;
 
-import io.github.notsyncing.lightfur.annotations.entity.Column;
+import io.github.notsyncing.lightfur.core.annotations.entity.Column;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

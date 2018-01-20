@@ -1,11 +1,11 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
+import io.github.notsyncing.lightfur.core.sql.base.ExpressionBuilder
+import io.github.notsyncing.lightfur.core.sql.base.SQLPart
+import io.github.notsyncing.lightfur.core.sql.builders.SelectQueryBuilder
+import io.github.notsyncing.lightfur.core.sql.models.OrderByColumnInfo
 import io.github.notsyncing.lightfur.entity.EntityField
 import io.github.notsyncing.lightfur.entity.EntityModel
-import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
-import io.github.notsyncing.lightfur.sql.base.SQLPart
-import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
-import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
 import kotlin.reflect.KProperty0
 
 class EntitySelectDSL<F : EntityModel>(val resultModel: F) : EntityRawQueryDSL<F>(resultModel, "", emptyArray()) {

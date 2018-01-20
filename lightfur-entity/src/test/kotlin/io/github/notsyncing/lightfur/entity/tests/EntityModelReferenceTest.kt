@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.entity.tests
 
-import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.core.DataSession
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.entity.EntityQueryExecutor
 import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL

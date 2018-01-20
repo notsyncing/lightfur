@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.entity.events
 
-import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.core.DataSession
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 

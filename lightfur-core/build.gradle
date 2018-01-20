@@ -5,7 +5,6 @@ plugins {
     id "me.champeau.gradle.jmh" version "0.3.1"
 }
 
-sourceCompatibility = 1.8
 def ver = rootProject.ext.ver
 
 repositories {
@@ -13,19 +12,28 @@ repositories {
     mavenCentral()
 }
 
+sourceCompatibility = 9
+
 dependencies {
     compile 'com.alibaba:fastjson:1.2.35'
-    compile group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: '2.4.2'
+    compile group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: '2.11.0'
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile 'io.vertx:vertx-core:3.4.2'
-    testCompile 'io.vertx:vertx-mysql-postgresql-client:3.4.2'
-    testCompile 'io.vertx:vertx-unit:3.4.2'
+    testCompile 'io.vertx:vertx-core:3.5.0'
+    testCompile 'io.vertx:vertx-sql-common:3.5.0'
     testCompile 'org.slf4j:slf4j-api:1.7.21'
 }
 
 compileJava {
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+
+        classpath = files()
+    }
+
     options.encoding = "utf-8"
 }
 

@@ -1,10 +1,10 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
+import io.github.notsyncing.lightfur.core.sql.base.ExpressionBuilder
+import io.github.notsyncing.lightfur.core.sql.base.SQLPart
+import io.github.notsyncing.lightfur.core.sql.builders.UpdateQueryBuilder
 import io.github.notsyncing.lightfur.entity.EntityField
 import io.github.notsyncing.lightfur.entity.EntityModel
-import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
-import io.github.notsyncing.lightfur.sql.base.SQLPart
-import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 import java.security.InvalidParameterException
 
 class EntityUpdateDSL<F: EntityModel>(val updateModel: F) : EntityBaseDSL<F>(updateModel) {

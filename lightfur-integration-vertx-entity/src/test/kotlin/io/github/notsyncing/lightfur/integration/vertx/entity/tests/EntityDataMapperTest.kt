@@ -1,8 +1,8 @@
 package io.github.notsyncing.lightfur.integration.vertx.entity.tests
 
+import io.github.notsyncing.lightfur.core.tests.DataMapperTest
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.integration.vertx.entity.VertxEntityDataMapper
-import io.github.notsyncing.lightfur.tests.DataMapperTest
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.sql.ResultSet

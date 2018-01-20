@@ -1,9 +1,9 @@
 package io.github.notsyncing.lightfur.entity.functions
 
+import io.github.notsyncing.lightfur.core.sql.base.ExpressionBuilder
+import io.github.notsyncing.lightfur.core.sql.base.SQLPart
 import io.github.notsyncing.lightfur.entity.EntityField
 import io.github.notsyncing.lightfur.entity.field
-import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
-import io.github.notsyncing.lightfur.sql.base.SQLPart
 
 fun function(func: String, vararg param: Any?): ExpressionBuilder {
     val b = ExpressionBuilder().beginFunction(func)

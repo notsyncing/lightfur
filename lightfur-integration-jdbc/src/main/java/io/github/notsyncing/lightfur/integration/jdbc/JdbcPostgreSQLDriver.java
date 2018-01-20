@@ -2,8 +2,8 @@ package io.github.notsyncing.lightfur.integration.jdbc;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import io.github.notsyncing.lightfur.DatabaseDriver;
-import io.github.notsyncing.lightfur.common.LightfurConfig;
+import io.github.notsyncing.lightfur.core.DatabaseDriver;
+import io.github.notsyncing.lightfur.core.common.LightfurConfig;
 import org.postgresql.Driver;
 
 import java.sql.Connection;
@@ -12,7 +12,8 @@ import java.sql.Statement;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-public class JdbcPostgreSQLDriver extends DatabaseDriver<Connection> {
+public class JdbcPostgreSQLDriver extends DatabaseDriver<Connection>
+{
     private HikariDataSource db;
 
     @Override

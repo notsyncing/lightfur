@@ -7,7 +7,7 @@ plugins {
 
 apply plugin: "kotlin"
 
-sourceCompatibility = 1.8
+sourceCompatibility = 9
 def ver = rootProject.ext.ver
 
 repositories {
@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile project(":lightfur-entity")
 

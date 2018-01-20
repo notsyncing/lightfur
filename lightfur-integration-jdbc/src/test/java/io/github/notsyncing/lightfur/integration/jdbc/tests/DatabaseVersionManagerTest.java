@@ -1,9 +1,9 @@
 package io.github.notsyncing.lightfur.integration.jdbc.tests;
 
-import io.github.notsyncing.lightfur.DataSession;
-import io.github.notsyncing.lightfur.DatabaseManager;
-import io.github.notsyncing.lightfur.common.LightfurConfig;
-import io.github.notsyncing.lightfur.common.LightfurConfigBuilder;
+import io.github.notsyncing.lightfur.core.DataSession;
+import io.github.notsyncing.lightfur.core.DatabaseManager;
+import io.github.notsyncing.lightfur.core.common.LightfurConfig;
+import io.github.notsyncing.lightfur.core.common.LightfurConfigBuilder;
 import io.github.notsyncing.lightfur.integration.jdbc.JdbcDataSession;
 import io.github.notsyncing.lightfur.integration.jdbc.JdbcPostgreSQLDriver;
 import io.vertx.core.json.JsonObject;
@@ -20,9 +20,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.stream.Collectors;
 
 @RunWith(VertxUnitRunner.class)
 public class DatabaseVersionManagerTest
@@ -54,7 +52,7 @@ public class DatabaseVersionManagerTest
     public void setUp(TestContext context)
     {
         DatabaseManager.setDriver(new JdbcPostgreSQLDriver());
-        DataSession.setCreator(() -> new JdbcDataSession());
+        DataSession.setCreator(JdbcDataSession::new);
 
         Async async = context.async();
 

@@ -1,10 +1,10 @@
 package io.github.notsyncing.lightfur.entity
 
+import io.github.notsyncing.lightfur.core.sql.base.ExpressionBuilder
+import io.github.notsyncing.lightfur.core.sql.base.SQLPart
+import io.github.notsyncing.lightfur.core.sql.builders.CaseWhenBuilder
+import io.github.notsyncing.lightfur.core.sql.models.OrderByColumnInfo
 import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
-import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
-import io.github.notsyncing.lightfur.sql.base.SQLPart
-import io.github.notsyncing.lightfur.sql.builders.CaseWhenBuilder
-import io.github.notsyncing.lightfur.sql.models.OrderByColumnInfo
 
 infix fun EntityField<*>.eq(value: EntityField<*>): ExpressionBuilder {
     val column1 = EntityBaseDSL.getColumnModelFromEntityField(this)

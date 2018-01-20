@@ -1,9 +1,9 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
+import io.github.notsyncing.lightfur.core.sql.builders.InsertQueryBuilder
+import io.github.notsyncing.lightfur.core.sql.builders.SelectQueryBuilder
 import io.github.notsyncing.lightfur.entity.EntityField
 import io.github.notsyncing.lightfur.entity.EntityModel
-import io.github.notsyncing.lightfur.sql.builders.InsertQueryBuilder
-import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
 import java.security.InvalidParameterException
 import kotlin.reflect.KProperty
 

@@ -1,6 +1,5 @@
 package io.github.notsyncing.lightfur.ql
 
-import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
 import java.util.concurrent.CompletableFuture
 

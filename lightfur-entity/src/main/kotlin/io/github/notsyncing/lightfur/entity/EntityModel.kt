@@ -1,13 +1,13 @@
 package io.github.notsyncing.lightfur.entity
 
 import com.alibaba.fastjson.annotation.JSONField
-import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.core.DataSession
+import io.github.notsyncing.lightfur.core.sql.base.ExpressionBuilder
+import io.github.notsyncing.lightfur.core.sql.models.TableModel
 import io.github.notsyncing.lightfur.entity.dsl.*
 import io.github.notsyncing.lightfur.entity.events.CanFireEvents
 import io.github.notsyncing.lightfur.entity.events.EntityEvent
 import io.github.notsyncing.lightfur.entity.events.EntityEventDispatcher
-import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
-import io.github.notsyncing.lightfur.sql.models.TableModel
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.io.InvalidObjectException

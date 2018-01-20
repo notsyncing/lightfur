@@ -1,9 +1,7 @@
-package io.github.notsyncing.lightfur.entity.tests.performance
+package io.github.notsyncing.lightfur.core.entity.tests.performance
 
-import io.github.notsyncing.lightfur.entity.EntityDataMapper
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.vertx.core.json.JsonArray
-import io.vertx.ext.sql.ResultSet
 import org.openjdk.jmh.annotations.*
 import org.openjdk.jmh.runner.Runner
 import org.openjdk.jmh.runner.options.OptionsBuilder

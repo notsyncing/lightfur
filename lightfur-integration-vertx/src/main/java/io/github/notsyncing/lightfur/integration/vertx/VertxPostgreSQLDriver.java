@@ -1,7 +1,7 @@
 package io.github.notsyncing.lightfur.integration.vertx;
 
-import io.github.notsyncing.lightfur.DatabaseDriver;
-import io.github.notsyncing.lightfur.common.LightfurConfig;
+import io.github.notsyncing.lightfur.core.DatabaseDriver;
+import io.github.notsyncing.lightfur.core.common.LightfurConfig;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
@@ -11,7 +11,8 @@ import io.vertx.ext.sql.SQLConnection;
 
 import java.util.concurrent.CompletableFuture;
 
-public class VertxPostgreSQLDriver extends DatabaseDriver<SQLConnection> {
+public class VertxPostgreSQLDriver extends DatabaseDriver<SQLConnection>
+{
     private Vertx vertx;
     private AsyncSQLClient client;
 

@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.entity
 
-import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.core.DataSession
 import io.github.notsyncing.lightfur.entity.exceptions.NothingUpdatedException
 import kotlinx.coroutines.experimental.*
 import java.lang.reflect.ParameterizedType

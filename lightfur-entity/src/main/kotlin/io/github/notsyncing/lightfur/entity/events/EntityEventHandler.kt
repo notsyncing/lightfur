@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.entity.events
 
-import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.core.DataSession
 import java.util.concurrent.CompletableFuture
 
 interface EntityEventHandler<T: EntityEvent> {

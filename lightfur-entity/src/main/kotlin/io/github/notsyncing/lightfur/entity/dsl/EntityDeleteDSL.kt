@@ -1,8 +1,8 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
+import io.github.notsyncing.lightfur.core.sql.base.ExpressionBuilder
+import io.github.notsyncing.lightfur.core.sql.builders.DeleteQueryBuilder
 import io.github.notsyncing.lightfur.entity.EntityModel
-import io.github.notsyncing.lightfur.sql.base.ExpressionBuilder
-import io.github.notsyncing.lightfur.sql.builders.DeleteQueryBuilder
 import java.security.InvalidParameterException
 
 class EntityDeleteDSL<F: EntityModel>(val deleteModel: F) : EntityBaseDSL<F>(deleteModel) {

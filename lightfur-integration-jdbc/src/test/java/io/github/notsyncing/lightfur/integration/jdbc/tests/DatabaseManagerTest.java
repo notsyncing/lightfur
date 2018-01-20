@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.integration.jdbc.tests;
 
-import io.github.notsyncing.lightfur.DatabaseManager;
+import io.github.notsyncing.lightfur.core.DatabaseManager;
 import io.github.notsyncing.lightfur.integration.jdbc.JdbcPostgreSQLDriver;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.swing.plaf.nimbus.State;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;

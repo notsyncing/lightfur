@@ -1,7 +1,7 @@
 package io.github.notsyncing.lightfur.integration.jdbc;
 
 import com.alibaba.fastjson.JSON;
-import io.github.notsyncing.lightfur.entity.DataMapper;
+import io.github.notsyncing.lightfur.core.entity.DataMapper;
 import org.postgresql.util.PGobject;
 
 import java.sql.ResultSet;

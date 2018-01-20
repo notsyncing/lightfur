@@ -1,8 +1,8 @@
 package io.github.notsyncing.lightfur.integration.jdbc;
 
 import com.alibaba.fastjson.JSONObject;
-import io.github.notsyncing.lightfur.DataSession;
-import io.github.notsyncing.lightfur.models.ExecutionResult;
+import io.github.notsyncing.lightfur.core.DataSession;
+import io.github.notsyncing.lightfur.core.models.ExecutionResult;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -13,7 +13,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.logging.Logger;
 
-public class JdbcDataSession extends DataSession<Connection, ResultSet, ExecutionResult> {
+public class JdbcDataSession extends DataSession<Connection, ResultSet, ExecutionResult>
+{
     private Logger log = Logger.getLogger(this.getClass().getSimpleName());
 
     public JdbcDataSession() {

@@ -1,4 +1,4 @@
-package io.github.notsyncing.lightfur.ql.tests.toys
+package io.github.notsyncing.lightfur.ql.tests.performance.toys
 
 import io.github.notsyncing.lightfur.entity.EntityModel
 import java.time.LocalDateTime

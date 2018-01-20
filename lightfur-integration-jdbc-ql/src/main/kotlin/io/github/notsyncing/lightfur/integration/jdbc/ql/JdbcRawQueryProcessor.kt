@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.integration.jdbc.ql
 
-import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.core.DataSession
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
 import io.github.notsyncing.lightfur.integration.jdbc.JdbcDataSession
 import io.github.notsyncing.lightfur.ql.RawQueryProcessor

@@ -1,7 +1,7 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
+import io.github.notsyncing.lightfur.core.sql.base.SQLPart
 import io.github.notsyncing.lightfur.entity.EntityModel
-import io.github.notsyncing.lightfur.sql.base.SQLPart
 
 class EntityRawExecuteDSL(val sql: String,
                           val params: Array<Any?>) : EntityBaseDSL<EntityModel>(null, isQuery = false, isInsert = false) {

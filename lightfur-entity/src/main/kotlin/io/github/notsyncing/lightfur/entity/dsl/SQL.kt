@@ -1,8 +1,8 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
 import com.alibaba.fastjson.JSONObject
-import io.github.notsyncing.lightfur.DataSession
-import io.github.notsyncing.lightfur.models.ExecutionResult
+import io.github.notsyncing.lightfur.core.DataSession
+import io.github.notsyncing.lightfur.core.models.ExecutionResult
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.util.concurrent.CompletableFuture

@@ -7,7 +7,7 @@ plugins {
 
 apply plugin: "kotlin"
 
-sourceCompatibility = 1.8
+sourceCompatibility = 9
 def ver = rootProject.ext.ver
 
 repositories {
@@ -20,13 +20,13 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:0.21"
     compile project(":lightfur-core")
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile 'io.vertx:vertx-unit:3.4.2'
+    testCompile 'io.vertx:vertx-unit:3.5.0'
     testCompile 'org.slf4j:slf4j-api:1.7.21'
     testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
     testCompile project(":lightfur-core").sourceSets.test.output

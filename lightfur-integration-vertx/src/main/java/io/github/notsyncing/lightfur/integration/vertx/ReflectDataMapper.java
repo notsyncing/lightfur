@@ -1,6 +1,6 @@
 package io.github.notsyncing.lightfur.integration.vertx;
 
-import io.github.notsyncing.lightfur.annotations.entity.Column;
+import io.github.notsyncing.lightfur.core.annotations.entity.Column;
 import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Field;

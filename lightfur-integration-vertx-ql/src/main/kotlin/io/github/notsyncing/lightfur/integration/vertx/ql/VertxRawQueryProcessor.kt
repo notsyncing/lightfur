@@ -1,7 +1,6 @@
 package io.github.notsyncing.lightfur.integration.vertx.ql
 
 import com.alibaba.fastjson.JSON
-import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
 import io.github.notsyncing.lightfur.entity.dsl.EntitySelectDSL
 import io.github.notsyncing.lightfur.ql.RawQueryProcessor
 import io.vertx.core.json.JsonArray

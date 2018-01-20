@@ -1,7 +1,7 @@
 package io.github.notsyncing.lightfur.entity
 
 import com.alibaba.fastjson.JSONObject
-import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.core.DataSession
 import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
 import java.util.concurrent.CompletableFuture
 

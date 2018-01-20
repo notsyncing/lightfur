@@ -1,17 +1,17 @@
 package io.github.notsyncing.lightfur.entity.dsl
 
 import com.alibaba.fastjson.JSONObject
-import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.core.DataSession
+import io.github.notsyncing.lightfur.core.sql.base.SQLPart
+import io.github.notsyncing.lightfur.core.sql.builders.SelectQueryBuilder
+import io.github.notsyncing.lightfur.core.sql.builders.UpdateQueryBuilder
+import io.github.notsyncing.lightfur.core.sql.models.ColumnModel
+import io.github.notsyncing.lightfur.core.sql.models.TableModel
+import io.github.notsyncing.lightfur.core.utils.FutureUtils
 import io.github.notsyncing.lightfur.entity.EntityField
 import io.github.notsyncing.lightfur.entity.EntityGlobal
 import io.github.notsyncing.lightfur.entity.EntityModel
 import io.github.notsyncing.lightfur.entity.EntityQueryExecutor
-import io.github.notsyncing.lightfur.sql.base.SQLPart
-import io.github.notsyncing.lightfur.sql.builders.SelectQueryBuilder
-import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
-import io.github.notsyncing.lightfur.sql.models.ColumnModel
-import io.github.notsyncing.lightfur.sql.models.TableModel
-import io.github.notsyncing.lightfur.utils.FutureUtils
 import kotlinx.coroutines.experimental.future.await
 import kotlinx.coroutines.experimental.future.future
 import java.util.concurrent.CompletableFuture

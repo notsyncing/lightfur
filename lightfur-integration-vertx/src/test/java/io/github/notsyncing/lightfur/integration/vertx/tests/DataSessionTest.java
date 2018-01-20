@@ -1,7 +1,7 @@
 package io.github.notsyncing.lightfur.integration.vertx.tests;
 
-import io.github.notsyncing.lightfur.DataSession;
-import io.github.notsyncing.lightfur.DatabaseManager;
+import io.github.notsyncing.lightfur.core.DataSession;
+import io.github.notsyncing.lightfur.core.DatabaseManager;
 import io.github.notsyncing.lightfur.integration.vertx.VertxDataSession;
 import io.github.notsyncing.lightfur.integration.vertx.VertxPostgreSQLDriver;
 import io.vertx.ext.sql.SQLConnection;

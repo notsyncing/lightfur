@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.10'
+    ext.kotlin_version = '1.2.20'
 
     repositories {
         mavenCentral()
@@ -14,7 +14,7 @@ plugins {
     id "java"
 }
 
-sourceCompatibility = 1.8
+sourceCompatibility = 9
 
 project.ext {
     ver = '0.4.2'
@@ -23,3 +23,4 @@ project.ext {
 repositories {
     mavenCentral()
 }
+

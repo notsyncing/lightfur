@@ -2,10 +2,10 @@ package io.github.notsyncing.lightfur.integration.vertx.entity
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
-import io.github.notsyncing.lightfur.DataSession
+import io.github.notsyncing.lightfur.core.DataSession
+import io.github.notsyncing.lightfur.core.sql.builders.UpdateQueryBuilder
 import io.github.notsyncing.lightfur.entity.EntityQueryExecutor
 import io.github.notsyncing.lightfur.entity.dsl.EntityBaseDSL
-import io.github.notsyncing.lightfur.sql.builders.UpdateQueryBuilder
 import io.vertx.ext.sql.ResultSet
 import io.vertx.ext.sql.SQLConnection
 import io.vertx.ext.sql.UpdateResult

@@ -41,7 +41,7 @@ LIMIT ?
 OFFSET ?"""
 
         assertEquals(expected, s)
-        assertArrayEquals(arrayOf(2, "133", 4, arrayOf(2, 3, 5), 10, 10, 0), p.toTypedArray())
+        assertArrayEquals(arrayOf(2, "133", 4, arrayOf(2, 3, 5), 10, 10, 0), p!!.toTypedArray())
     }
 
     @Test
@@ -68,7 +68,7 @@ LIMIT ?
 OFFSET ?"""
 
         assertEquals(expected, s)
-        assertArrayEquals(arrayOf(2, "133", 4, true, arrayOf(2, 3, 5), 10, 10, 0), p.toTypedArray())
+        assertArrayEquals(arrayOf(2, "133", 4, true, arrayOf(2, 3, 5), 10, 10, 0), p!!.toTypedArray())
     }
 
     @Test
@@ -98,7 +98,7 @@ LIMIT ?
 OFFSET ?"""
 
         assertEquals(expected, s)
-        assertArrayEquals(arrayOf(2, "133", 4, true, arrayOf(2, 3, 5), 10, 10, 0), p.toTypedArray())
+        assertArrayEquals(arrayOf(2, "133", 4, true, arrayOf(2, 3, 5), 10, 10, 0), p!!.toTypedArray())
     }
 
     @Test
@@ -148,6 +148,6 @@ LIMIT ?
 OFFSET ?"""
 
         assertEquals(expected, s)
-        assertArrayEquals(arrayOf(2, "133", 4, arrayOf(2, 3, 5), 10, 2, 10, 0), p.toTypedArray())
+        assertArrayEquals(arrayOf(2, "133", 4, arrayOf(2, 3, 5), 10, 2, 10, 0), p!!.toTypedArray())
     }
 }
